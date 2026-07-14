@@ -1,0 +1,197 @@
+\documentclass[letterpaper,12pt]{extarticle}
+\usepackage{astro-mini}
+\usepackage{microtype}
+
+\usepackage{graphicx}
+\usepackage{array}   % for \newcolumntype macro
+% math-mode version of column types
+\newcolumntype{L}{>{$}l<{$}}
+\newcolumntype{C}{>{$}c<{$}}
+\newcolumntype{R}{>{$}r<{$}}
+
+
+\begin{document}
+
+\begin{center}
+
+    \Large Determinación de periodicidad en estrellas variables mediante\\
+    la combinación del periodograma de Lomb--Scargle y el método de mínima entropía
+    
+    \vspace{3mm}
+
+    \large Juan David Aparicio - 202116532
+
+    \large Director: Dr. Alejandro García
+
+    \vspace{3mm}
+
+    \large Opción de grado: proyecto de investigación
+    \normalsize 
+\end{center}
+
+
+\section{Introducción}
+
+La variabilidad periódica de las estrellas es una manifestación directa de procesos
+físicos fundamentales: oscilaciones de presión y gravedad en estrellas pulsantes,
+eclipses geométricos en sistemas binarios, y modulación rotacional en estrellas activas \citep{Karttunen2016}.
+El periodo de variación es por ello un observable importante para clasificar objetos
+astrofísicos, inferir parámetros físicos como masas y radios, estudiar la estructura
+interna estelar, y estimar distancias galácticas y extragalácticas mediante la relación periodo-luminosidad \citep{Ngeow_Gieren_Klein_2013}.
+Los grandes relevamientos fotométricos de largo plazo, como el Optical Gravitational Lensing
+Experiment (OGLE), han catalogado más de un millón de estrellas variables de tipos
+morfológicamente heterogéneos en la Vía Láctea y las Nubes de Magallanes
+\citep{iwanek_2025}, poniendo de manifiesto la necesidad de métodos de determinación
+de periodicidad que sean precisos y generalizables a distintas morfologías de variabilidad.
+
+Los métodos actuales de determinación de periodicidad presentan fortalezas
+complementarias. El periodograma de Lomb--Scargle \citep{lomb_1976,scargle_1982} identifica
+eficientemente las frecuencias dominantes en datos irregularmente muestreados
+y concentra su poder estadístico en las señales de morfología aproximadamente
+sinusoidal. En el caso de variabilidades físicamente más complejas, como eclipses pronunciados,
+pulsaciones asimétricas o señales con armónicos dominantes, la potencia espectral puede
+fraccionarse entre múltiples frecuencias, dificultando la identificación del periodo
+correcto. El método de mínima entropía de \cite{cincotta_1995}, en cambio, selecciona
+el periodo que produce la curva de luz con mayor orden estadístico,
+siendo sensible a cualquier morfología de variabilidad e independiente de la forma
+funcional de la señal.
+
+Dado que las debilidades de cada método son precisamente las fortalezas del otro,
+en este trabajo se propone construir un método combinado que integre la información
+espectral de Lomb--Scargle con el criterio de orden de la entropía mínima para
+obtener candidatos robustos a periodo y fase. La hipótesis central es que
+Lomb--Scargle reduce eficientemente el espacio de búsqueda señalando las frecuencias
+físicamente relevantes, mientras que la entropía mínima determina cuál de esas
+frecuencias produce la representación más coherente de la variabilidad estelar.
+Se evaluará si el método combinado logra superar las limitaciones de cada técnica
+por separado, contrastando su precisión y robustez frente a Lomb--Scargle y mínima
+entropía aplicados de forma individual.
+
+\section{Objetivo General}
+
+Desarrollar y validar un método para la determinación robusta de periodos en estrellas
+variables mediante la integración del periodograma de Lomb--Scargle y el criterio de
+mínima entropía, aplicado a curvas de luz con distintas morfologías de variabilidad.
+
+\section{Objetivos Específicos}
+
+\begin{itemize}
+    \item Implementar de manera independiente el periodograma de Lomb--Scargle y el
+método de mínima entropía, caracterizando sus fortalezas y limitaciones frente a
+diferentes tipos de variabilidad estelar.
+    \item Diseñar un esquema de integración entre ambas técnicas que permita identificar
+de forma consistente el periodo y la fase más probables en curvas de luz.
+    \item Evaluar el desempeño del método propuesto utilizando curvas de luz sintéticas
+con distintas morfologías físicas, niveles de ruido y cadencias de muestreo.
+    \item Comparar la precisión y robustez del método desarrollado frente a la aplicación
+individual de Lomb--Scargle y mínima entropía en datos reales de los proyectos OGLE,
+VVV y TESS. 
+\end{itemize}
+
+\section{Metodología}
+
+El proyecto se desarrollará en cuatro etapas.
+
+\begin{enumerate}
+    \item En la primera etapa se implementarán de manera independiente el periodograma de
+Lomb--Scargle y el método de mínima entropía, y se estudiará el comportamiento individual
+de cada uno frente a curvas de luz con distintas morfologías físicas, con el fin de
+caracterizar sus fortalezas y limitaciones de manera controlada.
+    \item En la segunda etapa se diseñará e implementará el método combinado. A partir del
+análisis previo, se establecerá el esquema de integración: cómo la distribución de potencia
+espectral de Lomb--Scargle y el perfil de entropía mínima se articulan para identificar
+conjuntamente los candidatos más robustos a periodo y fase.
+    \item En la tercera etapa el método combinado se validará sobre curvas de luz sintéticas
+generadas con morfologías físicas representativas (oscilaciones sinusoidales, eclipses y
+pulsaciones asimétricas) bajo distintas condiciones de ruido y muestreo irregular. Los
+resultados se compararán contra los de Lomb--Scargle y mínima entropía aplicados por
+separado, evaluando si el método combinado logra contrarrestar las limitaciones de cada
+técnica individual.
+    \item Finalmente, el método combinado se aplicará a curvas de luz reales de catálogos
+astronómicos públicos (OGLE, VVV, TESS). Los periodos obtenidos se cotejarán con los
+valores reportados en la literatura y con los resultados de los métodos individuales,
+evaluando la precisión y la facilidad de aplicación generalizada del método propuesto.
+\end{enumerate}
+
+\section{Consideraciones Éticas}
+
+Los datos utilizados en este proyecto provendrán de repositorios astronómicos públicos
+de libre acceso. No se realizará manipulación experimental sobre seres vivos ni sobre
+muestras físicas. Todos los resultados obtenidos serán reproducibles y estarán disponibles
+en un repositorio público junto con el código desarrollado durante el proyecto. Se citarán adecuadamente todas las fuentes consultadas durante el proyecto. Por lo
+anterior, el proyecto no requiere ser sometido a evaluación por el Comité de Ética
+de la Facultad de Ciencias.
+
+\section{Cronograma}
+
+\begin{center}
+\begin{tabular}{c|cccccccccccccccc}
+Tareas / Semanas & 1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16 \\
+\hline
+Tarea 1 & X&X&X&X&X&X&X&X&X&X&X&X&X&X&X&X \\
+Tarea 2 &  &X&X&X& & & & & & & & & & & & \\
+Tarea 3 &  & &X&X&X&X& & & & & & & & & & \\
+Tarea 4 &  & & & &X&X&X& & & & & & & & & \\
+Tarea 5 &  & & & & &X&X&X&X& & & & & & & \\
+Tarea 6 &  & & & & & & &X&X&X&X& & & & & \\
+Tarea 7 &  & & & & & & & & &X&X&X&X& & & \\
+Tarea 8 &  & & & & & & & & & & &X&X&X& & \\
+Tarea 9 &  & & & & & & &X& & & & & & & & \\
+Tarea 10&  & & & & & & & & & & & & &X&X&X 
+\end{tabular}
+\end{center}
+
+\vspace{4mm}
+
+\begin{enumerate}
+    \item Revisión bibliográfica sobre métodos de determinación de periodicidad en curvas de luz y redacción progresiva del documento durante todo el semestre. Reunión semanal con el director del proyecto.
+    \item Implementación del periodograma de Lomb--Scargle y caracterización de su respuesta ante distintas morfologías físicas de variabilidad estelar.
+    \item Implementación del método de mínima entropía y caracterización de su respuesta ante distintas morfologías físicas de variabilidad estelar.
+    \item Diseño e implementación del método combinado que integra la información espectral de Lomb--Scargle con el criterio de orden de la entropía mínima.
+    \item Generación de curvas de luz sintéticas con morfologías físicas representativas, distintos niveles de ruido y cadencias de muestreo irregular.
+    \item Validación del método combinado sobre datos sintéticos y comparación de su precisión frente a Lomb--Scargle y mínima entropía por separado.
+    \item Aplicación del método combinado a curvas de luz reales de catálogos astronómicos públicos (OGLE, TESS, VVV).
+    \item Análisis estadístico comparativo del método combinado frente a los métodos individuales, evaluando precisión y aplicabilidad generalizada.
+    \item Preparación del informe y presentación correspondientes a la evaluación parcial del 30\%.
+    \item Análisis de resultados definitivos y redacción del documento final.
+\end{enumerate}
+
+\section{Personas Conocedoras del Tema}
+
+\begin{itemize}
+        \item Beatriz Sabogal
+        
+        \item Benjamín Oostra
+        
+        \item Jaime Forero
+\end{itemize}
+
+% Bibliography
+\footnotesize
+\bibliographystyle{aa_url}
+\bibliography{global.bib}
+
+\vspace{1.0cm}
+
+\noindent
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=5cm]{img/firma.png}\\[-2mm]
+    \rule{\linewidth}{0.4pt}\\[1mm]
+    Juan David Aparicio\\
+    202116532\\
+    Estudiante
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \vspace{0.38cm}
+    \rule{\linewidth}{0.4pt}\\[1mm]
+    Dr. Alejandro García\\
+    Director del Proyecto
+\end{minipage}
+
+\end{document}
+
+
+

@@ -1,0 +1,58 @@
+# --- Tus reglas originales (corregidas con *) ---
+*.pdf
+*.csv
+*.fit
+*.fits
+*.xlsx
+*.xls
+*.parquet
+
+# --- Entornos virtuales / dependencias (Python) ---
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# --- Entornos virtuales / dependencias (Node.js) ---
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# --- Variables de entorno y secretos ---
+.env
+.env.local
+*.pem
+*.key
+
+# --- Archivos de sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Archivos de editores/IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Logs y temporales ---
+*.log
+*.tmp
+*.bak
+*.cache
+
+# --- Jupyter Notebooks (si usas Python para análisis de datos) ---
+.ipynb_checkpoints/
+
+# --- Compilados / build ---
+dist/
+build/
+*.o
+*.class
+
+# --- Archivos comprimidos grandes (opcional) ---
+*.zip
+*.tar.gz
+*.rar

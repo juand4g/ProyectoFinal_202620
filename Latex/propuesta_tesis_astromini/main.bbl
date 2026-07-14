@@ -1,0 +1,36 @@
+\begin{thebibliography}{6}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Cincotta} {et~al.}(1995){Cincotta}, {Mendez}, \&
+  {Nunez}}]{cincotta_1995}
+{Cincotta}, P.~M., {Mendez}, M., \& {Nunez}, J.~A. 1995,
+  \href{http://dx.doi.org/10.1086/176050}{\color{magenta}\apj},
+  \href{https://ui.adsabs.harvard.edu/abs/1995ApJ...449..231C}{449, 231}
+
+\bibitem[{Iwanek(2025)}]{iwanek_2025}
+Iwanek, P. 2025,
+  \href{http://dx.doi.org/10.3390/universe11090304}{\color{magenta}Universe},
+  11, 304
+
+\bibitem[{Karttunen {et~al.}(2016)Karttunen, Kröger, Oja, Poutanen, Donner,
+  Karttunen, Oja, Kröger, \& Poutanen}]{Karttunen2016}
+Karttunen, H., Kröger, P., Oja, H., {et~al.} 2016, Fundamental Astronomy,
+  sixth edition. edn. (Springer Nature)
+
+\bibitem[{{Lomb}(1976)}]{lomb_1976}
+{Lomb}, N.~R. 1976,
+  \href{http://dx.doi.org/10.1007/BF00648343}{\color{magenta}\apss},
+  \href{https://ui.adsabs.harvard.edu/abs/1976Ap&SS..39..447L}{39, 447}
+
+\bibitem[{Ngeow {et~al.}(2013)Ngeow, Gieren, \&
+  Klein}]{Ngeow_Gieren_Klein_2013}
+Ngeow, C.-C., Gieren, W., \& Klein, C. 2013,
+  \href{http://dx.doi.org/10.1017/S1743921313014208}{\color{magenta}Proceedings
+  of the International Astronomical Union}, 9, 123–128
+
+\bibitem[{{Scargle}(1982)}]{scargle_1982}
+{Scargle}, J.~D. 1982,
+  \href{http://dx.doi.org/10.1086/160554}{\color{magenta}\apj},
+  \href{https://ui.adsabs.harvard.edu/abs/1982ApJ...263..835S}{263, 835}
+
+\end{thebibliography}
