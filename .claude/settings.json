@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(latexmk -pdf -interaction=nonstopmode main.tex)",
+      "Bash(grep -c \"^\\\\\\\\\\\\\\\\bibitem\" main.bbl)",
+      "Bash(grep -oE \"\\\\\\\\\\\\\\\\cite[pt]?\\\\{[^}]+\\\\}|\\\\\\\\\\\\\\\\citep\\\\[[^]]*\\\\]\\\\[[^]]*\\\\]\\\\{[^}]+\\\\}\" main.tex)",
+      "Bash(grep -oP '\\(?<=cite[a-z]{0,4}\\\\{\\)[^}]+' main.tex)",
+      "Read(//tmp/**)",
+      "Bash(grep -oP '\\(?<=\\\\\\\\bibitem\\\\[\\)[^]]*\\\\]\\\\{[^}]*' main.bbl)",
+      "Bash(grep -oP '\\(?<=\\\\{\\)[^}]*$')",
+      "Bash(grep -oP '\\\\\\\\bibitem\\(\\\\[[^]]*\\\\]\\)?\\\\{[^}]*\\\\}' main.bbl)",
+      "Bash(grep -oE '\\\\\\\\cite[a-z]*\\\\{[^}]+\\\\}' main.tex)",
+      "Bash(tee /tmp/cited_unique.txt)",
+      "Bash(grep -oE '^@[A-Za-z]+\\\\{[^,]+,' global.bib)",
+      "Bash(grep -oE '\\\\{[A-Za-z_,0-9]+\\\\}' main.tex)",
+      "Bash(python3 -c ' *)",
+      "PowerShell(Get-Command python, py -ErrorAction SilentlyContinue)",
+      "PowerShell(python -c \"import astropy, numpy, pandas, matplotlib, tqdm; print\\(astropy.__version__, numpy.__version__, pandas.__version__, matplotlib.__version__, tqdm.__version__\\)\")",
+      "Bash(rm \"Lomb-Scargle/cache_resultados_ls.csv\"; rm \"Lomb-Scargle/graficas\"/*.png; ls \"Lomb-Scargle/graficas\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\japar\\Documents\\Proyecto Final\\Lomb-Scargle\\graficas"
+    ]
+  }
+}

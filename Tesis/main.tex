@@ -1,66 +1,65 @@
 \documentclass[12pt,letterpaper,oneside]{book}
 \usepackage{astro-thesis}
-\usepackage{lipsum}
-
 
 \begin{document}
 	\begin{titlepage}
 		\begin{center}
-			\includegraphics[height=3cm]{img/sample_logo.pdf}
-			
-			\vspace{2cm}
-			
-			{\fontsize{25}{40}\selectfont \bf Title\par}
-			
+
+			\includegraphics[height=2.7cm]{img/logouniversidad.png}
+
+			\vspace{6mm}
+
+			{\bfseries\small UNIVERSIDAD DE LOS ANDES \\}
+			{\small FACULTAD DE CIENCIAS \\}
+			{\small Departamento de F\'isica}
+
 			\vspace{10mm}
-			
-			{\huge Author}
-			
-			\vspace{10mm}
-			
-			{\huge Second Author } 
-			
-			\vspace{15mm}
-			
-			{\large
-				A thesis submitted in partial fulfillment\\
-				for the degree of 
+
+			\rule{\textwidth}{0.6pt}
+
+			\vspace{4mm}
+
+			{\Large Determinaci\'on de periodicidad en estrellas variables mediante la combinaci\'on del periodograma de Lomb--Scargle y el m\'etodo de m\'inima entrop\'ia}
+
+			\vspace{4mm}
+
+			\rule{\textwidth}{0.6pt}
+
+			\vspace{14mm}
+
+			{\bfseries Autor:} \\
+			Juan David Aparicio \\
+			202116532
+
+			\vspace{8mm}
+
+			{\bfseries Director:} \\
+			Prof. Dr. Alejandro Garc\'ia
+
+			\vspace{14mm}
+
+			{\itshape
+				Trabajo de grado presentado para optar \\
+				por el t\'itulo de F\'ISICO \\
+				en la Universidad de los Andes
 			}
-			
-			\vspace{5mm}
-			
-			{\Large
-				University\\
-				Faculty, Department\\
-				City, Country\\ \phantom{} \\
-				Date
-			}
+
+			\vspace{16mm}
+
+			Bogot\'a D.C. -- Colombia \\
+			Julio de 2026
+
 		\end{center}
 	\end{titlepage}
-    
-    
-\frontmatter 
-
-\chapter*{Abstract}
-
-\lipsum{3}
 
 
-\newpage
+\frontmatter
 
-\begin{flushright}
-	\textit{
-		My        \\
-		Cheesy           \\
-		words
-	}
-\end{flushright}
+\chapter*{Resumen}
 
-\vspace{2mm}
+\lipsum[1]
 
-\chapter*{Acknowledgements}
-
-\lipsum{4}
+\textit{Nota: este resumen es un texto de relleno (\emph{lorem ipsum}) provisional. Se redactar\'a al final, una vez el trabajo est\'e completo.}
 
 \mainmatter
 
@@ -70,101 +69,227 @@
 
 \listoffigures
 \listoftables
-\listoflistings
 
 \newpage
 
-\visibleintentfalse
+\chapter{Introducci\'on}
+\label{ch:introduccion}
 
-\chapter{Introduction}
-\lipsum{20}
+La variabilidad peri\'odica de las estrellas es una manifestaci\'on directa de procesos f\'isicos fundamentales: oscilaciones de presi\'on y gravedad en estrellas pulsantes, eclipses geom\'etricos en sistemas binarios, y modulaci\'on rotacional en estrellas activas \citep{Karttunen2016,Carroll2017}. El periodo de variaci\'on es, por ello, un observable de importancia central en astrof\'isica estelar: permite clasificar objetos, inferir par\'ametros f\'isicos como masas y radios, estudiar la estructura interna estelar mediante asterosismolog\'ia, y estimar distancias gal\'acticas y extragal\'acticas a trav\'es de relaciones periodo--luminosidad como la de Leavitt \citep{Ngeow_Gieren_Klein_2013}.
 
-\begin{figure}[H]
+Los grandes cartografiados fotom\'etricos de largo plazo han transformado la escala de este problema. Como muestran \citet{iwanek_2025} y \citet{soszynski_2024}, el proyecto \emph{Optical Gravitational Lensing Experiment} (OGLE) monitorea de forma continua el abultamiento y el disco gal\'acticos, as\'i como las Nubes de Magallanes, desde 1992. A lo largo de sus cuatro fases, ha acumulado m\'as de un bill\'on de observaciones fotom\'etricas individuales para aproximadamente dos mil millones de estrellas. Cartografiados complementarios en el infrarrojo cercano, como VVV y su extensi\'on VVVX, permiten adem\'as penetrar regiones de alta extinci\'on interestelar inaccesibles en el \'optico \citep{vvv_survey,saito_2024}. Misiones espaciales como TESS aportan, por su parte, fotometr\'ia de alta cadencia, pr\'acticamente libre de las interrupciones diarias propias de la observaci\'on terrestre \citep{ricker_2015}. Esta explosi\'on en el volumen y la diversidad morfol\'ogica de las curvas de luz disponibles pone de manifiesto la necesidad de m\'etodos de determinaci\'on de periodicidad precisos, robustos frente a distintas morfolog\'ias de variabilidad, y computacionalmente viables a gran escala.
+
+\section{Estado del arte}
+\label{sec:estado-del-arte}
+
+\subsection{M\'etodos basados en el an\'alisis espectral}
+
+El enfoque cl\'asico para la b\'usqueda de periodicidades en series de tiempo astron\'omicas es el an\'alisis de Fourier. Sin embargo, la mayor\'ia de las series de tiempo astron\'omicas est\'an muestreadas de forma irregular, debido a limitaciones observacionales como el ciclo d\'ia--noche, las fases lunares y las condiciones clim\'aticas. Esto impide la aplicaci\'on directa de la transformada discreta de Fourier cl\'asica. \citet{lomb_1976} y \citet{scargle_1982} resuelven este problema formulando la detecci\'on de periodicidad como un ajuste de m\'inimos cuadrados de una funci\'on sinusoidal para cada frecuencia de prueba. As\'i nace el periodograma de Lomb--Scargle: una generalizaci\'on del an\'alisis de Fourier, matem\'aticamente equivalente a este \'ultimo cuando el muestreo es uniforme. Esta t\'ecnica es, hasta la fecha, una de las m\'as utilizadas en la literatura. Su eficiencia computacional y su teor\'ia estad\'istica bien establecida, que permite evaluar la significancia de los picos del periodograma, explican su popularidad. Su principal limitaci\'on aparece cuando la variabilidad subyacente se aparta significativamente de una forma sinusoidal, como ocurre en eclipses pronunciados o en pulsaciones con arm\'onicos dominantes. En estos casos, la potencia espectral se fracciona entre la frecuencia fundamental y sus arm\'onicos, lo que dificulta identificar sin ambig\"uedad el periodo correcto.
+
+\subsection{M\'etodos basados en el orden de fase}
+
+Una familia alternativa de m\'etodos, menos sensible a la forma funcional de la se\~nal, se basa en evaluar el grado de orden que exhibe la curva de luz al ser plegada en fase para un periodo de prueba dado. Dentro de esta familia se encuentran t\'ecnicas como la minimizaci\'on de la dispersi\'on de fase (PDM) y el an\'alisis de varianza (AOV), popularizadas desde finales de la d\'ecada de 1970 \citep[v\'ease la revisi\'on de][]{Graham2013}. El m\'etodo de m\'inima entrop\'ia pertenece conceptualmente a esta familia. Fue propuesto por \citet{cincotta_1995} y formalizado anal\'iticamente por \citet{cincotta_1999}, y se distingue de los dem\'as m\'etodos de dispersi\'on de fase por sustentarse en un marco te\'orico riguroso proveniente de la teor\'ia de la informaci\'on: el periodo correcto es aquel que produce el diagrama de fase con menor entrop\'ia de Shannon, es decir, el de mayor orden estad\'istico. F\'isicamente, esto equivale a decir que el periodo correcto es aquel que ordena mejor los datos al plegarlos en fase, sin importar la forma que tenga esa curva ordenada. Esta formulaci\'on es intr\'insecamente sensible a cualquier morfolog\'ia de variabilidad, pues no exige asumir una forma funcional particular para la se\~nal. Por ello resulta especialmente adecuada para curvas de luz con eclipses, pulsaciones asim\'etricas o comportamientos multiperi\'odicos.
+
+\subsection{Comparaciones sistem\'aticas y limitaciones persistentes}
+
+El trabajo de \citet{Graham2013} constituye la comparaci\'on sistem\'atica m\'as citada entre algoritmos de determinaci\'on de periodicidad, evaluando m\'etodos basados en Fourier, dispersi\'on de fase y entrop\'ia condicional sobre curvas de luz reales de los cartografiados Catalina Real-Time Transient Survey, MACHO y ASAS. Sus resultados muestran que los m\'etodos basados en dispersi\'on de fase y entrop\'ia condicional ofrecen consistentemente los mejores resultados en t\'erminos de completitud. Sin embargo, los autores se\~nalan expl\'icitamente que \emph{el aliasing de periodos y la identificaci\'on de arm\'onicos siguen siendo problemas significativos}, incluso para los m\'etodos m\'as precisos. Este hallazgo es central para la presente propuesta. Sugiere que la principal debilidad de los m\'etodos de orden de fase no es su precisi\'on una vez identificado el periodo correcto, sino la dificultad para descartar eficientemente picos esp\'ureos y arm\'onicos entre un gran n\'umero de periodos candidatos. Esta \'ultima es precisamente la tarea para la cual el periodograma de Lomb--Scargle, con su interpretaci\'on espectral directa, resulta m\'as id\'oneo.
+
+M\'as recientemente, \citet{gurpide_2025} retomaron el problema de la detecci\'on de periodicidades en datos muestreados irregularmente. Se\~nalan que los periodogramas cl\'asicos carecen de propiedades estad\'isticas bien definidas bajo muestreo irregular, un problema que se agrava en presencia de variabilidad aperi\'odica o estoc\'astica (``ruido rojo''), f\'acilmente confundible con una se\~nal peri\'odica genuina. Su propuesta, basada en procesos gaussianos, confirma que el problema de la determinaci\'on robusta de periodicidad en datos irregulares dista de estar resuelto y que sigue siendo un \'area activa de investigaci\'on metodol\'ogica.
+
+En el contexto local, \citet{Cubillos2021} realiz\'o, bajo la direcci\'on del mismo director de este trabajo, una comparaci\'on directa entre el m\'etodo de m\'inima entrop\'ia, un m\'etodo basado en Fourier (\texttt{fnpeaks}) y el periodograma de Lomb--Scargle, enfocada en determinar la cantidad m\'inima de puntos observacionales necesaria para reconstruir confiablemente el periodo de Cefeidas, RR Lyrae y binarias eclipsantes. Este antecedente directo confirma la viabilidad pr\'actica de trabajar con estos tres m\'etodos sobre curvas de luz de morfolog\'ias diversas, y aporta un precedente metodol\'ogico valioso para el dise\~no de las pruebas de validaci\'on de la presente propuesta.
+
+\subsection{Aprendizaje autom\'atico como enfoque complementario}
+
+En a\~nos recientes, la disponibilidad de cat\'alogos masivos de curvas de luz ha impulsado el uso de t\'ecnicas de aprendizaje autom\'atico para la clasificaci\'on de estrellas variables. \citet{PerezOrtiz2017}, en un trabajo desarrollado en la Universidad de los Andes, evaluaron clasificadores supervisados (bosques aleatorios, m\'aquinas de soporte vectorial, entre otros) para identificar candidatas a estrellas Be en el campo del polo ecl\'iptico sur de OGLE-IV. \citet{naydenkin_2020}, por su parte, aplicaron un enfoque similar para clasificar Cefeidas, RR Lyrae y estrellas $\delta$~Scuti en el cat\'alogo del Zwicky Transient Facility. Es importante notar que estos m\'etodos abordan un problema distinto al de esta propuesta: la \emph{clasificaci\'on} de tipos de variabilidad a partir de caracter\'isticas extra\'idas de la curva de luz, en muchos casos incluyendo el periodo ya determinado por otros m\'etodos como una de dichas caracter\'isticas. En contraste, este trabajo se concentra en la \emph{determinaci\'on} misma del periodo, un paso previo y frecuentemente indispensable para dicha clasificaci\'on. La naturaleza de caja negra de los clasificadores de aprendizaje autom\'atico contrasta, adem\'as, con la interpretabilidad anal\'itica que ofrecen tanto el periodograma de Lomb--Scargle como el m\'etodo de m\'inima entrop\'ia. Esta es una caracter\'istica deseable cuando se busca comprender f\'isicamente el origen de la variabilidad detectada.
+
+\subsection{Cartografiados observacionales contempor\'aneos}
+
+La motivaci\'on observacional de este trabajo est\'a directamente ligada al estado actual de los grandes cartografiados fotom\'etricos. El proyecto OGLE, actualmente en su cuarta fase, mantiene el \emph{OGLE Collection of Variable Stars} \citep{iwanek_2025,soszynski_2024}. Se trata de un cat\'alogo p\'ublico y sistem\'aticamente ampliado de curvas de luz en las bandas $V$ e $I$, que cubre el abultamiento y el disco gal\'acticos, as\'i como el sistema de las Nubes de Magallanes, e incluye subcat\'alogos espec\'ificos para Cefeidas, RR Lyrae y binarias eclipsantes, entre otros tipos de variabilidad \citep{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}. El cartografiado VVV y su extensi\'on VVVX complementan esta cobertura en el infrarrojo cercano, proporcionando fotometr\'ia $JHK_s$ para regiones de alta extinci\'on interestelar inaccesibles en el \'optico \citep{vvv_survey,saito_2024}. La misi\'on espacial TESS, dise\~nada originalmente para la detecci\'on de exoplanetas en tr\'ansito, aporta finalmente fotometr\'ia de cadencia de pocos minutos y l\'ineas base continuas de semanas a meses \citep{ricker_2015}. Estas cualidades la han convertido en una fuente cada vez m\'as explotada para la determinaci\'on de periodos de estrellas variables en general, no solo de sistemas con planetas en tr\'ansito, como lo demuestra el trabajo reciente de \citet{kepler_2026} sobre periodos fotom\'etricos de variables catacl\'ismicas.
+
+\section{Motivaci\'on y justificaci\'on}
+\label{sec:motivacion}
+
+De la revisi\'on anterior se desprende un panorama consistente. El periodograma de Lomb--Scargle es computacionalmente eficiente y concentra su poder estad\'istico en identificar frecuencias dominantes, pero fracciona su sensibilidad ante se\~nales con arm\'onicos importantes. El m\'etodo de m\'inima entrop\'ia, en cambio, es sensible a cualquier morfolog\'ia de variabilidad; sin embargo, como lo evidenci\'o \citet{Graham2013}, el aliasing y la identificaci\'on del arm\'onico correcto siguen siendo problemas persistentes incluso para los m\'etodos de orden de fase m\'as precisos. Estas debilidades no son independientes entre s\'i. La principal fortaleza de Lomb--Scargle, su capacidad de identificar eficientemente las frecuencias f\'isicamente relevantes dentro de un espacio de b\'usqueda amplio mediante una sola pasada vectorizada, es precisamente la herramienta que se necesita para mitigar la principal debilidad del m\'etodo de entrop\'ia m\'inima.
+
+Con base en esto, se propone construir un m\'etodo combinado en el que el periodograma de Lomb--Scargle y el criterio de m\'inima entrop\'ia se apliquen en paralelo, de forma simult\'anea, sobre la misma grilla de periodos de prueba, y no uno como filtro previo del otro. El periodo final candidato se obtiene combinando ambos criterios, favoreciendo los periodos que exhiban simult\'aneamente alta potencia espectral y baja entrop\'ia. La hip\'otesis central de este trabajo es que esta integraci\'on paralela permite superar las limitaciones de cada t\'ecnica por separado. La capacidad de discriminaci\'on de frecuencias del periodograma, combinada con la robustez morfol\'ogica del criterio de entrop\'ia, deber\'ia producir determinaciones de periodo m\'as precisas y m\'as robustas que cualquiera de los dos m\'etodos aplicados de forma individual.
+
+\section{Objetivo general}
+\label{sec:objetivo-general}
+
+Desarrollar y validar un m\'etodo para la determinaci\'on robusta de periodos en estrellas variables mediante la integraci\'on del periodograma de Lomb--Scargle y el criterio de m\'inima entrop\'ia, aplicado a curvas de luz con distintas morfolog\'ias de variabilidad.
+
+\section{Objetivos espec\'ificos}
+\label{sec:objetivos-especificos}
+
+\begin{itemize}
+	\item Implementar de manera independiente el periodograma de Lomb--Scargle y el m\'etodo de m\'inima entrop\'ia, caracterizando sus fortalezas y limitaciones frente a diferentes tipos de variabilidad estelar.
+	\item Dise\~nar un esquema de integraci\'on entre ambas t\'ecnicas que permita identificar de forma consistente el periodo y la fase m\'as probables en curvas de luz.
+	\item Evaluar el desempe\~no del m\'etodo propuesto utilizando curvas de luz sint\'eticas con distintas morfolog\'ias f\'isicas, niveles de ruido y cadencias de muestreo.
+	\item Comparar la precisi\'on y robustez del m\'etodo desarrollado frente a la aplicaci\'on individual de Lomb--Scargle y m\'inima entrop\'ia en datos reales de los proyectos OGLE, VVV y TESS.
+\end{itemize}
+
+
+\chapter{Descripci\'on de los datos}
+\label{ch:datos}
+
+Para dise\~nar, entrenar el criterio de decisi\'on y validar el m\'etodo combinado propuesto en este trabajo se emplear\'an dos categor\'ias de datos. La primera son curvas de luz sint\'eticas, generadas con control total sobre la morfolog\'ia de la se\~nal, el nivel de ruido y la cadencia de muestreo. La segunda son curvas de luz reales, provenientes de los cartografiados OGLE, VVV/VVVX y TESS, cuyos periodos catalogados sirven como referencia (\emph{ground truth}) independiente. Este cap\'itulo describe ambas fuentes de datos.
+
+\section{Curvas de luz sint\'eticas}
+\label{sec:datos-sinteticas}
+
+El uso de curvas de luz sint\'eticas permite evaluar el desempe\~no de un algoritmo de determinaci\'on de periodicidad bajo condiciones completamente controladas, en las que el periodo verdadero es conocido de antemano. Esta estrategia fue empleada originalmente por \citet{cincotta_1995} para validar el m\'etodo de m\'inima entrop\'ia, y ser\'a adoptada aqu\'i con tres grados de libertad principales: la morfolog\'ia f\'isica de la variabilidad, el modelo de ruido, y la cadencia de muestreo temporal.
+
+\subsection{Morfolog\'ias de variabilidad}
+
+Se generar\'an tres familias de curvas de luz sint\'eticas, representativas de los principales mecanismos f\'isicos de variabilidad estelar discutidos en la Secci\'on~\ref{sec:estado-del-arte}:
+
+\begin{itemize}
+	\item \textbf{Oscilaciones sinusoidales}, como aproximaci\'on de primer orden a pulsadores radiales de baja amplitud, representadas por una \'unica componente arm\'onica.
+	\item \textbf{Pulsaciones asim\'etricas}, representativas de Cefeidas y RR Lyrae cl\'asicas, cuyas curvas de luz reales exhiben una subida r\'apida hacia el m\'aximo de brillo seguida de un descenso m\'as lento, y que se modelar\'an mediante una serie de Fourier truncada con m\'ultiples arm\'onicos y fases relativas no triviales entre ellos \citep{Karttunen2016,Carroll2017}.
+	\item \textbf{Eclipses}, representativos de sistemas binarios eclipsantes, caracterizados por m\'inimos de brillo abruptos y de corta duraci\'on relativa al periodo orbital, que fraccionan fuertemente la potencia espectral entre la frecuencia fundamental y sus arm\'onicos al ser analizados mediante t\'ecnicas puramente espectrales.
+\end{itemize}
+
+Esta selecci\'on de morfolog\'ias permite explorar de manera controlada el espacio en el que se espera que las fortalezas y debilidades de Lomb--Scargle y de la entrop\'ia m\'inima sean m\'as distinguibles. Se anticipa que ambos m\'etodos se desempe\~nen de forma similar sobre la morfolog\'ia sinusoidal, mientras que las morfolog\'ias asim\'etrica y de eclipses deber\'ian favorecer progresivamente al m\'etodo de entrop\'ia.
+
+\subsection{Modelo de ruido}
+
+Adem\'as del ruido blanco gaussiano, que aproxima el ruido fotom\'etrico y de conteo de fotones, se incorporar\'a ruido correlacionado (``ruido rojo'', o ruido con espectro de potencias tipo ley de potencia). Para esto se usar\'a el algoritmo de \citet{timmer_1995}, que genera series de tiempo estoc\'asticas con un espectro de potencias prescrito, aleatorizando tanto la fase como la amplitud de la transformada de Fourier de la se\~nal. \citet{gurpide_2025} se\~nalan que la variabilidad aperi\'odica de tipo ruido rojo es f\'acilmente confundible con una se\~nal peri\'odica genuina cuando se emplean periodogramas cl\'asicos. Por esta raz\'on, su inclusi\'on constituye una prueba de robustez exigente para cualquier m\'etodo de determinaci\'on de periodicidad.
+
+\subsection{Cadencia y muestreo temporal}
+
+Finalmente, cada combinaci\'on de morfolog\'ia y nivel de ruido se muestrear\'a bajo distintos esquemas temporales: muestreo regular denso, como referencia; y muestreo irregular con brechas, dise\~nado para emular las ventanas de visibilidad estacional y las interrupciones diarias t\'ipicas de los cartografiados terrestres descritos en la Secci\'on~\ref{sec:datos-reales}. Este \'ultimo esquema es central para poner a prueba el comportamiento de ambos m\'etodos frente al aliasing, cuya relaci\'on con la frecuencia de Nyquist bajo muestreo irregular se discute con mayor detalle en la Secci\'on~\ref{sec:nyquist} del Cap\'itulo~\ref{ch:metodologia}.
+
+\section{Curvas de luz reales}
+\label{sec:datos-reales}
+
+\subsection{OGLE}
+
+El \emph{Optical Gravitational Lensing Experiment} (OGLE) es uno de los cartografiados fotom\'etricos m\'as extensos y longevos en operaci\'on. Monitorea de forma continua, desde 1992, el abultamiento y el disco gal\'acticos, as\'i como las Nubes de Magallanes, con el telescopio Warsaw de 1.3~m ubicado en el Observatorio de Las Campanas, Chile \citep{soszynski_2024}. A lo largo de sus cuatro fases, el proyecto ha acumulado m\'as de un bill\'on de observaciones fotom\'etricas individuales para aproximadamente dos mil millones de estrellas \citep{iwanek_2025}. De particular inter\'es para este trabajo es el \emph{OGLE Collection of Variable Stars} (OCVS): un cat\'alogo p\'ublico que incluye fotometr\'ia en las bandas $V$ e $I$ junto con los periodos catalogados de cientos de miles de estrellas variables, organizados en subcat\'alogos por tipo de variabilidad, incluyendo Cefeidas cl\'asicas, RR Lyrae y binarias eclipsantes \citep{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}. Estos periodos fueron obtenidos por el equipo de OGLE mediante procedimientos independientes de los que se emplear\'an en este trabajo. Por ello, constituyen una referencia externa contra la cual contrastar los resultados del m\'etodo combinado.
+
+\subsection{VVV y VVVX}
+
+El cartografiado \emph{VISTA Variables in the V\'ia L\'actea} (VVV) es un relevamiento p\'ublico del Observatorio Europeo Austral. Observa el abultamiento gal\'actico y una secci\'on adyacente del disco en cinco bandas del infrarrojo cercano ($0.9$--$2.5\ \mu$m), utilizando el telescopio VISTA de 4~m, con el objetivo de construir un cat\'alogo de m\'as de un mill\'on de fuentes puntuales variables \citep{vvv_survey}. Su extensi\'on, VVVX, ampli\'o la cobertura espacial original de $562$ a $1700$ grados cuadrados y a\~nadi\'o \'epocas adicionales de observaci\'on entre 2016 y 2023. Entre ambos cartografiados se acumularon aproximadamente $4200$ horas de observaci\'on, con las que se produjo un cat\'alogo de fuentes variables en banda $K_s$ del orden de $10^7$ objetos \citep{saito_2024}. La cobertura en el infrarrojo cercano hace de VVV/VVVX una fuente de datos complementaria a OGLE, particularmente valiosa para estrellas variables situadas en regiones de alta extinci\'on interestelar, donde la fotometr\'ia \'optica se ve fuertemente afectada. En contraste con OGLE, la cadencia de observaci\'on de VVV/VVVX es t\'ipicamente m\'as dispersa e irregular. Esto la convierte en un caso de prueba exigente para la determinaci\'on de periodicidad bajo muestreo irregular.
+
+\subsection{TESS}
+
+El \emph{Transiting Exoplanet Survey Satellite} (TESS) es una misi\'on espacial de la NASA de la clase Explorer, dise\~nada originalmente para la detecci\'on de exoplanetas en tr\'ansito alrededor de estrellas brillantes y cercanas \citep{ricker_2015}. Emplea cuatro c\'amaras CCD de campo amplio en una \'orbita altamente el\'iptica de 13.7~d\'ias alrededor de la Tierra. Monitorea al menos 200\,000 estrellas de secuencia principal con cadencias de dos minutos para objetivos preseleccionados, adem\'as de im\'agenes de campo completo cada treinta minutos \citep{ricker_2015}. Su dise\~no est\'a optimizado para la detecci\'on de tr\'ansitos planetarios, pero la combinaci\'on de alta cadencia y l\'ineas base fotom\'etricas continuas de semanas a meses ha hecho de TESS una fuente cada vez m\'as explotada para la determinaci\'on general de periodos de estrellas variables. \citet{kepler_2026} lo ilustran recientemente con la determinaci\'on de periodos fotom\'etricos coherentes para variables catacl\'ismicas. Para este trabajo, TESS aporta el caso de muestreo m\'as denso y regular entre las tres fuentes de datos reales consideradas, y sirve como contraste frente a la irregularidad caracter\'istica de OGLE y VVV/VVVX.
+
+\section{S\'intesis comparativa}
+\label{sec:sintesis-datos}
+
+La Tabla~\ref{tab:comparacion-datos} resume las caracter\'isticas m\'as relevantes de las tres fuentes de datos reales para efectos de este trabajo. Como se aprecia, las tres fuentes difieren sustancialmente en banda espectral, l\'inea base temporal y regularidad de muestreo, lo cual permite poner a prueba el m\'etodo combinado bajo un rango amplio y realista de condiciones observacionales.
+
+\begin{table}[H]
 	\centering
-	\includegraphics[width=\textwidth]{img/filters.pdf}
-	\caption[Johnson-Cousins and OGLE-IV photometric systems]{
-		Johnson-Cousins (filled) and OGLE-IV equivalent (solid) filters transmittance curves. 
-		Colors are meant to be representative, not exact. UBVRI curves were adapted from \cite{Bessell2005}, and OGLE-IV curves from \cite{OGLE2015}. 
-		It is to note that OGLE-IV curves are experimental measurements of custom made filters.
-	}
-	\label{fig:filters}
-\end{figure}
-
-\begin{table}
-	\centering
-	\begin{tabular}{c|c||c|c}
-		Filter & description & $\lambda_{eff}$ (nm) & $\Delta_{\lambda}$ (nm) \\ \hline\hline
-		U & Ultraviolet & 366.3 & 65 \\ 
-		B & Blue & 436.1 & 89 \\ 
-		V & Visual & 544.8 & 84 \\ 
-		R & Red & 640.7 & 158 \\ 
-		I & Infrared & 798 & 154
+	\begin{tabular}{p{2.6cm}p{2.8cm}p{3.4cm}p{4.4cm}}
+		\hline
+		\textbf{Cartografiado} & \textbf{Banda(s)} & \textbf{Muestreo t\'ipico} & \textbf{Fortaleza principal} \\
+		\hline
+		OGLE & \'Optico ($V$, $I$) & Terrestre, irregular, l\'inea base de d\'ecadas & Cat\'alogos extensos con periodos de referencia bien establecidos \\
+		VVV/VVVX & Infrarrojo cercano ($JHK_s$) & Terrestre, dispersa e irregular & Acceso a regiones de alta extinci\'on interestelar \\
+		TESS & \'Optico de banda ancha & Espacial, alta cadencia, casi continua & Muestreo denso y regular libre del ciclo d\'ia--noche \\
+		\hline
 	\end{tabular}
-	\caption[Johnson-Cousins effective wavelengths and bandwidths]{
-		Effective wavelengths and bandwidths for the Johnson-Cousins photometric system. Data from \cite{Bessell2005}.
-		}
-	\label{tab:filters}
+	\caption[Comparaci\'on de las fuentes de datos reales]{Comparaci\'on cualitativa de las tres fuentes de datos reales consideradas en este trabajo.}
+	\label{tab:comparacion-datos}
 \end{table}
 
-	
-\chapter{Theoretical Framework}
-\lipsum{20}
 
-\chapter{Methodology}
-\lipsum{20}
+\chapter{Metodolog\'ia}
+\label{ch:metodologia}
 
-\chapter{Results}
-\lipsum{20}
+Este cap\'itulo describe el marco te\'orico de los dos m\'etodos individuales que se combinar\'an, el problema del aliasing bajo muestreo irregular, el dise\~no propuesto para el m\'etodo combinado, y el esquema de validaci\'on que se emplear\'a tanto sobre datos sint\'eticos como sobre datos reales.
 
-\chapter{Conclusions}
-\lipsum{20}
+\section{Periodograma de Lomb--Scargle}
+\label{sec:metodologia-ls}
 
-% Bibliography
+Sea $u(t_i)$, con $i = 1, \dots, N$, una serie de tiempo que representa la magnitud observada de una estrella en los instantes $t_i$, no necesariamente igualmente espaciados. El periodograma de Lomb--Scargle punt\'ua la potencia espectral asociada a una frecuencia angular de prueba $\omega$ mediante un ajuste de m\'inimos cuadrados de una funci\'on sinusoidal a los datos. Siguiendo la formulaci\'on de \citet{scargle_1982}, que generaliza el trabajo original de \citet{lomb_1976}, la potencia espectral se define como se muestra en la Ecuaci\'on~\eqref{eq:lomb-scargle}.
 
-\nocite{*}%test
+\begin{equation}
+	P_{LS}(\omega) = \frac{1}{2}\left\{
+	\frac{\left[\sum_i (u_i - \bar u)\cos\omega(t_i - \tau)\right]^2}{\sum_i \cos^2\omega(t_i - \tau)}
+	+
+	\frac{\left[\sum_i (u_i - \bar u)\sin\omega(t_i - \tau)\right]^2}{\sum_i \sin^2\omega(t_i - \tau)}
+	\right\},
+	\label{eq:lomb-scargle}
+\end{equation}
 
-\bibliographystyle{aa_url} % style aa.bst
-\bibliography{global.bib}
+En esta, $\bar u$ es la magnitud media de la serie, y el desfase $\tau$ se calcula para cada $\omega$ como se muestra en la Ecuaci\'on~\eqref{eq:lomb-scargle-tau}.
 
-% Appendices
+\begin{equation}
+	\tan(2\omega\tau) = \frac{\sum_i \sin(2\omega t_i)}{\sum_i \cos(2\omega t_i)}.
+	\label{eq:lomb-scargle-tau}
+\end{equation}
 
-\appendix
-\appendixpage
-\noappendicestocpagenum
-\addappheadtotoc
+La elecci\'on de $\tau$ hace que la Ecuaci\'on~\eqref{eq:lomb-scargle} sea invariante ante traslaciones temporales y equivalente, en el caso de muestreo uniforme, al periodograma cl\'asico basado en la transformada discreta de Fourier. F\'isicamente, $P_{LS}(\omega)$ puede interpretarse como una medida de cu\'anta varianza de los datos queda explicada por una onda sinusoidal de frecuencia $\omega$: mientras m\'as se parezca la se\~nal a esa sinusoide, mayor ser\'a la potencia asignada a esa frecuencia. El periodo candidato corresponde, por tanto, a la frecuencia que maximiza $P_{LS}(\omega)$. Esta formulaci\'on es computacionalmente eficiente, pues admite una evaluaci\'on vectorizada sobre toda una grilla de frecuencias de prueba en una \'unica pasada, y cuenta con una teor\'ia estad\'istica bien establecida para evaluar la significancia de los picos resultantes. Su principal limitaci\'on, como se discuti\'o en la Secci\'on~\ref{sec:estado-del-arte}, es que al concentrarse en una \'unica componente arm\'onica, fracciona su sensibilidad ante se\~nales fuertemente no sinusoidales.
 
-\chapter{Code utilities}
-\lipsum{2}
+\section{M\'etodo de m\'inima entrop\'ia}
+\label{sec:metodologia-entropia}
 
-\begin{listing}[H]
-	\begin{minted}{c}
-	double eps(double x) {
-	    long i = *(long*) &x;
-	    i++;
-	    double x_next = *(double*) &i;
-	    return x_next - x;
-	}
-	\end{minted}
-	\caption[\texttt{eps} C function]{
-		C code
-	}
-	\label{lst:c-eps}
-\end{listing}
+El m\'etodo de m\'inima entrop\'ia, propuesto y formalizado por \citet{cincotta_1995,cincotta_1999}, aborda el problema desde una perspectiva distinta: en lugar de ajustar una forma funcional a los datos, punt\'ua cada periodo de prueba $P$ seg\'un el grado de orden estad\'istico que exhibe la curva de luz al ser plegada en fase con ese periodo.
 
-\lipsum{2}
+Para un periodo de prueba $P$, la fase de cada observaci\'on se define como se muestra en la Ecuaci\'on~\eqref{eq:fase}.
 
-\chapter{Complementary figures}
-\lipsum{20}
+\begin{equation}
+	\varphi_i = \frac{t_i - t_0}{P} - \left\lfloor \frac{t_i - t_0}{P} \right\rfloor \in [0, 1),
+	\label{eq:fase}
+\end{equation}
+
+En esta, $t_0$ es un instante de referencia arbitrario y $\lfloor \cdot \rfloor$ denota la parte entera. Tanto la fase $\varphi_i$ como la magnitud normalizada se definen sobre el cuadrado unitario $[0,1)\times[0,1)$, el cual se subdivide en una grilla de $L \times K$ celdas. Contando el n\'umero de observaciones que caen dentro de cada celda $(l,k)$ y normalizando por el n\'umero total de puntos, se obtiene una probabilidad de ocupaci\'on $\mu_{lk}(P)$ para cada celda. A partir de esta probabilidad se calcula la entrop\'ia de Shannon del diagrama de fase, como se muestra en la Ecuaci\'on~\eqref{eq:entropia}.
+
+\begin{equation}
+	S(P) = -\sum_{l=1}^{L}\sum_{k=1}^{K} \mu_{lk}(P)\,\ln \mu_{lk}(P).
+	\label{eq:entropia}
+\end{equation}
+
+F\'isicamente, cuando $P$ coincide con el periodo real de la se\~nal, los puntos plegados en fase se agrupan de forma ordenada a lo largo de la curva de luz caracter\'istica, concentrando la probabilidad de ocupaci\'on en relativamente pocas celdas y produciendo un valor bajo de $S(P)$. Para periodos incorrectos, en cambio, los puntos se distribuyen de manera aproximadamente uniforme sobre el cuadrado unitario, maximizando la entrop\'ia. El periodo candidato corresponde, por tanto, al m\'inimo global de $S(P)$ sobre la grilla de periodos de prueba. A diferencia del periodograma de Lomb--Scargle, este criterio no asume ninguna forma funcional para la variabilidad. Por ello es sensible por igual a pulsaciones sinusoidales, pulsaciones asim\'etricas y eclipses, aunque a un mayor costo computacional por evaluaci\'on, asociado al c\'alculo de la grilla de ocupaci\'on para cada periodo de prueba.
+
+La implementaci\'on computacional de este m\'etodo se realizar\'a mediante la librer\'ia \texttt{entropypf}, desarrollada previamente por el autor de este trabajo, la cual provee una implementaci\'on vectorizada del c\'alculo de la Ecuaci\'on~\eqref{eq:entropia} sobre arreglos completos de periodos de prueba, as\'i como rutinas para la remoci\'on de aliases conocidos y la selecci\'on de m\'ultiples candidatos locales de m\'inima entrop\'ia.
+
+\section{Aliasing y la frecuencia de Nyquist bajo muestreo irregular}
+\label{sec:nyquist}
+
+En series de tiempo con muestreo regular, la frecuencia de Nyquist $f_{Ny} = 1/(2\Delta t)$, con $\Delta t$ el intervalo de muestreo, impone un l\'imite superior estricto a las frecuencias que pueden recuperarse sin ambig\"uedad. \citet{Mignard2005} muestra, sin embargo, que este l\'imite no se generaliza de forma directa al caso de muestreo irregular. Bajo ciertas condiciones sobre la secuencia de intervalos entre observaciones, es posible recuperar frecuencias significativamente superiores al inverso del intervalo de muestreo medio, un resultado que depende de la periodicidad de la ventana espectral asociada al patr\'on de muestreo. Este resultado es relevante para la definici\'on del rango de b\'usqueda de periodos de prueba, tanto del periodograma de Lomb--Scargle como del m\'etodo de m\'inima entrop\'ia, particularmente al trabajar con los patrones de muestreo altamente irregulares caracter\'isticos de OGLE y VVV/VVVX descritos en el Cap\'itulo~\ref{ch:datos}. De ah\'i la pr\'actica, ya incorporada en \texttt{entropypf}, de explorar rangos de periodos de prueba m\'as amplios de lo que la intuici\'on basada en el muestreo regular sugerir\'ia, junto con la remoci\'on expl\'icita de aliases conocidos asociados a periodicidades observacionales como el d\'ia sid\'ereo o el a\~no.
+
+\section{Dise\~no del m\'etodo combinado}
+\label{sec:metodo-combinado}
+
+El m\'etodo combinado propuesto en este trabajo integra el periodograma de Lomb--Scargle y el criterio de m\'inima entrop\'ia en paralelo:
+
+\begin{itemize}
+	\item \textbf{Periodograma de Lomb--Scargle.} Se calcula la potencia espectral $P_{LS}(\omega)$, seg\'un la Ecuaci\'on~\eqref{eq:lomb-scargle}, sobre una grilla amplia de frecuencias de prueba.
+	\item \textbf{Entrop\'ia de Shannon.} Sobre la misma grilla de periodos de prueba, expresada en frecuencia, se calcula de forma simult\'anea e independiente la entrop\'ia $S(P)$ del diagrama de fase, seg\'un la Ecuaci\'on~\eqref{eq:entropia}.
+\end{itemize}
+
+Ambos criterios se calculan, por tanto, sobre el mismo dominio y de manera concurrente. El periodo final candidato se obtiene combin\'andolos en una \'unica m\'etrica conjunta que privilegie los periodos con alta potencia espectral y baja entrop\'ia de forma simult\'anea. La forma exacta de esta m\'etrica conjunta, as\'i como el peso relativo asignado a cada criterio, constituyen los principales hiperpar\'ametros del m\'etodo, cuyo efecto sobre el desempe\~no se explorar\'a sistem\'aticamente durante la etapa de validaci\'on descrita en la Secci\'on~\ref{sec:validacion}.
+
+\section{Esquema de validaci\'on}
+\label{sec:validacion}
+
+La validaci\'on del m\'etodo combinado se realizar\'a en dos etapas, siguiendo la estructura de datos descrita en el Cap\'itulo~\ref{ch:datos}.
+
+\subsection{Validaci\'on con curvas de luz sint\'eticas}
+
+Sobre el conjunto de curvas de luz sint\'eticas descrito en la Secci\'on~\ref{sec:datos-sinteticas} se aplicar\'an, de forma independiente, el periodograma de Lomb--Scargle, el m\'etodo de m\'inima entrop\'ia y el m\'etodo combinado, para cada combinaci\'on de morfolog\'ia, nivel de ruido y esquema de muestreo. El periodo verdadero es conocido por construcci\'on en este conjunto de datos, por lo que el desempe\~no de cada m\'etodo se cuantificar\'a mediante:
+
+\begin{itemize}
+	\item la fracci\'on de curvas de luz para las cuales el periodo recuperado coincide con el periodo verdadero dentro de una tolerancia relativa preestablecida;
+	\item la distribuci\'on del error relativo del periodo recuperado, para los casos en que la recuperaci\'on es exitosa;
+	\item la incidencia de aliases y arm\'onicos err\'oneos entre los periodos recuperados incorrectamente; y
+	\item el tiempo de c\'omputo requerido por cada m\'etodo.
+\end{itemize}
+
+Esta comparaci\'on permitir\'a caracterizar de forma controlada en qu\'e condiciones de morfolog\'ia, ruido y muestreo el m\'etodo combinado ofrece una ventaja medible frente a cada m\'etodo individual, y en cu\'ales su desempe\~no es equivalente o inferior.
+
+\subsection{Aplicaci\'on y validaci\'on sobre datos reales}
+
+Posteriormente, el m\'etodo combinado se aplicar\'a a muestras de curvas de luz reales, extra\'idas de los cat\'alogos de OGLE, VVV/VVVX y TESS descritos en la Secci\'on~\ref{sec:datos-reales}. Sus periodos catalogados en la literatura servir\'an como referencia externa. Los periodos obtenidos mediante el m\'etodo combinado se contrastar\'an contra dichos valores de referencia, y contra los resultados de aplicar Lomb--Scargle y m\'inima entrop\'ia de forma individual sobre las mismas curvas de luz. Esto permitir\'a evaluar tanto la precisi\'on del m\'etodo propuesto como su facilidad de aplicaci\'on generalizada sobre datos observacionales reales, con sus imperfecciones caracter\'isticas de muestreo irregular, ruido correlacionado y brechas observacionales.
 
 
+\backmatter
 
-
-
-
-
-
-
-
-
+\footnotesize
+\bibliographystyle{aa_url}
+\bibliography{global}
 
 \end{document}

@@ -5,6 +5,8 @@
 *.fits
 *.xlsx
 *.xls
+*.dat
+*.txt
 *.parquet
 
 # --- Entornos virtuales / dependencias (Python) ---
