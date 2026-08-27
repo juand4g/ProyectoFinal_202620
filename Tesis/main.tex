@@ -77,18 +77,197 @@
 
 La variabilidad peri\'odica de las estrellas es una manifestaci\'on directa de procesos f\'isicos fundamentales: oscilaciones de presi\'on y gravedad en estrellas pulsantes, eclipses geom\'etricos en sistemas binarios, y modulaci\'on rotacional en estrellas activas \citep{Karttunen2016,Carroll2017}. El periodo de variaci\'on es, por ello, un observable de importancia central en astrof\'isica estelar: permite clasificar objetos, inferir par\'ametros f\'isicos como masas y radios, estudiar la estructura interna estelar mediante asterosismolog\'ia, y estimar distancias gal\'acticas y extragal\'acticas a trav\'es de relaciones periodo--luminosidad como la de Leavitt \citep{Ngeow_Gieren_Klein_2013}.
 
-Los grandes cartografiados fotom\'etricos de largo plazo han transformado la escala de este problema. Como muestran \citet{iwanek_2025} y \citet{soszynski_2024}, el proyecto \emph{Optical Gravitational Lensing Experiment} (OGLE) monitorea de forma continua el abultamiento y el disco gal\'acticos, as\'i como las Nubes de Magallanes, desde 1992. A lo largo de sus cuatro fases, ha acumulado m\'as de un bill\'on de observaciones fotom\'etricas individuales para aproximadamente dos mil millones de estrellas. Cartografiados complementarios en el infrarrojo cercano, como VVV y su extensi\'on VVVX, permiten adem\'as penetrar regiones de alta extinci\'on interestelar inaccesibles en el \'optico \citep{vvv_survey,saito_2024}. Misiones espaciales como TESS aportan, por su parte, fotometr\'ia de alta cadencia, pr\'acticamente libre de las interrupciones diarias propias de la observaci\'on terrestre \citep{ricker_2015}. Esta explosi\'on en el volumen y la diversidad morfol\'ogica de las curvas de luz disponibles pone de manifiesto la necesidad de m\'etodos de determinaci\'on de periodicidad precisos, robustos frente a distintas morfolog\'ias de variabilidad, y computacionalmente viables a gran escala.
+Los grandes cartografiados fotom\'etricos de largo plazo han transformado la escala de este problema. Como muestran \citet{iwanek_2025} y \citet{soszynski_2024}, el proyecto \emph{Optical Gravitational Lensing Experiment} (OGLE) monitorea de forma continua el bulbo y el disco gal\'acticos, as\'i como las Nubes de Magallanes, desde 1992. A lo largo de sus cuatro fases, ha acumulado m\'as de un bill\'on de observaciones fotom\'etricas individuales para aproximadamente dos mil millones de estrellas. Cartografiados complementarios en el infrarrojo cercano, como VVV y su extensi\'on VVVX, permiten adem\'as penetrar regiones de alta extinci\'on interestelar inaccesibles en el \'optico \citep{vvv_survey,saito_2024}. Misiones espaciales como TESS aportan, por su parte, fotometr\'ia de alta cadencia, pr\'acticamente libre de las interrupciones diarias propias de la observaci\'on terrestre \citep{ricker_2015}. Esta explosi\'on en el volumen y la diversidad morfol\'ogica de las curvas de luz disponibles pone de manifiesto la necesidad de m\'etodos de determinaci\'on de periodicidad precisos, robustos frente a distintas morfolog\'ias de variabilidad, y computacionalmente viables a gran escala.
+
+Esta diversidad no es solo morfol\'ogica, sino tambi\'en observacional. Como se detallar\'a en la Secci\'on~\ref{sec:estado-del-arte}, los grandes cartografiados fotom\'etricos actuales difieren entre s\'i en la longitud de onda que observan, en la cadencia con la que muestrean el cielo y en la l\'inea base temporal que cubren. Un m\'etodo de determinaci\'on de periodicidad \'util para la astronom\'ia observacional contempor\'anea debe, por tanto, ser capaz de operar de forma confiable sobre curvas de luz obtenidas en filtros y cadencias muy distintas entre s\'i, y no solamente sobre el caso ideal de un muestreo denso y regular en una \'unica banda fotom\'etrica.
 
 \section{Estado del arte}
 \label{sec:estado-del-arte}
 
+\subsection{Fundamentos de fotometr\'ia: magnitud y sistemas de filtros}
+
+La caracterizaci\'on observacional de una estrella variable parte de la fotometr\'ia, es decir, de la medici\'on de su brillo en funci\'on del tiempo. Por convenci\'on hist\'orica, el brillo estelar se expresa en magnitudes, una escala logar\'itmica introducida por \citet{Pogson1856}, seg\'un la cual una diferencia de cinco magnitudes corresponde exactamente a un factor 100 en el flujo recibido. La magnitud aparente $m$ de una estrella se relaciona con su flujo observado $F$ y con el de una estrella de referencia $F_0$ como se muestra en la Ecuaci\'on~\eqref{eq:pogson}.
+
+\begin{equation}
+	m - m_0 = -2.5 \log_{10}\left(\frac{F}{F_0}\right).
+	\label{eq:pogson}
+\end{equation}
+
+En esta, $m_0$ es la magnitud de referencia asociada al flujo $F_0$. Por la naturaleza logar\'itmica e invertida de esta escala, valores m\'as altos de $m$ corresponden a objetos m\'as d\'ebiles, una convenci\'on heredada de los cat\'alogos visuales antiguos, en los que las estrellas se ordenaban de la m\'as a la menos brillante.
+
+La magnitud medida depende, adem\'as, de la banda espectral en la que se observa, definida por el filtro fotom\'etrico utilizado. El sistema fotom\'etrico \'optico m\'as extendido es el de Johnson--Cousins, con bandas est\'andar $U$, $B$, $V$, $R$ e $I$ centradas en longitudes de onda crecientes, desde el ultravioleta cercano hasta el rojo \citep{Bessell2005}. La Tabla~\ref{tab:filtros} resume la longitud de onda efectiva y el ancho de banda de cada filtro.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{ccc}
+		\hline
+		\textbf{Filtro} & \textbf{$\lambda_{\text{eff}}$ (nm)} & \textbf{$\Delta\lambda$ (nm)} \\
+		\hline
+		$U$ & 366.3 & 65 \\
+		$B$ & 436.1 & 89 \\
+		$V$ & 544.8 & 84 \\
+		$R$ & 640.7 & 158 \\
+		$I$ & 798.0 & 154 \\
+		\hline
+	\end{tabular}
+	\caption[Longitudes de onda efectivas del sistema Johnson--Cousins]{Longitud de onda efectiva ($\lambda_{\text{eff}}$) y ancho de banda ($\Delta\lambda$) de los filtros \'opticos est\'andar del sistema Johnson--Cousins \citep{Bessell2005}.}
+	\label{tab:filtros}
+\end{table}
+
+La forma real de estos filtros, m\'as all\'a de su longitud de onda efectiva y ancho de banda nominal, se muestra en la Figura~\ref{fig:bessell-filtros}, que compara adem\'as el sistema Johnson--Cousins con otros sistemas fotom\'etricos de uso extendido.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{img/bessell2005_fig1.png}
+	\caption[Curvas de transmisi\'on de sistemas fotom\'etricos de banda ancha]{Curvas de transmisi\'on esquem\'aticas de varios sistemas fotom\'etricos de banda ancha, incluyendo el sistema Johnson--Cousins ($UBVRI$, panel superior) empleado por OGLE. Reproducida de \citet{Bessell2005}.}
+	\label{fig:bessell-filtros}
+\end{figure}
+
+Como se aprecia en el panel superior de la Figura~\ref{fig:bessell-filtros}, las bandas $V$ e $I$ empleadas por OGLE (Secci\'on~\ref{sec:datos-reales}) se solapan solo parcialmente, y la banda $I$ es notablemente m\'as ancha y asim\'etrica que las dem\'as, con una cola de transmisi\'on que se extiende hasta cerca de 9000~\AA.
+
+Para regiones de alta extinci\'on interestelar, donde la absorci\'on por polvo gal\'actico afecta con much\'isima mayor intensidad a las longitudes de onda cortas que a las largas, se recurre en cambio a sistemas fotom\'etricos del infrarrojo cercano, con bandas $J$, $H$ y $K_s$, centradas t\'ipicamente entre 1.2 y 2.2~$\mu$m \citep{Bessell2005}. La curva de luz de una estrella variable, es decir, la magnitud observada en funci\'on del tiempo, depende as\'i tanto de la f\'isica intr\'inseca de la variabilidad como del filtro particular en el que se realiza la observaci\'on: una misma estrella puede exhibir amplitudes, e incluso formas de curva de luz, distintas en diferentes bandas fotom\'etricas, lo cual es precisamente lo que motiva el uso de distintos sistemas de filtros por parte de OGLE, VVV/VVVX y TESS, descritos en el Cap\'itulo~\ref{ch:datos}.
+
+\subsection{Variabilidad intr\'inseca y extr\'inseca}
+
+Las estrellas variables se clasifican tradicionalmente en tres grandes grupos, seg\'un el origen f\'isico de su variabilidad: pulsantes, eruptivas y eclipsantes \citep{Karttunen2016}. En las estrellas pulsantes y eruptivas, la variaci\'on de brillo corresponde a un cambio f\'isico real en la estrella misma, ya sea por expansi\'on y contracci\'on peri\'odica de sus capas externas o por eyecciones episódicas de masa; por esta raz\'on se habla de variabilidad intr\'inseca. En las estrellas eclipsantes, en cambio, el brillo total del sistema cambia porque las componentes de un sistema binario se ocultan mutuamente de manera peri\'odica, sin que ocurra ning\'un cambio f\'isico en ninguna de las estrellas involucradas; este tipo de variabilidad se denomina extr\'inseca \citep{Karttunen2016}. Un cuarto grupo, el de las variables rotacionales, en las que la variaci\'on se debe a manchas fr\'ias o calientes en la superficie estelar que entran y salen de la vista al rotar la estrella, es igualmente extr\'inseco en este sentido \citep{Karttunen2016}. Esta distinci\'on es relevante porque los mecanismos f\'isicos, y por tanto las morfolog\'ias de curva de luz asociadas a cada tipo de variabilidad, son cualitativamente distintas, lo cual, como se discutir\'a m\'as adelante, condiciona el desempe\~no de los m\'etodos de determinaci\'on de periodicidad.
+
+\subsection{Mecanismo de pulsaci\'on: el mecanismo $\kappa$}
+
+Las estrellas pulsantes oscilan radialmente porque su equilibrio hidrost\'atico se ve perturbado de forma peri\'odica: si las capas externas se expanden, la densidad y la presi\'on disminuyen y la gravedad vuelve a comprimir el gas; sin embargo, a menos que la energ\'ia pueda transferirse eficientemente a este movimiento, la oscilaci\'on se amortigua \citep{Karttunen2016,Carroll2017}. El mecanismo que sostiene la oscilaci\'on se conoce como mecanismo $\kappa$ \citep{Carroll2017}. En la mayor parte del interior estelar, la opacidad disminuye al comprimirse el gas, lo cual amortigua cualquier oscilaci\'on. La opacidad del gas estelar sigue aproximadamente la ley de Kramers, seg\'un la cual $\kappa$ depende de la densidad $\rho$ y la temperatura $T$ como se muestra en la Ecuaci\'on~\eqref{eq:kramers} \citep{Carroll2017}.
+
+\begin{equation}
+	\kappa \propto \frac{\rho}{T^{3.5}}.
+	\label{eq:kramers}
+\end{equation}
+
+En esta, la fuerte dependencia de $\kappa$ con la temperatura implica que, en la mayor parte de la estrella, un aumento de densidad y de temperatura durante la compresi\'on hace disminuir la opacidad. Sin embargo, en las llamadas zonas de ionizaci\'on parcial, donde el hidr\'ogeno o el helio est\'an parcialmente ionizados, ocurre lo contrario: parte del trabajo de compresi\'on se invierte en ionizar el gas en lugar de elevar su temperatura, de modo que, con un incremento de temperatura menor, domina el t\'ermino de densidad en la Ecuaci\'on~\eqref{eq:kramers} y la opacidad efectivamente aumenta con la compresi\'on. Esto le permite a la capa absorber energ\'ia durante la compresi\'on y liberarla durante la expansi\'on, actuando como una v\'alvula que impulsa la oscilaci\'on en cada ciclo \citep{Carroll2017}. Las Cefeidas cl\'asicas y las RR Lyrae deben su pulsaci\'on principalmente a la segunda zona de ionizaci\'on del helio, ubicada a una temperatura caracter\'istica de unos $4\times10^4$~K \citep{Carroll2017}.
+
+Este mecanismo opera de forma an\'aloga a un instrumento de viento: las oscilaciones radiales de una estrella son esencialmente ondas estacionarias, similares a las de un tubo de \'organo abierto en un extremo, con un nodo en el centro de la estrella y un antinodo en la superficie. En el modo m\'as simple, llamado modo fundamental, todas las capas de la estrella se mueven simult\'aneamente en la misma direcci\'on; en el primer sobretono existe, adem\'as, un nodo intermedio entre el centro y la superficie, con capas oscilando en direcciones opuestas a ambos lados de \'este \citep{Carroll2017}. La mayor\'ia de las Cefeidas cl\'asicas y las W Virginis pulsan en el modo fundamental, mientras que las RR Lyrae pulsan en el modo fundamental o en el primer sobretono, e incluso, en algunos casos, en ambos modos de forma simult\'anea \citep{Carroll2017}.
+
+Una consecuencia directa de este mecanismo es la relaci\'on periodo--densidad, que puede estimarse a partir de un argumento simple: el periodo de pulsaci\'on es del orden del tiempo que tarda una onda sonora en atravesar el di\'ametro de la estrella \citep{Carroll2017}. La velocidad adiab\'atica del sonido en un gas de \'indice adiab\'atico $\gamma$, presi\'on $P$ y densidad $\rho$ est\'a dada por la Ecuaci\'on~\eqref{eq:sound-speed}.
+
+\begin{equation}
+	v_s = \sqrt{\frac{\gamma P}{\rho}}.
+	\label{eq:sound-speed}
+\end{equation}
+
+Aproximando la estrella como una esfera de densidad constante en equilibrio hidrost\'atico, la presi\'on en funci\'on del radio $r$ resulta ser la que se muestra en la Ecuaci\'on~\eqref{eq:pressure-r}.
+
+\begin{equation}
+	P(r) = \frac{2}{3}\pi G \rho^2 \left(R^2 - r^2\right),
+	\label{eq:pressure-r}
+\end{equation}
+
+En esta, $R$ es el radio total de la estrella y $G$ la constante de gravitaci\'on universal. Integrando el tiempo de cruce de la onda sonora a lo largo del di\'ametro estelar con las Ecuaciones~\eqref{eq:sound-speed} y \eqref{eq:pressure-r} se obtiene la relaci\'on periodo--densidad, mostrada en la Ecuaci\'on~\eqref{eq:period-density} \citep{Carroll2017}.
+
+\begin{equation}
+	\Pi \approx \sqrt{\frac{3\pi}{2\gamma G \rho}}.
+	\label{eq:period-density}
+\end{equation}
+
+Es decir, el periodo de pulsaci\'on $\Pi$ es aproximadamente proporcional al inverso de la ra\'iz cuadrada de la densidad media de la estrella. Esta relaci\'on explica por qu\'e estrellas m\'as grandes y menos densas, como las Cefeidas supergigantes, pulsan con periodos mucho m\'as largos que estrellas m\'as compactas, como las RR Lyrae \citep{Karttunen2016,Carroll2017}.
+
+\subsection{Cefeidas cl\'asicas y estrellas RR Lyrae}
+
+Las Cefeidas cl\'asicas, llamadas as\'i en honor a $\delta$~Cephei, son supergigantes de poblaci\'on~I\footnote{Las poblaciones estelares son una clasificaci\'on introducida por Walter Baade que distingue, a grandes rasgos, dos grupos de estrellas seg\'un su edad, metalicidad y ubicaci\'on gal\'actica: la poblaci\'on~I, joven y rica en metales, asociada al disco gal\'actico y a regiones de formaci\'on estelar reciente; y la poblaci\'on~II, vieja y pobre en metales, asociada al halo, el bulbo y los c\'umulos globulares \citep{Karttunen2016}.} y tipo espectral F--K, con periodos de pulsaci\'on t\'ipicamente entre 1 y 50 d\'ias. Su amplitud fotom\'etrica depende fuertemente de la longitud de onda de observaci\'on: puede alcanzar hasta 2.5 magnitudes en filtros de longitud de onda muy corta, como el ultravioleta, mientras que en el infrarrojo cercano, por ejemplo en la banda $K_s$ a 2.2~$\mu$m, se reduce a apenas 0.1 magnitudes \citep{Karttunen2016}. Ocupan, junto con otras clases de pulsantes, la llamada franja de inestabilidad del diagrama de Hertzsprung--Russell (HR), una regi\'on casi vertical que cruza el diagrama a temperaturas efectivas de entre 6000 y 9000~K \citep{Karttunen2016}. Al ser j\'ovenes, masivas y luminosas, las Cefeidas cl\'asicas se encuentran preferentemente en el disco gal\'actico, asociadas a brazos espirales y regiones de formaci\'on estelar reciente. Su inter\'es observacional radica en la relaci\'on periodo--luminosidad descubierta por Henrietta Leavitt en 1912, seg\'un la cual las Cefeidas m\'as luminosas pulsan con periodos m\'as largos, lo que las convierte en indicadores de distancia fundamentales para la escala de distancias extragal\'actica \citep{Karttunen2016,Carroll2017}.
+
+Existe un an\'alogo de poblaci\'on~II de las Cefeidas cl\'asicas, las estrellas W Virginis, con periodos de 2 a 45 d\'ias \citep{Carroll2017}. Aunque obedecen una relaci\'on periodo--luminosidad similar, son sistem\'aticamente unas 1.5 magnitudes m\'as d\'ebiles que una Cefeida cl\'asica del mismo periodo, dado que se trata de estrellas viejas y de menor masa \citep{Karttunen2016}.
+
+Las estrellas RR Lyrae son el tercer gran grupo de pulsantes de la franja de inestabilidad. Son estrellas de poblaci\'on~II, viejas, con periodos mucho m\'as cortos que las Cefeidas, t\'ipicamente entre 1.5 y 24 horas \citep{Carroll2017}, y amplitudes generalmente menores a una magnitud \citep{Karttunen2016}. Todas las RR Lyrae comparten aproximadamente la misma edad y masa, correspondiente a la fase evolutiva de quema de helio en el n\'ucleo, por lo cual sus magnitudes absolutas son casi id\'enticas entre s\'i ($M_V\approx0.6\pm0.3$), lo que las hace, al igual que las Cefeidas, \'utiles como indicadores de distancia \citep{Karttunen2016}. Son extremadamente comunes en c\'umulos globulares, de donde proviene su nombre hist\'orico de ``variables de c\'umulo'', y trazan tambi\'en el halo viejo y pobre en metales de la V\'ia L\'actea \citep{Karttunen2016}. Seg\'un su modo de pulsaci\'on, se distinguen habitualmente subtipos an\'alogos a los modos descritos en la secci\'on anterior: las que pulsan en el modo fundamental, denominadas RRab en la literatura; las que lo hacen en el primer sobretono, RRc; y una minor\'ia que pulsa simult\'aneamente en ambos modos, RRd \citep{Carroll2017}.
+
+Un grupo relacionado, aunque de poblaci\'on~I, son las estrellas $\delta$~Scuti o Cefeidas enanas, ubicadas por debajo de las RR Lyrae en la franja de inestabilidad, con periodos de apenas 1 a 3 horas. Sus curvas de luz muestran a menudo un batido debido a la interferencia entre el modo fundamental y el primer sobretono \citep{Karttunen2016,Carroll2017}.
+
+Estas tres morfolog\'ias se ilustran con curvas de luz reales, plegadas en fase, tomadas del \emph{OGLE Atlas of Variable Star Light Curves}\footnote{\url{https://ogle.astrouw.edu.pl/atlas/}}, en la Figura~\ref{fig:lc-pulsantes}.
+
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/OGLE-LMC-CEP-2491.png}
+		\small (a) Cefeida cl\'asica
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/OGLE-BLG-RRLYR-09643.png}
+		\small (b) RR Lyrae
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/OGLE-BLG-DSCT-04672.png}
+		\small (c) $\delta$~Scuti
+	\end{minipage}
+	\caption[Curvas de luz plegadas en fase de estrellas pulsantes]{Curvas de luz plegadas en fase de tres estrellas pulsantes del cat\'alogo de OGLE: (a) una Cefeida cl\'asica (OGLE-LMC-CEP-2491, $P=1.0659$~d), (b) una RR Lyrae (OGLE-BLG-RRLYR-09643, $P=0.3898$~d) y (c) una $\delta$~Scuti (OGLE-BLG-DSCT-04672, $P=0.0763$~d). N\'otese la subida r\'apida y ca\'ida lenta caracter\'istica de (a) y (b), frente a la morfolog\'ia m\'as sim\'etrica y de menor amplitud de (c).}
+	\label{fig:lc-pulsantes}
+\end{figure}
+
+\subsection{Binarias eclipsantes y variables elipsoidales}
+
+A diferencia de las estrellas pulsantes, cuya variabilidad es intr\'inseca y est\'a determinada por su edad, masa y estado evolutivo, las binarias eclipsantes son sistemas de dos estrellas cuya variabilidad es puramente geom\'etrica: el brillo total del sistema cambia porque una componente oculta peri\'odicamente a la otra, vista desde la Tierra \citep{Karttunen2016}. La Figura~\ref{fig:lc-ecl-generica} muestra un ejemplo real de este comportamiento.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/OGLE-LMC-ECL-08181.png}
+	\caption[Curva de luz de una binaria eclipsante]{Curva de luz plegada en fase de una binaria eclipsante del cat\'alogo de OGLE (OGLE-LMC-ECL-08181, $P=58.574$~d), tomada del \emph{OGLE Atlas of Variable Star Light Curves}. El brillo permanece esencialmente constante fuera de los eclipses, que son breves en relaci\'on con el periodo orbital.}
+	\label{fig:lc-ecl-generica}
+\end{figure}
+
+Seg\'un la forma de su curva de luz, las binarias eclipsantes se agrupan tradicionalmente en tres tipos principales \citep{Karttunen2016}:
+
+\begin{itemize}
+	\item \textbf{Tipo Algol (EA)}, llamadas as\'i por $\beta$~Persei. Son sistemas separados (\emph{detached}), en los que ninguna componente llena su l\'obulo de Roche. La curva de luz es plana durante la mayor parte del periodo, con dos m\'inimos bien definidos, el primario notablemente m\'as profundo que el secundario.
+	\item \textbf{Tipo $\beta$ Lyrae (EB)}. Son sistemas semiseparados, en los que una de las componentes ha llenado su l\'obulo de Roche y transfiere masa a la otra, adquiriendo una forma elipsoidal. El brillo total var\'ia de forma continua a lo largo de todo el periodo, no solo durante los eclipses.
+	\item \textbf{Tipo W Ursae Majoris (EW)}. Son binarias de contacto, en las que ambas componentes llenan su l\'obulo de Roche y comparten una envoltura com\'un. Los dos m\'inimos de la curva de luz son casi id\'enticos en profundidad, anchos y redondeados, con periodos t\'ipicamente cortos, de menos de un d\'ia.
+\end{itemize}
+
+La Figura~\ref{fig:lc-ecl-subtipos} ilustra las diferencias morfol\'ogicas entre estos tres tipos con curvas de luz reales del cat\'alogo de OGLE.
+
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/OGLE-BLG-ECL-126852-EA.png}
+		\small (a) Algol (EA)
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/OGLE-BLG-ECL-217270-EB.png}
+		\small (b) $\beta$ Lyrae (EB)
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/OGLE-BLG-ECL-163835-EW.png}
+		\small (c) W Ursae Majoris (EW)
+	\end{minipage}
+	\caption[Curvas de luz de los tres tipos de binarias eclipsantes]{Curvas de luz plegadas en fase de los tres tipos morfol\'ogicos de binarias eclipsantes: (a) tipo Algol (OGLE-BLG-ECL-126852, $P=7.575$~d), con m\'inimos bien diferenciados y brillo constante fuera de ellos; (b) tipo $\beta$~Lyrae (OGLE-BLG-ECL-217270, $P=1.623$~d), con variaci\'on continua entre eclipses de profundidad desigual; y (c) tipo W~Ursae~Majoris (OGLE-BLG-ECL-163835, $P=0.520$~d), con m\'inimos casi id\'enticos y periodo corto.}
+	\label{fig:lc-ecl-subtipos}
+\end{figure}
+
+Un tipo relacionado, que no presenta eclipses propiamente dichos, son las variables elipsoidales, en las que la deformaci\'on por marea de al menos una de las componentes hacia una forma elipsoidal produce una variaci\'on peri\'odica del \'area proyectada y, por tanto, del brillo, sin que exista un tr\'ansito real de una estrella frente a la otra \citep{Karttunen2016}. La Figura~\ref{fig:lc-ell} muestra un ejemplo real de este comportamiento.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/OGLE-LMC-ECL-31518-ELL.png}
+	\caption[Curva de luz de una variable elipsoidal]{Curva de luz plegada en fase de una variable elipsoidal del cat\'alogo de OGLE (OGLE-LMC-ECL-31518, $P=1.062$~d). A diferencia de las binarias eclipsantes de la Figura~\ref{fig:lc-ecl-subtipos}, la variaci\'on es suave y continua, sin m\'inimos abruptos.}
+	\label{fig:lc-ell}
+\end{figure}
+
+A diferencia de las Cefeidas y las RR Lyrae, cuyo rango de periodos y ubicaci\'on en el diagrama HR est\'an determinados por un mecanismo pulsacional intr\'inseco ligado a su edad y masa, las binarias eclipsantes no pertenecen a una poblaci\'on estelar particular ni ocupan una regi\'on fija del diagrama HR: su periodo orbital, que puede ir desde unas pocas horas en sistemas de contacto hasta a\~nos en binarias separadas y anchas, depende principalmente de la separaci\'on entre las componentes y no de su edad evolutiva \citep{Karttunen2016}. Esto las convierte en un caso de prueba particularmente exigente para los m\'etodos de determinaci\'on de periodicidad, dado que combinan eclipses de corta duraci\'on relativa al periodo con formas de curva de luz muy alejadas de una sinusoide.
+
+\subsection{Flujo general de b\'usqueda y caracterizaci\'on de estrellas variables}
+
+M\'as all\'a del inter\'es en la f\'isica particular de cada tipo de variabilidad, la b\'usqueda sistem\'atica de estrellas variables en un cartografiado fotom\'etrico sigue, en t\'erminos generales, un flujo de trabajo com\'un. A partir de observaciones fotom\'etricas repetidas de un campo del cielo, se construye la serie temporal de cada objeto detectado como magnitud versus tiempo. Sobre esta serie de tiempo se calculan estad\'isticos que resumen su comportamiento, tales como el \'indice de variabilidad, la amplitud, o la asimetr\'ia de la distribuci\'on de magnitudes, con el fin de separar las estrellas genuinamente variables de aquellas que solo presentan ruido fotom\'etrico. Una vez identificado un objeto como variable, la determinaci\'on de su periodo resulta ser una de las variables m\'as decisivas para su clasificaci\'on posterior: el periodo, junto con la amplitud y la forma de la curva de luz plegada en fase, permite discriminar entre los distintos tipos de variabilidad descritos anteriormente, y constituye adem\'as, en el caso de Cefeidas y RR Lyrae, el insumo directo de las relaciones periodo--luminosidad utilizadas como indicadores de distancia. Por esta raz\'on, contar con determinaciones de periodo precisas y confiables no es solamente un fin en s\'i mismo, sino un paso habilitante para gran parte de la caracterizaci\'on posterior de una estrella variable.
+
 \subsection{M\'etodos basados en el an\'alisis espectral}
 
-El enfoque cl\'asico para la b\'usqueda de periodicidades en series de tiempo astron\'omicas es el an\'alisis de Fourier. Sin embargo, la mayor\'ia de las series de tiempo astron\'omicas est\'an muestreadas de forma irregular, debido a limitaciones observacionales como el ciclo d\'ia--noche, las fases lunares y las condiciones clim\'aticas. Esto impide la aplicaci\'on directa de la transformada discreta de Fourier cl\'asica. \citet{lomb_1976} y \citet{scargle_1982} resuelven este problema formulando la detecci\'on de periodicidad como un ajuste de m\'inimos cuadrados de una funci\'on sinusoidal para cada frecuencia de prueba. As\'i nace el periodograma de Lomb--Scargle: una generalizaci\'on del an\'alisis de Fourier, matem\'aticamente equivalente a este \'ultimo cuando el muestreo es uniforme. Esta t\'ecnica es, hasta la fecha, una de las m\'as utilizadas en la literatura. Su eficiencia computacional y su teor\'ia estad\'istica bien establecida, que permite evaluar la significancia de los picos del periodograma, explican su popularidad. Su principal limitaci\'on aparece cuando la variabilidad subyacente se aparta significativamente de una forma sinusoidal, como ocurre en eclipses pronunciados o en pulsaciones con arm\'onicos dominantes. En estos casos, la potencia espectral se fracciona entre la frecuencia fundamental y sus arm\'onicos, lo que dificulta identificar sin ambig\"uedad el periodo correcto.
+El enfoque cl\'asico para la b\'usqueda de periodicidades en series de tiempo astron\'omicas es el an\'alisis de Fourier. Sin embargo, la mayor\'ia de las series de tiempo astron\'omicas est\'an muestreadas de forma irregular, debido a limitaciones observacionales como el ciclo d\'ia--noche, las fases lunares y las condiciones clim\'aticas. Esto impide la aplicaci\'on directa de la transformada discreta de Fourier cl\'asica. \citet{lomb_1976} y \citet{scargle_1982} resuelven este problema formulando la detecci\'on de periodicidad como un ajuste de m\'inimos cuadrados de una funci\'on sinusoidal para cada frecuencia de prueba. As\'i nace el periodograma de Lomb--Scargle: una generalizaci\'on del an\'alisis de Fourier, matem\'aticamente equivalente a este \'ultimo cuando el muestreo es uniforme. Esta t\'ecnica es, hasta la fecha, una de las m\'as utilizadas en la literatura. Su eficiencia computacional y su teor\'ia estad\'istica bien establecida, que permite evaluar la significancia de los picos del periodograma, explican su popularidad. Su principal limitaci\'on aparece cuando la variabilidad subyacente se aparta significativamente de una forma sinusoidal, como ocurre en eclipses pronunciados o en pulsaciones con arm\'onicos dominantes. En estos casos, la potencia espectral se fracciona entre la frecuencia fundamental y sus arm\'onicos, lo que dificulta identificar sin ambig\"uedad el periodo correcto. Su amplia adopci\'on se ve favorecida, adem\'as, por la disponibilidad de implementaciones computacionales maduras y de acceso libre: en este trabajo se emplear\'a la implementaci\'on del periodograma de Lomb--Scargle incluida en el paquete de Python \texttt{Astropy} \citep{astropy}.
 
 \subsection{M\'etodos basados en el orden de fase}
 
-Una familia alternativa de m\'etodos, menos sensible a la forma funcional de la se\~nal, se basa en evaluar el grado de orden que exhibe la curva de luz al ser plegada en fase para un periodo de prueba dado. Dentro de esta familia se encuentran t\'ecnicas como la minimizaci\'on de la dispersi\'on de fase (PDM) y el an\'alisis de varianza (AOV), popularizadas desde finales de la d\'ecada de 1970 \citep[v\'ease la revisi\'on de][]{Graham2013}. El m\'etodo de m\'inima entrop\'ia pertenece conceptualmente a esta familia. Fue propuesto por \citet{cincotta_1995} y formalizado anal\'iticamente por \citet{cincotta_1999}, y se distingue de los dem\'as m\'etodos de dispersi\'on de fase por sustentarse en un marco te\'orico riguroso proveniente de la teor\'ia de la informaci\'on: el periodo correcto es aquel que produce el diagrama de fase con menor entrop\'ia de Shannon, es decir, el de mayor orden estad\'istico. F\'isicamente, esto equivale a decir que el periodo correcto es aquel que ordena mejor los datos al plegarlos en fase, sin importar la forma que tenga esa curva ordenada. Esta formulaci\'on es intr\'insecamente sensible a cualquier morfolog\'ia de variabilidad, pues no exige asumir una forma funcional particular para la se\~nal. Por ello resulta especialmente adecuada para curvas de luz con eclipses, pulsaciones asim\'etricas o comportamientos multiperi\'odicos.
+Una familia alternativa de m\'etodos, menos sensible a la forma funcional de la se\~nal, se basa en evaluar el grado de orden que exhibe la curva de luz al ser plegada en fase para un periodo de prueba dado. Dentro de esta familia se encuentran t\'ecnicas como la minimizaci\'on de la dispersi\'on de fase (PDM) y el an\'alisis de varianza (AOV), popularizadas desde finales de la d\'ecada de 1970 \citep[v\'ease la revisi\'on de][]{Graham2013}. El m\'etodo de m\'inima entrop\'ia pertenece conceptualmente a esta familia. Fue propuesto por \citet{cincotta_1995} y formalizado anal\'iticamente por \citet{cincotta_1999}, y se distingue de los dem\'as m\'etodos de dispersi\'on de fase por sustentarse en un marco te\'orico riguroso proveniente de la teor\'ia de la informaci\'on: el periodo correcto es aquel que produce el diagrama de fase con menor entrop\'ia de Shannon, es decir, el de mayor orden estad\'istico. F\'isicamente, esto equivale a decir que el periodo correcto es aquel que ordena mejor los datos al plegarlos en fase, sin importar la forma que tenga esa curva ordenada. Esta formulaci\'on es intr\'insecamente sensible a cualquier morfolog\'ia de variabilidad, pues no exige asumir una forma funcional particular para la se\~nal. Por ello resulta especialmente adecuada para curvas de luz con eclipses, pulsaciones asim\'etricas o comportamientos multiperi\'odicos. A diferencia del periodograma de Lomb--Scargle, el m\'etodo de m\'inima entrop\'ia no cuenta con una implementaci\'on est\'andar de amplia difusi\'on; en este trabajo se emplear\'a \texttt{entropypf}, una implementaci\'on en Python de autor\'ia propia del autor de este trabajo.
 
 \subsection{Comparaciones sistem\'aticas y limitaciones persistentes}
 
@@ -104,7 +283,7 @@ En a\~nos recientes, la disponibilidad de cat\'alogos masivos de curvas de luz h
 
 \subsection{Cartografiados observacionales contempor\'aneos}
 
-La motivaci\'on observacional de este trabajo est\'a directamente ligada al estado actual de los grandes cartografiados fotom\'etricos. El proyecto OGLE, actualmente en su cuarta fase, mantiene el \emph{OGLE Collection of Variable Stars} \citep{iwanek_2025,soszynski_2024}. Se trata de un cat\'alogo p\'ublico y sistem\'aticamente ampliado de curvas de luz en las bandas $V$ e $I$, que cubre el abultamiento y el disco gal\'acticos, as\'i como el sistema de las Nubes de Magallanes, e incluye subcat\'alogos espec\'ificos para Cefeidas, RR Lyrae y binarias eclipsantes, entre otros tipos de variabilidad \citep{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}. El cartografiado VVV y su extensi\'on VVVX complementan esta cobertura en el infrarrojo cercano, proporcionando fotometr\'ia $JHK_s$ para regiones de alta extinci\'on interestelar inaccesibles en el \'optico \citep{vvv_survey,saito_2024}. La misi\'on espacial TESS, dise\~nada originalmente para la detecci\'on de exoplanetas en tr\'ansito, aporta finalmente fotometr\'ia de cadencia de pocos minutos y l\'ineas base continuas de semanas a meses \citep{ricker_2015}. Estas cualidades la han convertido en una fuente cada vez m\'as explotada para la determinaci\'on de periodos de estrellas variables en general, no solo de sistemas con planetas en tr\'ansito, como lo demuestra el trabajo reciente de \citet{kepler_2026} sobre periodos fotom\'etricos de variables catacl\'ismicas.
+La motivaci\'on observacional de este trabajo est\'a directamente ligada al estado actual de los grandes cartografiados fotom\'etricos. El proyecto OGLE, actualmente en su cuarta fase, mantiene el \emph{OGLE Collection of Variable Stars} \citep{iwanek_2025,soszynski_2024}. Se trata de un cat\'alogo p\'ublico y sistem\'aticamente ampliado de curvas de luz en las bandas $V$ e $I$, que cubre el bulbo y el disco gal\'acticos, as\'i como el sistema de las Nubes de Magallanes, e incluye subcat\'alogos espec\'ificos para Cefeidas, RR Lyrae y binarias eclipsantes, entre otros tipos de variabilidad \citep{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}. El cartografiado VVV y su extensi\'on VVVX complementan esta cobertura en el infrarrojo cercano, proporcionando fotometr\'ia $JHK_s$ para regiones de alta extinci\'on interestelar inaccesibles en el \'optico \citep{vvv_survey,saito_2024}. La misi\'on espacial TESS, dise\~nada originalmente para la detecci\'on de exoplanetas en tr\'ansito, aporta finalmente fotometr\'ia de cadencia de pocos minutos y l\'ineas base continuas de semanas a meses \citep{ricker_2015}. Estas cualidades la han convertido en una fuente cada vez m\'as explotada para la determinaci\'on de periodos de estrellas variables en general, no solo de sistemas con planetas en tr\'ansito, como lo demuestra el trabajo reciente de \citet{kepler_2026} sobre periodos fotom\'etricos de variables catacl\'ismicas.
 
 \section{Motivaci\'on y justificaci\'on}
 \label{sec:motivacion}
@@ -139,6 +318,8 @@ Para dise\~nar, entrenar el criterio de decisi\'on y validar el m\'etodo combina
 
 El uso de curvas de luz sint\'eticas permite evaluar el desempe\~no de un algoritmo de determinaci\'on de periodicidad bajo condiciones completamente controladas, en las que el periodo verdadero es conocido de antemano. Esta estrategia fue empleada originalmente por \citet{cincotta_1995} para validar el m\'etodo de m\'inima entrop\'ia, y ser\'a adoptada aqu\'i con tres grados de libertad principales: la morfolog\'ia f\'isica de la variabilidad, el modelo de ruido, y la cadencia de muestreo temporal.
 
+Esta estrategia complementa, en lugar de reemplazar, el uso de datos reales, y resulta indispensable por al menos tres razones. En primer lugar, en los datos reales el periodo verdadero de una estrella no se conoce con certeza absoluta, sino que proviene, a su vez, de la aplicaci\'on de alg\'un otro m\'etodo de determinaci\'on de periodicidad reportado en la literatura; esto introduce una circularidad que las curvas sint\'eticas, con periodo impuesto por construcci\'on, evitan por completo. En segundo lugar, las curvas de luz reales combinan de forma simult\'anea e inseparable la morfolog\'ia de la variabilidad, el nivel de ruido y el patr\'on de muestreo, lo que dificulta atribuir un cambio en el desempe\~no de un m\'etodo a una causa espec\'ifica; las curvas sint\'eticas permiten, en cambio, variar cada uno de estos factores de forma independiente y sistem\'atica. En tercer lugar, las curvas sint\'eticas permiten explorar regiones del espacio de par\'ametros, como niveles de ruido extremos o cadencias de muestreo particularmente escasas, que pueden estar subrepresentadas o ausentes en los cat\'alogos reales disponibles, pero que son relevantes para caracterizar los l\'imites de aplicabilidad del m\'etodo combinado.
+
 \subsection{Morfolog\'ias de variabilidad}
 
 Se generar\'an tres familias de curvas de luz sint\'eticas, representativas de los principales mecanismos f\'isicos de variabilidad estelar discutidos en la Secci\'on~\ref{sec:estado-del-arte}:
@@ -164,15 +345,77 @@ Finalmente, cada combinaci\'on de morfolog\'ia y nivel de ruido se muestrear\'a 
 
 \subsection{OGLE}
 
-El \emph{Optical Gravitational Lensing Experiment} (OGLE) es uno de los cartografiados fotom\'etricos m\'as extensos y longevos en operaci\'on. Monitorea de forma continua, desde 1992, el abultamiento y el disco gal\'acticos, as\'i como las Nubes de Magallanes, con el telescopio Warsaw de 1.3~m ubicado en el Observatorio de Las Campanas, Chile \citep{soszynski_2024}. A lo largo de sus cuatro fases, el proyecto ha acumulado m\'as de un bill\'on de observaciones fotom\'etricas individuales para aproximadamente dos mil millones de estrellas \citep{iwanek_2025}. De particular inter\'es para este trabajo es el \emph{OGLE Collection of Variable Stars} (OCVS): un cat\'alogo p\'ublico que incluye fotometr\'ia en las bandas $V$ e $I$ junto con los periodos catalogados de cientos de miles de estrellas variables, organizados en subcat\'alogos por tipo de variabilidad, incluyendo Cefeidas cl\'asicas, RR Lyrae y binarias eclipsantes \citep{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}. Estos periodos fueron obtenidos por el equipo de OGLE mediante procedimientos independientes de los que se emplear\'an en este trabajo. Por ello, constituyen una referencia externa contra la cual contrastar los resultados del m\'etodo combinado.
+El \emph{Optical Gravitational Lensing Experiment} (OGLE)\footnote{P\'agina web del proyecto: \url{https://ogle.astrouw.edu.pl/}} es uno de los cartografiados fotom\'etricos m\'as extensos y longevos en operaci\'on \citep{soszynski_2024}. Naci\'o en 1992 y se ha desarrollado desde entonces en cuatro fases sucesivas, cada una con instrumentaci\'on progresivamente m\'as capaz, como se resume en la Tabla~\ref{tab:ogle-fases}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{p{2.8cm}p{1.6cm}p{1.6cm}p{2.0cm}p{3.9cm}}
+		\hline
+		\textbf{Fase} & \textbf{C\'amara} & \textbf{\'Area (deg\textsuperscript{2})} & \textbf{Estrellas (millones)} & \textbf{Campo principal} \\
+		\hline
+		OGLE-I \newline (1992--1995) & 4~Mpx & 1.5 & 6 & Bulbo gal\'actico \\
+		OGLE-II \newline (1997--2000) & 4~Mpx & 27 & 44 & Bulbo, Nubes de Magallanes \\
+		OGLE-III \newline (2001--2009) & 64~Mpx & 170 & 389 & Bulbo, Nubes de Magallanes \\
+		OGLE-IV \newline (2010--presente) & 256~Mpx & 3600 & 2000 & Bulbo, disco, Nubes de Magallanes \\
+		\hline
+	\end{tabular}
+	\caption[Fases del proyecto OGLE]{Fases sucesivas del proyecto OGLE, con el tama\~no de la c\'amara utilizada, el \'area de cielo cubierta, el n\'umero aproximado de estrellas monitoreadas y el campo principal observado en cada una \citep{soszynski_2024}.}
+	\label{tab:ogle-fases}
+\end{table}
+
+Las observaciones de OGLE-I se realizaron con el telescopio Swope de 1~m del Observatorio de Las Campanas, Chile. Desde OGLE-II, el proyecto ha empleado en cambio un telescopio dedicado de 1.3~m, tambi\'en ubicado en Las Campanas \citep{soszynski_2024}. A lo largo de sus cuatro fases, el proyecto ha acumulado m\'as de un bill\'on de observaciones fotom\'etricas individuales para aproximadamente dos mil millones de estrellas \citep{soszynski_2024,iwanek_2025}, principalmente en las bandas $V$ e $I$ del sistema Johnson--Cousins \citep{Bessell2005}. De particular inter\'es para este trabajo es el \emph{OGLE Collection of Variable Stars} (OCVS): un cat\'alogo p\'ublico que incluye fotometr\'ia en dichas bandas junto con los periodos catalogados de cientos de miles de estrellas variables, organizados en subcat\'alogos por tipo de variabilidad, incluyendo Cefeidas cl\'asicas, RR Lyrae y binarias eclipsantes \citep{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}. Estos periodos fueron obtenidos por el equipo de OGLE mediante procedimientos independientes de los que se emplear\'an en este trabajo. Por ello, constituyen una referencia externa contra la cual contrastar los resultados del m\'etodo combinado.
+
+Con el fin de caracterizar mejor la composici\'on del subconjunto de OCVS relevante para este trabajo, se realiz\'o un sondeo descriptivo de los cat\'alogos de Cefeidas cl\'asicas, RR Lyrae y binarias del OCVS. La Figura~\ref{fig:ogle-totales} muestra el n\'umero total de estrellas catalogadas de cada tipo, junto con la fracci\'on de ellas para la cual existe fotometr\'ia individual disponible.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{img/ogle_totales_por_tipo.png}
+	\caption[Estrellas del subconjunto de OCVS utilizado en este trabajo, por tipo]{N\'umero de estrellas, para cada uno de los tres tipos de variabilidad de inter\'es, dentro de los subcat\'alogos del OCVS descargados para el desarrollo de este trabajo, junto con la fracci\'on de ellas con fotometr\'ia individual disponible. Elaboraci\'on propia a partir de los cat\'alogos de \citet{Soszynski2008,Soszynski2009,Soszynski2010,Soszynski2010b,Soszynski2011,Soszynski2011b,Soszynski2014,Soszynski2016,pawlak2016,pietrukowicz2013b}.}
+	\label{fig:ogle-totales}
+\end{figure}
+
+Las RR Lyrae y las binarias eclipsantes son, con much\'isima diferencia, los tipos de variabilidad m\'as numerosos en el subconjunto de OCVS considerado, mientras que las Cefeidas cl\'asicas son casi cuatro veces menos numerosas que cualquiera de los otros dos tipos. En los tres casos, la fracci\'on de estrellas con fotometr\'ia individual disponible supera el 94\%, lo cual garantiza una muestra amplia de curvas de luz reales sobre la cual aplicar el m\'etodo combinado.
+
+La distribuci\'on espacial de estas estrellas tambi\'en es marcadamente distinta entre tipos, como se aprecia en la Figura~\ref{fig:ogle-campo}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{img/ogle_distribucion_por_campo.png}
+	\caption[Distribuci\'on de las Cefeidas cl\'asicas del subconjunto de OCVS utilizado]{Distribuci\'on, seg\'un la regi\'on observada, de las Cefeidas cl\'asicas incluidas en los subcat\'alogos del OCVS descargados para este trabajo. Todas las RR Lyrae y binarias eclipsantes de dichos subcat\'alogos se ubican en la Nube Mayor de Magallanes. Elaboraci\'on propia a partir de los cat\'alogos citados en la Figura~\ref{fig:ogle-totales}.}
+	\label{fig:ogle-campo}
+\end{figure}
+
+Tanto las RR Lyrae como las binarias eclipsantes de este subconjunto se ubican en su totalidad en la Nube Mayor de Magallanes, mientras que las Cefeidas cl\'asicas se distribuyen entre ambas Nubes de Magallanes y el disco gal\'actico, incluyendo un peque\~no n\'umero de campos observados hacia el bulbo. Esto es consistente con lo discutido en la Secci\'on~\ref{sec:estado-del-arte}: al ser j\'ovenes trazadoras de poblaci\'on~I, las Cefeidas cl\'asicas se encuentran preferentemente en regiones de formaci\'on estelar reciente como el disco y las Nubes de Magallanes, y no en el bulbo gal\'actico, dominado por poblaci\'on vieja.
+
+Dentro de las Cefeidas cl\'asicas, el cat\'alogo de OGLE reporta adem\'as el modo de pulsaci\'on identificado para cada estrella, lo cual permite contrastar directamente la discusi\'on te\'orica de la Secci\'on~\ref{sec:estado-del-arte} con datos observacionales, como se muestra en la Figura~\ref{fig:ogle-modos}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{img/ogle_cefeidas_por_modo.png}
+	\caption[Cefeidas cl\'asicas del subconjunto de OCVS utilizado, por modo de pulsaci\'on]{Cefeidas cl\'asicas de los subcat\'alogos del OCVS descargados para este trabajo, seg\'un su modo de pulsaci\'on identificado. Elaboraci\'on propia a partir de los cat\'alogos citados en la Figura~\ref{fig:ogle-totales}.}
+	\label{fig:ogle-modos}
+\end{figure}
+
+Consistentemente con lo se\~nalado por \citet{Carroll2017}, la gran mayor\'ia de las Cefeidas cl\'asicas del cat\'alogo pulsan en el modo fundamental (55.1\%) o en el primer sobretono (35.6\%), mientras que los modos m\'ultiples (doble o triple modo, que involucran combinaciones del modo fundamental con el primer, segundo o tercer arm\'onico) son considerablemente m\'as raros, y suman en conjunto menos del 10\% del cat\'alogo. Esta distribuci\'on tiene una implicaci\'on directa sobre la metodolog\'ia: las curvas de luz de Cefeidas de modo m\'ultiple contienen, por construcci\'on, m\'as de una periodicidad simult\'anea, lo cual constituye un caso de prueba adicionalmente exigente para los m\'etodos de determinaci\'on de periodicidad descritos en el Cap\'itulo~\ref{ch:metodologia}.
+
+Finalmente, la Figura~\ref{fig:ogle-binarias} muestra la composici\'on del subcat\'alogo de binarias eclipsantes disponible para este trabajo, seg\'un su tipo morfol\'ogico, tal como lo reporta OGLE.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{img/ogle_binarias_por_tipo.png}
+	\caption[Binarias eclipsantes del subconjunto de OCVS utilizado, por tipo morfol\'ogico]{Binarias eclipsantes de los subcat\'alogos del OCVS descargados para este trabajo, seg\'un su tipo morfol\'ogico. El cat\'alogo de OGLE clasifica las binarias como no-contacto (NC), contacto (C) o elipsoidal (ELL), en lugar de la nomenclatura Algol/$\beta$~Lyrae/W~Ursae~Majoris utilizada en la Secci\'on~\ref{sec:estado-del-arte}. Elaboraci\'on propia a partir de los cat\'alogos citados en la Figura~\ref{fig:ogle-totales}.}
+	\label{fig:ogle-binarias}
+\end{figure}
+
+Es importante notar que la nomenclatura morfol\'ogica del cat\'alogo de OGLE no coincide exactamente con la clasificaci\'on cl\'asica de Algol, $\beta$~Lyrae y W~Ursae~Majoris introducida en la Secci\'on~\ref{sec:estado-del-arte}, sino que distingue entre sistemas de no-contacto (NC, que incluyen tanto binarias separadas como semiseparadas), de contacto (C) y elipsoidales (ELL, sin eclipses claros). Los sistemas de no-contacto, aproximadamente equivalentes a los tipos Algol y $\beta$~Lyrae, dominan ampliamente el cat\'alogo con un 95.9\% de las binarias, mientras que los sistemas de contacto, aproximadamente equivalentes al tipo W~Ursae~Majoris, representan apenas un 1.2\%; la correspondencia entre ambas clasificaciones, sin embargo, no es exactamente uno a uno. Dado que los sistemas de contacto son precisamente los que presentan las curvas de luz m\'as suaves y de periodo m\'as corto, su baja representaci\'on relativa en el cat\'alogo deber\'a tenerse en cuenta al seleccionar la muestra de binarias eclipsantes con la que se validar\'a el m\'etodo combinado sobre datos reales.
 
 \subsection{VVV y VVVX}
 
-El cartografiado \emph{VISTA Variables in the V\'ia L\'actea} (VVV) es un relevamiento p\'ublico del Observatorio Europeo Austral. Observa el abultamiento gal\'actico y una secci\'on adyacente del disco en cinco bandas del infrarrojo cercano ($0.9$--$2.5\ \mu$m), utilizando el telescopio VISTA de 4~m, con el objetivo de construir un cat\'alogo de m\'as de un mill\'on de fuentes puntuales variables \citep{vvv_survey}. Su extensi\'on, VVVX, ampli\'o la cobertura espacial original de $562$ a $1700$ grados cuadrados y a\~nadi\'o \'epocas adicionales de observaci\'on entre 2016 y 2023. Entre ambos cartografiados se acumularon aproximadamente $4200$ horas de observaci\'on, con las que se produjo un cat\'alogo de fuentes variables en banda $K_s$ del orden de $10^7$ objetos \citep{saito_2024}. La cobertura en el infrarrojo cercano hace de VVV/VVVX una fuente de datos complementaria a OGLE, particularmente valiosa para estrellas variables situadas en regiones de alta extinci\'on interestelar, donde la fotometr\'ia \'optica se ve fuertemente afectada. En contraste con OGLE, la cadencia de observaci\'on de VVV/VVVX es t\'ipicamente m\'as dispersa e irregular. Esto la convierte en un caso de prueba exigente para la determinaci\'on de periodicidad bajo muestreo irregular.
+El cartografiado \emph{VISTA Variables in the V\'ia L\'actea} (VVV)\footnote{P\'agina web del proyecto: \url{https://vvvsurvey.org/}} es un relevamiento p\'ublico del Observatorio Europeo Austral. Observa el bulbo gal\'actico y una secci\'on adyacente del disco en cinco bandas del infrarrojo cercano ($0.9$--$2.5\ \mu$m), utilizando el telescopio VISTA de 4~m, con el objetivo de construir un cat\'alogo de m\'as de un mill\'on de fuentes puntuales variables \citep{vvv_survey}. Su extensi\'on, VVVX, ampli\'o la cobertura espacial original de $562$ a $1700$ grados cuadrados y a\~nadi\'o \'epocas adicionales de observaci\'on entre 2016 y 2023. Entre ambos cartografiados se acumularon aproximadamente $4200$ horas de observaci\'on, con las que se produjo un cat\'alogo de fuentes variables en banda $K_s$ del orden de $10^7$ objetos \citep{saito_2024}. La cobertura en el infrarrojo cercano hace de VVV/VVVX una fuente de datos complementaria a OGLE, particularmente valiosa para estrellas variables situadas en regiones de alta extinci\'on interestelar, donde la fotometr\'ia \'optica se ve fuertemente afectada. En contraste con OGLE, la cadencia de observaci\'on de VVV/VVVX es t\'ipicamente m\'as dispersa e irregular. Esto la convierte en un caso de prueba exigente para la determinaci\'on de periodicidad bajo muestreo irregular.
 
 \subsection{TESS}
 
-El \emph{Transiting Exoplanet Survey Satellite} (TESS) es una misi\'on espacial de la NASA de la clase Explorer, dise\~nada originalmente para la detecci\'on de exoplanetas en tr\'ansito alrededor de estrellas brillantes y cercanas \citep{ricker_2015}. Emplea cuatro c\'amaras CCD de campo amplio en una \'orbita altamente el\'iptica de 13.7~d\'ias alrededor de la Tierra. Monitorea al menos 200\,000 estrellas de secuencia principal con cadencias de dos minutos para objetivos preseleccionados, adem\'as de im\'agenes de campo completo cada treinta minutos \citep{ricker_2015}. Su dise\~no est\'a optimizado para la detecci\'on de tr\'ansitos planetarios, pero la combinaci\'on de alta cadencia y l\'ineas base fotom\'etricas continuas de semanas a meses ha hecho de TESS una fuente cada vez m\'as explotada para la determinaci\'on general de periodos de estrellas variables. \citet{kepler_2026} lo ilustran recientemente con la determinaci\'on de periodos fotom\'etricos coherentes para variables catacl\'ismicas. Para este trabajo, TESS aporta el caso de muestreo m\'as denso y regular entre las tres fuentes de datos reales consideradas, y sirve como contraste frente a la irregularidad caracter\'istica de OGLE y VVV/VVVX.
+El \emph{Transiting Exoplanet Survey Satellite} (TESS)\footnote{P\'agina web del proyecto: \url{https://tess.mit.edu/}} es una misi\'on espacial de la NASA de la clase Explorer, dise\~nada originalmente para la detecci\'on de exoplanetas en tr\'ansito alrededor de estrellas brillantes y cercanas \citep{ricker_2015}. Emplea cuatro c\'amaras CCD de campo amplio en una \'orbita altamente el\'iptica de 13.7~d\'ias alrededor de la Tierra. Monitorea al menos 200\,000 estrellas de secuencia principal con cadencias de dos minutos para objetivos preseleccionados, adem\'as de im\'agenes de campo completo cada treinta minutos \citep{ricker_2015}. Su dise\~no est\'a optimizado para la detecci\'on de tr\'ansitos planetarios, pero la combinaci\'on de alta cadencia y l\'ineas base fotom\'etricas continuas de semanas a meses ha hecho de TESS una fuente cada vez m\'as explotada para la determinaci\'on general de periodos de estrellas variables. \citet{kepler_2026} lo ilustran recientemente con la determinaci\'on de periodos fotom\'etricos coherentes para variables catacl\'ismicas. Para este trabajo, TESS aporta el caso de muestreo m\'as denso y regular entre las tres fuentes de datos reales consideradas, y sirve como contraste frente a la irregularidad caracter\'istica de OGLE y VVV/VVVX.
 
 \section{S\'intesis comparativa}
 \label{sec:sintesis-datos}
@@ -222,6 +465,8 @@ En esta, $\bar u$ es la magnitud media de la serie, y el desfase $\tau$ se calcu
 \end{equation}
 
 La elecci\'on de $\tau$ hace que la Ecuaci\'on~\eqref{eq:lomb-scargle} sea invariante ante traslaciones temporales y equivalente, en el caso de muestreo uniforme, al periodograma cl\'asico basado en la transformada discreta de Fourier. F\'isicamente, $P_{LS}(\omega)$ puede interpretarse como una medida de cu\'anta varianza de los datos queda explicada por una onda sinusoidal de frecuencia $\omega$: mientras m\'as se parezca la se\~nal a esa sinusoide, mayor ser\'a la potencia asignada a esa frecuencia. El periodo candidato corresponde, por tanto, a la frecuencia que maximiza $P_{LS}(\omega)$. Esta formulaci\'on es computacionalmente eficiente, pues admite una evaluaci\'on vectorizada sobre toda una grilla de frecuencias de prueba en una \'unica pasada, y cuenta con una teor\'ia estad\'istica bien establecida para evaluar la significancia de los picos resultantes. Su principal limitaci\'on, como se discuti\'o en la Secci\'on~\ref{sec:estado-del-arte}, es que al concentrarse en una \'unica componente arm\'onica, fracciona su sensibilidad ante se\~nales fuertemente no sinusoidales.
+
+La implementaci\'on computacional de este m\'etodo se realizar\'a mediante el m\'odulo \texttt{astropy.\allowbreak timeseries.\allowbreak LombScargle} \citep{astropy}, que provee una evaluaci\'on vectorizada y de acceso libre de la Ecuaci\'on~\eqref{eq:lomb-scargle} sobre arreglos completos de frecuencias de prueba.
 
 \section{M\'etodo de m\'inima entrop\'ia}
 \label{sec:metodologia-entropia}

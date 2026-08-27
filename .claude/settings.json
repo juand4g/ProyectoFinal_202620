@@ -16,10 +16,26 @@
       "Bash(python3 -c ' *)",
       "PowerShell(Get-Command python, py -ErrorAction SilentlyContinue)",
       "PowerShell(python -c \"import astropy, numpy, pandas, matplotlib, tqdm; print\\(astropy.__version__, numpy.__version__, pandas.__version__, matplotlib.__version__, tqdm.__version__\\)\")",
-      "Bash(rm \"Lomb-Scargle/cache_resultados_ls.csv\"; rm \"Lomb-Scargle/graficas\"/*.png; ls \"Lomb-Scargle/graficas\")"
+      "Bash(rm \"Lomb-Scargle/cache_resultados_ls.csv\"; rm \"Lomb-Scargle/graficas\"/*.png; ls \"Lomb-Scargle/graficas\")",
+      "Bash(mkdir -p \"Sondeo_OGLE/tablas\")",
+      "Bash(pdfinfo main.pdf)",
+      "Read(//c/Users/japar/Documents/**)",
+      "Bash(pdftoppm -png -r 300 -f 12 -l 12 \"Artículos/STANDARD_PHOTOMETRIC_SYSTEMS.pdf\" /tmp/bessell_page)",
+      "Bash(ls -la /tmp/bessell_page*)",
+      "Bash(pwd -W)",
+      "Bash(cygpath -w /tmp/bessell_page-12.png)",
+      "Read(//c/Users/japar/AppData/Local/Temp/**)",
+      "Bash(rm -f /tmp/bessell_page-12.png)",
+      "Bash(python src/graficas_sondeo_ogle.py)",
+      "Bash(python3 src/graficas_sondeo_ogle.py)",
+      "WebFetch(domain:ogle.astrouw.edu.pl)",
+      "WebFetch(domain:vvvsurvey.org)",
+      "WebFetch(domain:tess.mit.edu)",
+      "WebSearch"
     ],
     "additionalDirectories": [
-      "C:\\Users\\japar\\Documents\\Proyecto Final\\Lomb-Scargle\\graficas"
+      "C:\\Users\\japar\\Documents\\Proyecto Final\\Lomb-Scargle\\graficas",
+      "C:\\Users\\japar\\Documents\\Proyecto Final\\ogle_collection\\Sondeo_OGLE"
     ]
   }
 }
