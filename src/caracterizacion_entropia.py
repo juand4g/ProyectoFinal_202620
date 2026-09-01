@@ -4,9 +4,16 @@ Shannon (entropypf; Cincotta, Mendez & Nunez 1995) para la busqueda de
 periodos en Binarias, Cefeidas Clasicas y RR Lyrae del catalogo fotometrico
 OGLE (banda I, tiempo en HJD).
 
-Analogo a caracterizacion_lomb_scargle.py: misma semilla aleatoria y mismos
-rangos de busqueda de periodo por tipo, para permitir comparar ambos metodos
-sobre exactamente las mismas estrellas.
+Analogo a caracterizacion_lomb_scargle.py: misma semilla aleatoria (misma
+muestra de estrellas) y mismos rangos de busqueda para Cefeidas y RR Lyrae.
+Para Binarias el rango se acota respecto al usado en Lomb-Scargle (ver nota
+junto a P_MAX_BINARIAS) porque con el rango completo (hasta 3000 d) el metodo
+de minima entropia, tal como esta documentado (aliases=(1,365), L=K=7),
+converge sistematicamente a un alias estacional de ~350-370 d en vez del
+periodo orbital real -- se verifico que el efecto persiste incluso con
+grillas mas finas (L=K=20), es decir, no es un problema de resolucion sino
+del propio metodo frente a curvas de luz dispersas de un solo sitio con
+brechas estacionales.
 
 Los resultados se guardan en un CSV que funciona como cache: al volver a
 ejecutar el script, las estrellas ya procesadas no se vuelven a calcular.
@@ -20,27 +27,46 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from entropypf import find_best_period, get_entropies, get_test_periods
+from scipy.signal import find_peaks
 from tqdm import tqdm
 
 # ---------------------------------------------------------------------------
 # PARAMETROS
 # ---------------------------------------------------------------------------
-N_BINARIAS = 5
-N_CEFEIDAS = 5
-N_RRLYRAE = 5
+N_BINARIAS = 500
+N_CEFEIDAS = 500
+N_RRLYRAE = 500
 
 RANDOM_SEED = 42  # misma semilla que caracterizacion_lomb_scargle.py -> misma muestra
 
-# Rango de busqueda de periodos (dias) para cada tipo de estrella.
-P_MIN_BINARIAS, P_MAX_BINARIAS = 0.1, 3000.0
+# Rango de busqueda de periodos (dias) para cada tipo de estrella. Cefeidas y
+# RR Lyrae usan el mismo rango que caracterizacion_lomb_scargle.py. Binarias
+# NO: con el rango completo (0.1-3000 d, igual que en Lomb-Scargle) el metodo
+# de minima entropia converge de forma sistematica a ~350-370 d (alias
+# estacional) en vez del periodo orbital real -- ver docstring del modulo.
+# Se acota a 100 d, que cubre holgadamente la mediana del catalogo (3.27 d) y
+# la inmensa mayoria de las binarias eclipsantes.
+P_MIN_BINARIAS, P_MAX_BINARIAS = 0.1, 100.0
 P_MIN_CEFEIDAS, P_MAX_CEFEIDAS = 0.2, 250.0
 P_MIN_RRLYRAE, P_MAX_RRLYRAE = 0.1, 1.2
 
 P_NUM = 10_000  # numero de periodos de prueba en la grilla no uniforme
 L, K = 7, 7  # dimensiones de la grilla fase-magnitud
-ALIASES = (1,)  # enmascara armonicos del dia sideral (0.5 d, 1/3 d, ...)
+ALIASES = (1, 365)  # enmascara armonicos del dia sideral y del alias anual
 N_CANDIDATOS = 3
 MIN_PUNTOS = 10  # curvas con menos puntos que esto se descartan
+
+# Fotometria terrestre de un solo sitio (~1 dato por noche) produce agrupa-
+# miento espurio de fase (entropia baja) no solo en P=1 d, 0.5 d y 1/3 d
+# (lo unico que cubre aliases=(1,...) de entropypf), sino en CUALQUIER
+# fraccion simple m/n de un dia: se verifico empiricamente que la busqueda
+# en binarias convergia a P=0.749 d = 3/4 d, que ningun alias estandar
+# cubre. Se enmascaran entonces todas las fracciones m/n con denominador
+# n <= ALIAS_DIURNO_QMAX dentro del rango de busqueda -- solo para binarias,
+# que son las unicas con periodos reales de pocos dias sobre baselines de
+# anios (Cefeidas y RR Lyrae ya funcionan bien con el manejo estandar).
+ALIAS_DIURNO_QMAX = 6
+ALIAS_DIURNO_EPS = 0.03  # dias, ventana de exclusion alrededor de cada m/n
 
 GENERAR_GRAFICAS = True
 N_EJEMPLOS_PERIODOGRAMA = 3  # numero de periodogramas de ejemplo a graficar por tipo
@@ -96,6 +122,41 @@ def calcular_periodo_entropia(t, mag, p_min, p_max):
         L=L, K=K, n_candidates=N_CANDIDATOS, aliases=ALIASES,
     )
     return float(periodos[0]), float(entropias[0])
+
+
+def generar_alias_diurnos(p_min, p_max, q_max=ALIAS_DIURNO_QMAX):
+    """Centros de exclusion en todas las fracciones simples m/n de un dia
+    (n <= q_max) dentro de [p_min, p_max] -- ver nota junto a ALIAS_DIURNO_QMAX."""
+    centros = set()
+    for n in range(1, q_max + 1):
+        m = 1
+        while m / n <= p_max + ALIAS_DIURNO_EPS:
+            p = m / n
+            if p >= p_min - ALIAS_DIURNO_EPS:
+                centros.add(round(p, 6))
+            m += 1
+    return np.array(sorted(centros))
+
+
+def calcular_periodo_entropia_binaria(t, mag, p_min, p_max):
+    """Version para binarias: enmascara fracciones simples de un dia ademas
+    de aplicar find_peaks sobre la grilla de entropypf (ver ALIAS_DIURNO_QMAX)."""
+    periodos_prueba = get_test_periods(p_min, p_max, P_NUM)
+
+    centros = generar_alias_diurnos(p_min, p_max)
+    mascara = (np.abs(periodos_prueba[:, None] - centros[None, :]) < ALIAS_DIURNO_EPS).any(axis=1)
+    periodos_prueba = periodos_prueba[~mascara]
+
+    entropias = get_entropies(t, mag, periodos_prueba, L=L, K=K)
+
+    picos, _ = find_peaks(-entropias, prominence=0.01, distance=30)
+    if len(picos) == 0:
+        picos = [int(np.argmin(entropias))]
+
+    candidatos_p = periodos_prueba[picos]
+    candidatos_s = entropias[picos]
+    orden = np.argsort(candidatos_s)[:N_CANDIDATOS]
+    return float(candidatos_p[orden][0]), float(candidatos_s[orden][0])
 
 
 def mejor_alias(periodo_entropia, periodo_catalogo):
@@ -222,9 +283,14 @@ def main():
 
             periodo_catalogo = float(periodos_catalogo.loc[id_estrella])
 
-            periodo_entropia, entropia_minima = calcular_periodo_entropia(
-                t, mag, cfg["p_min"], cfg["p_max"]
-            )
+            if tipo == "Binaria":
+                periodo_entropia, entropia_minima = calcular_periodo_entropia_binaria(
+                    t, mag, cfg["p_min"], cfg["p_max"]
+                )
+            else:
+                periodo_entropia, entropia_minima = calcular_periodo_entropia(
+                    t, mag, cfg["p_min"], cfg["p_max"]
+                )
 
             error_relativo = abs(periodo_entropia - periodo_catalogo) / periodo_catalogo
             periodo_alias, error_alias = mejor_alias(periodo_entropia, periodo_catalogo)
