@@ -17,6 +17,10 @@ import matplotlib.pyplot as plt
 from astropy.timeseries import LombScargle
 from tqdm import tqdm
 
+from graficas_periodograma import (
+    agregar_lineas_alias, handle_punto, marcar_punto_borde, panel_curva_luz,
+)
+
 # ---------------------------------------------------------------------------
 # PARAMETROS
 # ---------------------------------------------------------------------------
@@ -104,20 +108,67 @@ def mejor_alias(periodo_ls, periodo_catalogo):
     return candidatos[i], errores[i]
 
 
-def graficar_periodograma(frecuencia, potencia, periodo_catalogo, periodo_ls, tipo, id_estrella, outfile):
-    periodo = 1.0 / frecuencia
-    fig, ax = plt.subplots(figsize=(7, 4))
-    ax.plot(periodo, potencia, lw=0.7, color="steelblue")
-    ax.axvline(periodo_catalogo, color="green", ls="--", label=f"P catalogo = {periodo_catalogo:.5f} d")
-    ax.axvline(periodo_ls, color="red", ls=":", label=f"P Lomb-Scargle = {periodo_ls:.5f} d")
-    ax.set_xscale("log")
-    ax.set_xlabel("Periodo (d)")
-    ax.set_ylabel("Potencia LS")
-    ax.set_title(f"{tipo} - {id_estrella}")
-    ax.legend(fontsize=8)
-    fig.tight_layout()
+def graficar_periodograma(t, mag, frecuencia, potencia, periodo_catalogo, periodo_ls, tipo, id_estrella, outfile):
+    """Figura de 2 filas: el frecuenciograma de Lomb-Scargle ocupa toda la
+    fila superior, y la curva de luz real (plegada con el periodo catalogado)
+    y la curva de luz encontrada (plegada con el periodo de Lomb-Scargle) se
+    muestran en paneles separados, uno al lado del otro, en la fila inferior
+    -- nunca superpuestas en un mismo panel. El periodo catalogado y el de
+    Lomb-Scargle se marcan en el periodograma con parejas de triangulos en el
+    borde del recuadro, para no tapar el pico con una linea vertical."""
+    f_catalogo = 1.0 / periodo_catalogo
+    f_ls = 1.0 / periodo_ls
+
+    fig = plt.figure(figsize=(8.5, 7.2), constrained_layout=True)
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1])
+    ax_periodograma = fig.add_subplot(gs[0, :])
+    ax_lc_cat = fig.add_subplot(gs[1, 0])
+    ax_lc_enc = fig.add_subplot(gs[1, 1])
+
+    ax_periodograma.plot(frecuencia, potencia, lw=0.8, color="steelblue")
+    marcar_punto_borde(ax_periodograma, f_catalogo, color="green")
+    marcar_punto_borde(ax_periodograma, f_ls, color="red")
+    ax_periodograma.set_xscale("log")
+    ax_periodograma.set_xlabel("Frecuencia (d$^{-1}$)")
+    ax_periodograma.set_ylabel("Potencia LS")
+    ax_periodograma.legend(handles=[
+        handle_punto("green", f"f catalogo = {f_catalogo:.5f} d$^{{-1}}$ (P = {periodo_catalogo:.5f} d)"),
+        handle_punto("red", f"f Lomb-Scargle = {f_ls:.5f} d$^{{-1}}$ (P = {periodo_ls:.5f} d)"),
+    ], loc="best")
+
+    panel_curva_luz(ax_lc_cat, t, mag, periodo_catalogo, color="green",
+                     titulo="Curva real")
+    panel_curva_luz(ax_lc_enc, t, mag, periodo_ls, color="red",
+                     titulo="Curva encontrada")
+
+    fig.suptitle(f"{tipo} - {id_estrella}")
     fig.savefig(outfile, dpi=150)
     plt.close(fig)
+
+
+def regenerar_ejemplos(cache):
+    """Vuelve a graficar los primeros N_EJEMPLOS_PERIODOGRAMA de cada tipo
+    presentes en el cache, releyendo su fotometria original y recalculando
+    el periodograma. Se hace como paso separado (no dentro del bucle
+    principal) para que las graficas siempre reflejen el codigo de graficado
+    vigente, incluso en corridas donde esas estrellas ya estaban en cache y
+    por tanto no se reprocesan."""
+    for tipo, cfg in TIPOS.items():
+        candidatas = cache[(cache["tipo"] == tipo) & cache["periodo_ls"].notna()]
+        ids_ejemplo = candidatas["id"].head(N_EJEMPLOS_PERIODOGRAMA).tolist()
+        for id_estrella in ids_ejemplo:
+            fila = candidatas[candidatas["id"] == id_estrella].iloc[0]
+            path_dat = cfg["carpeta"] / f"{id_estrella}.dat"
+            t, mag, err = np.loadtxt(path_dat, unpack=True)
+            _, _, frecuencia, potencia = calcular_periodo_ls(
+                t, mag, err, cfg["p_min"], cfg["p_max"], SAMPLES_PER_PEAK
+            )
+            nombre = f"periodograma_{tipo.replace(' ', '_')}_{id_estrella}.png"
+            graficar_periodograma(
+                t, mag, frecuencia, potencia,
+                float(fila["periodo_catalogo"]), float(fila["periodo_ls"]),
+                tipo, id_estrella, PLOTS_DIR / nombre,
+            )
 
 
 def graficar_resumen(cache):
@@ -126,33 +177,38 @@ def graficar_resumen(cache):
         return
 
     tipos_lista = sorted(validos["tipo"].unique())
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig = plt.figure(figsize=(8.5, 10), constrained_layout=True)
+    gs = fig.add_gridspec(2, 1, height_ratios=[0.7, 1])
+    ax_box = fig.add_subplot(gs[0])
+    ax_scatter = fig.add_subplot(gs[1])
 
     datos_boxplot = [validos.loc[validos["tipo"] == t, "error_relativo"] for t in tipos_lista]
-    axes[0].boxplot(datos_boxplot, showfliers=False)
-    axes[0].set_xticks(range(1, len(tipos_lista) + 1))
-    axes[0].set_xticklabels(tipos_lista)
-    axes[0].set_yscale("log")
-    axes[0].set_ylabel("Error relativo |P_LS - P_cat| / P_cat")
-    axes[0].set_title("Exactitud y precision por tipo de estrella")
+    ax_box.boxplot(datos_boxplot, showfliers=False)
+    ax_box.set_xticks(range(1, len(tipos_lista) + 1))
+    ax_box.set_xticklabels(tipos_lista)
+    ax_box.set_yscale("log")
+    ax_box.set_ylabel("Error relativo del periodo")
+    ax_box.set_title("Exactitud y precision por tipo de estrella")
 
     colores = {"Binaria": "tab:orange", "Cefeida": "tab:blue", "RR Lyrae": "tab:green"}
+    f_catalogo = 1.0 / validos["periodo_catalogo"]
+    f_ls = 1.0 / validos["periodo_ls"]
     for tipo in tipos_lista:
-        grupo = validos[validos["tipo"] == tipo]
-        axes[1].scatter(
-            grupo["periodo_catalogo"], grupo["periodo_ls"],
+        mascara = validos["tipo"] == tipo
+        ax_scatter.scatter(
+            f_catalogo[mascara], f_ls[mascara],
             s=8, alpha=0.4, label=tipo, color=colores.get(tipo),
         )
-    lims = [validos["periodo_catalogo"].min(), validos["periodo_catalogo"].max()]
-    axes[1].plot(lims, lims, color="black", lw=0.8, ls="--", label="P_LS = P_cat")
-    axes[1].set_xscale("log")
-    axes[1].set_yscale("log")
-    axes[1].set_xlabel("Periodo catalogo (d)")
-    axes[1].set_ylabel("Periodo Lomb-Scargle (d)")
-    axes[1].set_title("Periodo recuperado vs. periodo catalogado")
-    axes[1].legend(fontsize=8)
+    lims = [f_catalogo.min(), f_catalogo.max()]
+    ax_scatter.plot(lims, lims, color="black", lw=0.8, ls="--", label="f_LS = f_cat")
+    agregar_lineas_alias(ax_scatter, lims)
+    ax_scatter.set_xscale("log")
+    ax_scatter.set_yscale("log")
+    ax_scatter.set_xlabel("Frecuencia catalogo (d$^{-1}$)")
+    ax_scatter.set_ylabel("Frecuencia Lomb-Scargle (d$^{-1}$)")
+    ax_scatter.set_title("Frecuencia recuperada vs. frecuencia catalogada")
+    ax_scatter.legend(loc="lower right")
 
-    fig.tight_layout()
     fig.savefig(PLOTS_DIR / "resumen_error_relativo.png", dpi=150)
     plt.close(fig)
 
@@ -191,8 +247,6 @@ def main():
 
         n = min(cfg["n_muestra"], len(ids_disponibles))
         muestra = random.sample(ids_disponibles, n)
-
-        n_ejemplos_graficados = 0
 
         for id_estrella in tqdm(muestra, desc=tipo, unit="estrella"):
             if (tipo, id_estrella) in procesados:
@@ -235,19 +289,12 @@ def main():
             })
             procesados.add((tipo, id_estrella))
 
-            if GENERAR_GRAFICAS and n_ejemplos_graficados < N_EJEMPLOS_PERIODOGRAMA:
-                nombre = f"periodograma_{tipo.replace(' ', '_')}_{id_estrella}.png"
-                graficar_periodograma(
-                    frecuencia, potencia, periodo_catalogo, periodo_ls,
-                    tipo, id_estrella, PLOTS_DIR / nombre,
-                )
-                n_ejemplos_graficados += 1
-
     if filas_nuevas:
         cache = pd.concat([cache, pd.DataFrame(filas_nuevas)], ignore_index=True)
         cache.to_csv(CACHE_CSV, index=False)
 
     if GENERAR_GRAFICAS:
+        regenerar_ejemplos(cache)
         graficar_resumen(cache)
 
     imprimir_resumen(cache)
