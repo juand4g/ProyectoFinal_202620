@@ -31,7 +31,8 @@ from scipy.signal import find_peaks
 from tqdm import tqdm
 
 from graficas_periodograma import (
-    agregar_lineas_alias, handle_punto, marcar_punto_borde, panel_curva_luz,
+    agregar_eje_periodo, agregar_lineas_alias, handle_punto, marcar_punto_borde,
+    panel_curva_luz,
 )
 
 # ---------------------------------------------------------------------------
@@ -202,6 +203,7 @@ def graficar_periodograma(t, mag, p_min, p_max, periodo_catalogo, periodo_entrop
     ax_periodograma.set_xscale("log")
     ax_periodograma.set_xlabel("Frecuencia (d$^{-1}$)")
     ax_periodograma.set_ylabel("Entropia normalizada")
+    agregar_eje_periodo(ax_periodograma)
     ax_periodograma.legend(handles=[
         handle_punto("green", f"f catalogo = {f_catalogo:.5f} d$^{{-1}}$ (P = {periodo_catalogo:.5f} d)"),
         handle_punto("red", f"f entropia minima = {f_entropia:.5f} d$^{{-1}}$ (P = {periodo_entropia:.5f} d)"),
@@ -264,17 +266,18 @@ def graficar_resumen(cache):
         mascara = validos["tipo"] == tipo
         ax_scatter.scatter(
             f_catalogo[mascara], f_entropia[mascara],
-            s=8, alpha=0.4, label=tipo, color=colores.get(tipo),
+            s=8, alpha=0.4, color=colores.get(tipo),
         )
     lims = [f_catalogo.min(), f_catalogo.max()]
-    ax_scatter.plot(lims, lims, color="black", lw=0.8, ls="--", label="f_entropia = f_cat")
+    ax_scatter.plot(lims, lims, color="black", lw=0.8, ls="--")
     agregar_lineas_alias(ax_scatter, lims)
     ax_scatter.set_xscale("log")
     ax_scatter.set_yscale("log")
     ax_scatter.set_xlabel("Frecuencia catalogo (d$^{-1}$)")
     ax_scatter.set_ylabel("Frecuencia minima entropia (d$^{-1}$)")
     ax_scatter.set_title("Frecuencia recuperada vs. frecuencia catalogada")
-    ax_scatter.legend(loc="lower right")
+    # Sin leyenda dentro de los ejes (tapaba puntos): el significado de
+    # colores y lineas se explica en el caption de la figura (ver Tesis).
 
     fig.savefig(PLOTS_DIR / "resumen_error_relativo.png", dpi=150)
     plt.close(fig)

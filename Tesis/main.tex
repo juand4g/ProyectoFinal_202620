@@ -539,7 +539,7 @@ La Figura~\ref{fig:ls-resumen} resume el desempe\~no del periodograma de Lomb--S
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/ls_resumen_error_relativo.png}
-	\caption[Exactitud y precisi\'on del periodograma de Lomb--Scargle, por tipo de estrella]{Izquierda: distribuci\'on del error relativo del periodo recuperado por el periodograma de Lomb--Scargle (con correcci\'on de alias), por tipo de estrella. Derecha: frecuencia recuperada vs. frecuencia catalogada, con la identidad $f_{LS}=f_{\text{cat}}$ y las diagonales correspondientes a los m\'ultiplos $\times2$ y $\times3$ del periodo. Elaboraci\'on propia sobre 500 binarias, 500 Cefeidas cl\'asicas y 500 RR Lyrae del OCVS.}
+	\caption[Exactitud y precisi\'on del periodograma de Lomb--Scargle, por tipo de estrella]{Izquierda: distribuci\'on del error relativo del periodo recuperado por el periodograma de Lomb--Scargle (con correcci\'on de alias), por tipo de estrella. Derecha: frecuencia recuperada vs. frecuencia catalogada, coloreada por tipo de estrella (naranja: binarias; azul: Cefeidas cl\'asicas; verde: RR Lyrae), con la identidad $f_{LS}=f_{\text{cat}}$ en negro discontinuo y, en gris y cada vez m\'as tenues, las diagonales correspondientes a los m\'ultiplos del periodo de $\times2$ a $\times6$ (es decir, $P/n$ y $nP$ para $n=2,\dots,6$). Elaboraci\'on propia sobre 500 binarias, 500 Cefeidas cl\'asicas y 500 RR Lyrae del OCVS.}
 	\label{fig:ls-resumen}
 \end{figure}
 
@@ -588,7 +588,7 @@ La Figura~\ref{fig:entropia-resumen} presenta el an\'alogo, para el m\'etodo de 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/entropia_resumen_error_relativo.png}
-	\caption[Exactitud y precisi\'on del m\'etodo de m\'inima entrop\'ia, por tipo de estrella]{Izquierda: distribuci\'on del error relativo del periodo recuperado por el m\'etodo de m\'inima entrop\'ia (con correcci\'on de alias), por tipo de estrella. Derecha: frecuencia recuperada vs. frecuencia catalogada, con la identidad $f_{\text{entrop\'ia}}=f_{\text{cat}}$ y las diagonales de m\'ultiplos $\times2$ y $\times3$. Misma muestra que la Figura~\ref{fig:ls-resumen}.}
+	\caption[Exactitud y precisi\'on del m\'etodo de m\'inima entrop\'ia, por tipo de estrella]{Izquierda: distribuci\'on del error relativo del periodo recuperado por el m\'etodo de m\'inima entrop\'ia (con correcci\'on de alias), por tipo de estrella. Derecha: frecuencia recuperada vs. frecuencia catalogada, con el mismo esquema de colores y l\'ineas que la Figura~\ref{fig:ls-resumen} (identidad $f_{\text{entrop\'ia}}=f_{\text{cat}}$ en negro discontinuo, m\'ultiplos del periodo de $\times2$ a $\times6$ en gris). Misma muestra que la Figura~\ref{fig:ls-resumen}.}
 	\label{fig:entropia-resumen}
 \end{figure}
 
@@ -639,6 +639,31 @@ Esta falla ilustra un riesgo distinto al del alias arm\'onico simple discutido p
 Adem\'as del m\'inimo global de inter\'es, los frecuenciogramas de entrop\'ia de pr\'acticamente todas las Cefeidas y RR Lyrae de la muestra exhiben un patr\'on adicional, visible incluso en las Figuras~\ref{fig:entropia-rrlyrae-ejemplo} y~\ref{fig:entropia-cefeida-falla}: numerosos m\'inimos locales estrechos y pronunciados, repartidos de forma m\'as o menos regular a lo largo del eje de frecuencia, que no guardan ninguna relaci\'on con el periodo real de la estrella ni con sus m\'ultiplos simples. Este comportamiento fue identificado y explicado en detalle por \citet{Henao2021} en un trabajo de grado dirigido, al igual que este, por el profesor Alejandro Garc\'ia, dedicado a comparar el periodograma de Lomb--Scargle con otros cuatro m\'etodos (incluido el de m\'inima entrop\'ia) sobre Cefeidas cl\'asicas de OGLE-IV. All\'i se muestra que, sin ninguna correcci\'on adicional, \emph{todos} los periodogramas estudiados presentan picos falsos cerca de la frecuencia correspondiente a la cadencia media de muestreo de los datos y sus m\'ultiplos, es decir, alrededor de 1~ciclo/d\'ia para fotometr\'ia terrestre de un solo sitio con cadencia aproximadamente nocturna como la de OGLE. La causa geom\'etrica, seg\'un \citet{Henao2021}, es que a esas frecuencias las observaciones, tomadas casi siempre a la misma hora local relativa a la fase, quedan agrupadas en una regi\'on angosta del diagrama de fase en lugar de distribuirse a lo largo de \'este; para el criterio de m\'inima entrop\'ia, cuya grilla fase--magnitud registra as\'i muchas celdas con probabilidad de ocupaci\'on nula, esto se traduce directamente en una entrop\'ia an\'omalamente baja, es decir, en un m\'inimo falso, sin que exista ninguna periodicidad f\'isica real en esa frecuencia.
 
 \citet{Henao2021} encuentra adem\'as que, si bien este problema admite correcciones sencillas para los periodogramas de Fourier, Lomb--Scargle, dispersi\'on de fase y longitud de arco, \emph{no se hall\'o una soluci\'on confiable para el periodograma de m\'inima entrop\'ia}. Esto es plenamente consistente con la experiencia propia de este trabajo: como se mencion\'o en la Secci\'on~\ref{sec:metodologia-entropia}, \texttt{entropypf} enmascara expl\'icitamente, tras el c\'alculo de la entrop\'ia, los periodos de prueba cercanos a m\'ultiplos conocidos del d\'ia sid\'ereo (par\'ametro \texttt{aliases}), precisamente porque el problema no puede eliminarse en el c\'alculo mismo de la entrop\'ia. De hecho, para las binarias eclipsantes de este cap\'itulo fue necesario ampliar dicho enmascaramiento m\'as all\'a de lo que cubre \texttt{aliases=(1,)} por defecto: se verific\'o emp\'iricamente que la b\'usqueda de periodo converg\'ia, en algunos casos, a fracciones simples de un d\'ia no cubiertas por ese enmascaramiento est\'andar (por ejemplo, $P=0.75$~d $=3/4$~d), por lo que fue necesario enmascarar adicionalmente toda fracci\'on $m/n$ de un d\'ia con denominador peque\~no dentro del rango de b\'usqueda. Los periodos de m\'inima entrop\'ia reportados en la Tabla~\ref{tab:resultados-entropia} ya incorporan este enmascaramiento; las Figuras~\ref{fig:entropia-rrlyrae-ejemplo} y~\ref{fig:entropia-cefeida-falla}, en cambio, muestran deliberadamente la entrop\'ia bruta, sin enmascarar, precisamente para exhibir este problema en su totalidad.
+
+\subsection{Aciertos acumulados por orden de alias en binarias}
+\label{sec:resultados-binarias-alias}
+
+Tanto la Tabla~\ref{tab:resultados-ls} como la Tabla~\ref{tab:resultados-entropia} reportan una \'unica tasa de aciertos con correcci\'on de alias, que solo considera candidatos hasta el m\'ultiplo $\times3$ del periodo ($P$, $P/2$, $2P$, $P/3$, $3P$). Dado que las binarias eclipsantes son, para ambos m\'etodos, el tipo de estrella m\'as afectado por esta degeneraci\'on arm\'onica, la Tabla~\ref{tab:binarias-aciertos-alias} desagrega, solo para ellas, la tasa de aciertos de forma acumulativa a medida que se aceptan \'ordenes de alias cada vez m\'as altos, hasta $\times6$: el mismo rango de m\'ultiplos ahora graficado en el panel derecho de las Figuras~\ref{fig:ls-resumen} y~\ref{fig:entropia-resumen}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{ccc}
+		\hline
+		\textbf{M\'ultiplos de alias aceptados} & \textbf{Aciertos Lomb--Scargle (1\%)} & \textbf{Aciertos m\'inima entrop\'ia (1\%)} \\
+		\hline
+		$\times1$ & 3.8\% & 14.6\% \\
+		$\times1$--$\times2$ & 74.8\% & 30.8\% \\
+		$\times1$--$\times3$ & 78.0\% & 32.0\% \\
+		$\times1$--$\times4$ & 82.4\% & 34.8\% \\
+		$\times1$--$\times5$ & 82.8\% & 35.8\% \\
+		$\times1$--$\times6$ & 84.2\% & 37.0\% \\
+		\hline
+	\end{tabular}
+	\caption[Aciertos acumulados por orden de alias para binarias, Lomb--Scargle y m\'inima entrop\'ia]{Tasa de aciertos (error relativo del periodo menor al 1\%) para las 500 binarias eclipsantes de la muestra, acumulada a medida que se acepta como acierto cualquier candidato $P/n$ o $nP$ con $n$ hasta el orden indicado en cada fila. Cada fila incluye a las estrellas de las filas anteriores m\'as las que solo se recuperan correctamente en el nuevo orden de alias.}
+	\label{tab:binarias-aciertos-alias}
+\end{table}
+
+El salto m\'as grande ocurre, para ambos m\'etodos, al incorporar el m\'ultiplo $\times2$: en Lomb--Scargle la tasa de aciertos pasa de 3.8\% a 74.8\%, consistente con el patr\'on dominante de alias en $P/2$ discutido en la Secci\'on~\ref{sec:resultados-ls}; en el m\'etodo de m\'inima entrop\'ia el salto es m\'as moderado, de 14.6\% a 30.8\%, reflejo de la dispersi\'on m\'as amplia de razones $P_{\text{entrop\'ia}}/P_{\text{cat}}$ se\~nalada en la Secci\'on~\ref{sec:resultados-entropia}. M\'as all\'a de $\times3$, cada m\'ultiplo adicional aporta mejoras marginales y decrecientes en ambos m\'etodos, lo que sugiere que extender la correcci\'on de alias m\'as all\'a de $\times3$ o $\times4$ tiene un costo creciente en falsos positivos por cada acierto adicional que efectivamente recupera.
 
 \section{S\'intesis de la caracterizaci\'on individual}
 \label{sec:sintesis-resultados}

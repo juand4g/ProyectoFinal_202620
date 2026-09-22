@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
-ESTILOS_MULTIPLO = {2: "-.", 3: ":"}
+MULTIPLO_MAX = 6
 
 # Tamano de fuente base ~60% mayor que el default de matplotlib (10 pt), para
 # que el texto de las graficas sea comparable al del cuerpo de la tesis.
@@ -71,11 +71,24 @@ def panel_curva_luz(ax, t, mag, periodo, color, titulo):
     ax.set_title(titulo, fontsize=14)
 
 
-def agregar_lineas_alias(ax, lims, multiplos=ESTILOS_MULTIPLO):
+def agregar_lineas_alias(ax, lims, multiplo_max=MULTIPLO_MAX):
     """Ademas de la identidad f_encontrada = f_catalogo (dibujada aparte por
-    quien llama), agrega lineas diagonales para los multiplos m\'as comunes
-    del periodo (equivalentes, en frecuencia, a f = f_cat/n y f = n*f_cat)."""
-    for n, estilo in multiplos.items():
-        ax.plot(lims, [l * n for l in lims], color="gray", lw=0.7, ls=estilo,
-                 label=f"multiplos x{n} (P/{n}, {n}P)")
-        ax.plot(lims, [l / n for l in lims], color="gray", lw=0.7, ls=estilo)
+    quien llama), agrega lineas diagonales para los multiplos del periodo de
+    x2 a x`multiplo_max` (equivalentes, en frecuencia, a f = f_cat/n y
+    f = n*f_cat), cada vez mas tenues a medida que crece n. No llevan label:
+    su significado se explica en el caption de la figura, para no tapar
+    puntos con un recuadro de leyenda dentro de los ejes."""
+    for n in range(2, multiplo_max + 1):
+        alpha = max(0.2, 0.9 - 0.12 * (n - 2))
+        ax.plot(lims, [l * n for l in lims], color="gray", lw=0.7, ls="--", alpha=alpha)
+        ax.plot(lims, [l / n for l in lims], color="gray", lw=0.7, ls="--", alpha=alpha)
+
+
+def agregar_eje_periodo(ax):
+    """Agrega un eje horizontal secundario, en la parte superior del
+    recuadro, con la escala de periodo (d) correspondiente a la escala de
+    frecuencia (d$^{-1}$) del eje principal -- util para leer de un vistazo
+    la correspondencia aproximada entre rangos de frecuencia y de periodo."""
+    ax_periodo = ax.secondary_xaxis("top", functions=(lambda f: 1.0 / f, lambda p: 1.0 / p))
+    ax_periodo.set_xlabel("Periodo (d)")
+    return ax_periodo
