@@ -1,5 +1,6 @@
 # --- Tus reglas originales (corregidas con *) ---
 *.pdf
+!Tesis/main.pdf
 *.csv
 *.fit
 *.fits
