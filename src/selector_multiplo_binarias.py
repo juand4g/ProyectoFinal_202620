@@ -68,8 +68,12 @@ def entropias_en(t, mag, periodos):
 def indicadores_estrella(fila):
     t, mag, err = np.loadtxt(PHOT_DIR / f"{fila['id']}.dat", unpack=True)
     err = np.where(err > 0, err, np.median(err[err > 0]))
-    p0 = fila[f"periodo_{BASE}"]
-    ind = {"id": fila["id"]}
+    return {"id": fila["id"], **indicadores_curva(t, mag, err, fila[f"periodo_{BASE}"])}
+
+
+def indicadores_curva(t, mag, err, p0):
+    """Indicadores del selector para una curva cualquiera (OGLE o sintetica)."""
+    ind = {}
 
     periodos = np.array([m * p0 for m in MULTIPLOS])
     potencia = LombScargle(t, mag, err).power(1.0 / periodos)
