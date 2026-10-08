@@ -315,7 +315,7 @@ Adem\'as del ruido blanco gaussiano, que aproxima el ruido fotom\'etrico y de co
 
 \subsection{Cadencia y muestreo temporal}
 
-Finalmente, cada combinaci\'on de morfolog\'ia y nivel de ruido se muestrear\'a bajo distintos esquemas temporales: muestreo regular denso, como referencia; y muestreo irregular con brechas, dise\~nado para emular las ventanas de visibilidad estacional y las interrupciones diarias t\'ipicas de los cartografiados terrestres descritos en la Secci\'on~\ref{sec:datos-reales}. Este \'ultimo esquema es central para poner a prueba el comportamiento de ambos m\'etodos frente al aliasing, cuya relaci\'on con la frecuencia de Nyquist bajo muestreo irregular se discute con mayor detalle en la Secci\'on~\ref{sec:nyquist} del Cap\'itulo~\ref{ch:metodologia}.
+Finalmente, cada combinaci\'on de morfolog\'ia y nivel de ruido se muestrear\'a bajo distintos esquemas temporales: muestreo regular denso, como referencia; y muestreo irregular con brechas, dise\~nado para emular las ventanas de visibilidad estacional y las interrupciones diarias t\'ipicas de los cartografiados terrestres descritos en la Secci\'on~\ref{sec:datos-reales}. Este \'ultimo esquema es central para poner a prueba el comportamiento de ambos m\'etodos frente al aliasing, cuya relaci\'on con la frecuencia de Nyquist bajo muestreo irregular se discute con mayor detalle en la Secci\'on~\ref{sec:nyquist} del Cap\'itulo~\ref{ch:metodologia}. La implementaci\'on finalmente adoptada, basada en plantillas emp\'iricas construidas a partir de curvas de OGLE, se describe en la Secci\'on~\ref{sec:validacion-sinteticas}, junto con sus diferencias respecto de lo planteado aqu\'i.
 
 \section{Curvas de luz reales}
 \label{sec:datos-reales}
@@ -408,7 +408,7 @@ El \emph{Transiting Exoplanet Survey Satellite} (TESS)\footnote{P\'agina web del
 	\label{fig:tess-satelite}
 \end{figure}
 
-TESS emplea cuatro c\'amaras CCD id\'enticas de campo amplio, cada una con un objetivo \'optico de siete elementos con un di\'ametro de apertura de entrada de 10.5~cm y una raz\'on focal $f/1.4$, sensible en un ancho de banda \'optico de 600 a 1000~nm \citep{ricker_2015}. Cada c\'amara cubre un campo individual de $24^\circ\times24^\circ$, y las cuatro en conjunto forman un campo de visi\'on combinado de $24^\circ\times96^\circ$ (2300~grados cuadrados) \citep{ricker_2015}. El detector de cada c\'amara es un mosaico de cuatro CCD de $2048\times2048$ p\'ixeles, con un tama\~no f\'isico de p\'ixel de 15~$\mu$m, equivalente a unos 21 segundos de arco proyectados en el cielo \citep{ricker_2015}. Esta resoluci\'on espacial es notablemente menor que la de OGLE o VVV, lo cual puede producir contaminaci\'on por estrellas vecinas en campos densamente poblados y constituye una limitaci\'on adicional a considerar al aplicar el m\'etodo combinado sobre datos de TESS \citep{Elizabethson2023}. El sat\'elite utiliza el bus LEOStar-2/750, con dos paneles solares desplegables (potencia total generada de 415~W frente a un consumo estimado de 290~W) y una antena de alta ganancia de banda Ka para la transmisi\'on de datos \citep{ricker_2015}. Se ubica en una \'orbita altamente el\'iptica de 13.7~d\'ias alrededor de la Tierra, con perigeo y apogeo nominales de 17 y 59 radios terrestres, respectivamente, en resonancia 2:1 con la \'orbita lunar \citep{ricker_2015}. Monitorea al menos 200\,000 estrellas de secuencia principal con cadencias de dos minutos para objetivos preseleccionados, adem\'as de im\'agenes de campo completo cada treinta minutos \citep{ricker_2015}. Su dise\~no est\'a optimizado para la detecci\'on de tr\'ansitos planetarios, pero la combinaci\'on de alta cadencia y l\'ineas base fotom\'etricas continuas de semanas a meses ha hecho de TESS una fuente cada vez m\'as explotada para la determinaci\'on general de periodos de estrellas variables. \citet{kepler_2026} lo ilustran recientemente con la determinaci\'on de periodos fotom\'etricos coherentes para variables catacl\'ismicas. Tras varios a\~nos de operaci\'on, TESS ha cubierto aproximadamente el 85\% del cielo con al menos 27 d\'ias de observaci\'on continua por campo \citep{Elizabethson2023}. Para este trabajo, TESS aporta el caso de muestreo m\'as denso y regular entre las tres fuentes de datos reales consideradas, y sirve como contraste frente a la irregularidad caracter\'istica de OGLE y VVV/VVVX.
+TESS emplea cuatro c\'amaras CCD id\'enticas de campo amplio, cada una con un objetivo \'optico de siete elementos con un di\'ametro de apertura de entrada de 10.5~cm y una raz\'on focal $f/1.4$, sensible en un ancho de banda \'optico de 600 a 1000~nm \citep{ricker_2015}. Cada c\'amara cubre un campo individual de $24^\circ\times24^\circ$, y las cuatro en conjunto forman un campo de visi\'on combinado de $24^\circ\times96^\circ$ (2300~grados cuadrados) \citep{ricker_2015}. El detector de cada c\'amara es un mosaico de cuatro CCD de $2048\times2048$ p\'ixeles, con un tama\~no f\'isico de p\'ixel de 15~$\mu$m, equivalente a unos 21 segundos de arco proyectados en el cielo \citep{ricker_2015}. Esta resoluci\'on espacial es notablemente menor que la de OGLE o VVV, lo cual puede producir contaminaci\'on por estrellas vecinas en campos densamente poblados y constituye una limitaci\'on adicional a considerar al aplicar el m\'etodo combinado sobre datos de TESS \citep{Elizabethson2023}. El sat\'elite utiliza el bus LEOStar-2/750, con dos paneles solares desplegables (potencia total generada de 415~W frente a un consumo estimado de 290~W) y una antena de alta ganancia de banda Ka para la transmisi\'on de datos \citep{ricker_2015}. Se ubica en una \'orbita altamente el\'iptica de 13.7~d\'ias alrededor de la Tierra, con perigeo y apogeo nominales de 17 y 59 radios terrestres, respectivamente, en resonancia 2:1 con la \'orbita lunar \citep{ricker_2015}. Monitorea al menos 200\,000 estrellas de secuencia principal con cadencias de dos minutos para objetivos preseleccionados, adem\'as de im\'agenes de campo completo cada treinta minutos \citep{ricker_2015}. Su dise\~no est\'a optimizado para la detecci\'on de tr\'ansitos planetarios, pero la combinaci\'on de alta cadencia y l\'ineas base fotom\'etricas continuas de semanas a meses ha hecho de TESS una fuente cada vez m\'as explotada para la determinaci\'on general de periodos de estrellas variables. \citet{kepler_2026} lo ilustran recientemente con la determinaci\'on de periodos fotom\'etricos coherentes para variables catacl\'ismicas. Tras varios a\~nos de operaci\'on, TESS ha cubierto aproximadamente el 85\% del cielo con al menos 27 d\'ias de observaci\'on continua por campo \citep{Elizabethson2023}. Para este trabajo, TESS aporta el caso de muestreo m\'as denso y regular entre las tres fuentes de datos reales consideradas, y sirve como contraste frente a la irregularidad caracter\'istica de OGLE y VVV/VVVX. La muestra de TESS empleada y su preparaci\'on se describen en la Secci\'on~\ref{sec:validacion-tess}.
 
 \section{S\'intesis comparativa}
 \label{sec:sintesis-datos}
@@ -787,11 +787,11 @@ La Figura~\ref{fig:hibrido-ejemplo-combinacion} ilustra la primera etapa sobre u
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/hibrido_ejemplo_combinacion.png}
-	\caption[Primera etapa del m\'etodo h\'ibrido sobre una binaria eclipsante]{Primera etapa del m\'etodo h\'ibrido sobre la binaria OGLE-LMC-ECL-38031 ($P_{\mathrm{cat}}=6.9386$~d), en el intervalo de frecuencias entre 0 y 2.6~d$^{-1}$. (a) Periodograma de Lomb--Scargle generalizado (Ecuaci\'on~\ref{eq:gls-potencia}). (b) Entrop\'ia condicional normalizada (Ecuaci\'on~\ref{eq:entropia-condicional-normalizada}), sin ninguna m\'ascara. (c) Producto de rangos (Ecuaci\'on~\ref{eq:producto-rangos}), representado como $1-R(f)$ en escala logar\'itmica invertida para que su m\'aximo sea visible entre las $10^5$ frecuencias de la grilla. Los tri\'angulos negros, grises y de color marcan, respectivamente, $f_{\mathrm{cat}}$, $2f_{\mathrm{cat}}$ y el \'optimo de cada panel. Abajo: curva de luz plegada con el periodo final de la regla h\'ibrida de la Secci\'on~\ref{sec:hibrido-refinamiento} aplicada a Lomb--Scargle (izquierda) y al producto de rangos (derecha).}
+	\caption[Primera etapa del m\'etodo h\'ibrido sobre una binaria eclipsante]{Primera etapa del m\'etodo h\'ibrido sobre la binaria OGLE-LMC-ECL-11394 ($P_{\mathrm{cat}}=6.2728$~d), en el intervalo de frecuencias entre 0 y 1.5~d$^{-1}$. (a) Periodograma de Lomb--Scargle generalizado (Ecuaci\'on~\ref{eq:gls-potencia}). (b) Entrop\'ia condicional normalizada (Ecuaci\'on~\ref{eq:entropia-condicional-normalizada}), sin ninguna m\'ascara. (c) Producto de rangos (Ecuaci\'on~\ref{eq:producto-rangos}), representado como $1-R(f)$ en escala logar\'itmica invertida para que su m\'aximo sea visible entre las $10^5$ frecuencias de la grilla. Los tri\'angulos negros, grises y de color marcan, respectivamente, $f_{\mathrm{cat}}$, $2f_{\mathrm{cat}}$ y el \'optimo de cada panel. Abajo: curva de luz plegada con el periodo final de la regla h\'ibrida de la Secci\'on~\ref{sec:hibrido-refinamiento} aplicada a Lomb--Scargle (izquierda) y al producto de rangos (derecha).}
 	\label{fig:hibrido-ejemplo-combinacion}
 \end{figure}
 
-En este caso, el m\'aximo global de Lomb--Scargle se ubica en $P_{LS}=0.4365$~d, un pico sin relaci\'on arm\'onica simple con el periodo orbital, aunque el pico en $2f_{\mathrm{cat}}$ tiene una potencia apenas menor. La entrop\'ia condicional presenta un m\'inimo aislado y profundo precisamente en $2f_{\mathrm{cat}}$, de modo que en el producto de rangos dicha frecuencia es la \'unica que ocupa los percentiles m\'as altos de ambos criterios a la vez, y resulta $P_0=3.4695$~d $\approx P_{\mathrm{cat}}/2$. La segunda etapa duplica este valor y recupera el periodo orbital, con los dos eclipses de profundidad distinta visibles en el panel inferior derecho, mientras que la misma regla aplicada a Lomb--Scargle produce un plegado sin estructura.
+En este caso, el m\'aximo global de Lomb--Scargle se ubica en $P_{LS}=0.8961$~d $\approx P_{\mathrm{cat}}/7$, el s\'eptimo arm\'onico de la frecuencia orbital, entre numerosos picos de potencia comparable, ninguno de los cuales destaca claramente. La entrop\'ia condicional, en cambio, presenta dos m\'inimos profundos y aislados: el m\'as profundo en $f_{\mathrm{cat}}$ y el segundo en $2f_{\mathrm{cat}}$. El producto de rangos favorece a la frecuencia que ocupa a la vez los percentiles m\'as altos de ambos criterios, que es $2f_{\mathrm{cat}}$, pues en $f_{\mathrm{cat}}$ la potencia de Lomb--Scargle es baja, y resulta $P_0=3.1368$~d $\approx P_{\mathrm{cat}}/2$. La segunda etapa duplica este valor y recupera el periodo orbital con un error relativo de $1.3\times10^{-4}$. El panel inferior derecho muestra el resultado: un eclipse primario de unas 0.28~mag y un eclipse secundario de unas 0.05~mag, separados por medio ciclo. La misma regla aplicada a Lomb--Scargle produce, en cambio, un plegado en $2P_{LS}=1.792$~d $\approx 2P_{\mathrm{cat}}/7$ en el que los eclipses de ciclos distintos caen en fases distintas.
 
 \section{Segunda etapa: refinamiento por subarm\'onicos}
 \label{sec:hibrido-refinamiento}
@@ -960,11 +960,305 @@ La estructura de estos errores es reveladora. Los casos con $n^\ast=1$, en los q
 \section{Alcance y limitaciones}
 \label{sec:hibrido-limitaciones}
 
-El supuesto de dos eclipses por \'orbita es la principal restricci\'on de aplicabilidad del m\'etodo h\'ibrido. Supone saber de antemano que la estrella es una binaria eclipsante; aplicado sin modificaciones a una Cefeida o una RR Lyrae, cuyos periodos Lomb--Scargle recupera correctamente en m\'as del 98\% de los casos (Tabla~\ref{tab:resultados-ls}), la regla duplicar\'ia un periodo que ya era correcto. El m\'etodo debe entenderse, por tanto, como un esquema en dos niveles: una b\'usqueda global de prop\'osito general, la primera etapa, que no hace supuestos sobre la morfolog\'ia, seguida de una correcci\'on espec\'ifica para la morfolog\'ia eclipsante, la segunda etapa. El desempe\~no de la primera etapa sobre Cefeidas y RR Lyrae no ha sido evaluado todav\'ia.
+El supuesto de dos eclipses por \'orbita es la principal restricci\'on de aplicabilidad del m\'etodo h\'ibrido. Supone saber de antemano que la estrella es una binaria eclipsante; aplicado sin modificaciones a una Cefeida o una RR Lyrae, cuyos periodos Lomb--Scargle recupera correctamente en m\'as del 98\% de los casos (Tabla~\ref{tab:resultados-ls}), la regla duplicar\'ia un periodo que ya era correcto. El m\'etodo debe entenderse, por tanto, como un esquema en dos niveles: una b\'usqueda global de prop\'osito general, la primera etapa, que no hace supuestos sobre la morfolog\'ia, seguida de una correcci\'on espec\'ifica para la morfolog\'ia eclipsante, la segunda etapa. El Cap\'itulo~\ref{ch:metodo-unificado} eval\'ua la primera etapa sobre Cefeidas y RR Lyrae y a\~nade el paso que falta para aplicar el esquema sin conocer de antemano el tipo de variabilidad: una decisi\'on, tomada a partir de la fotometr\'ia, sobre cu\'al de las dos ramas aplicar.
 
-Adem\'as, el periodo de referencia es el periodo catalogado por OGLE, que proviene a su vez de otro procedimiento de determinaci\'on de periodicidad y no es una verdad absoluta, como se discuti\'o en la Secci\'on~\ref{sec:datos-sinteticas}. El rango de la grilla, de 0.1 a 100~d, excluye por construcci\'on el periodo de las binarias de periodo m\'as largo. Por \'ultimo, el costo computacional del m\'etodo, del orden de 6~s por estrella en el equipo utilizado, est\'a dominado por el c\'alculo de las dos entrop\'ias sobre las $10^5$ frecuencias de la grilla, y es considerablemente mayor que el de Lomb--Scargle solo.
+Adem\'as, el periodo de referencia es el periodo catalogado por OGLE, que proviene a su vez de otro procedimiento de determinaci\'on de periodicidad y no es una verdad absoluta, como se discuti\'o en la Secci\'on~\ref{sec:datos-sinteticas}. El rango de la grilla, de 0.1 a 100~d, excluye por construcci\'on el periodo de las binarias de periodo m\'as largo. Por \'ultimo, el costo computacional del m\'etodo, del orden de 6~s por estrella en el equipo utilizado, est\'a dominado por el c\'alculo de las dos entrop\'ias sobre las $10^5$ frecuencias de la grilla, y es considerablemente mayor que el de Lomb--Scargle solo. El comportamiento del esquema ante otros niveles de ruido, otros n\'umeros de puntos y otra cadencia de observaci\'on se examina en el Cap\'itulo~\ref{ch:validacion}.
 
 Con estas salvedades, el m\'etodo h\'ibrido constituye la primera combinaci\'on de Lomb--Scargle y un criterio de entrop\'ia que, en este trabajo, supera de forma estad\'isticamente significativa a Lomb--Scargle aplicado de forma individual con la misma regla de decisi\'on, sin utilizar en ning\'un paso el periodo catalogado. De los 18.6 puntos porcentuales que separan la regla simple de duplicar siempre el periodo de Lomb--Scargle (68.1\%) del techo del producto de rangos (86.7\%), el m\'etodo h\'ibrido recupera 7.2, es decir, cerca del 39\%.
+
+
+\chapter{M\'etodo unificado para binarias eclipsantes y estrellas pulsantes}
+\label{ch:metodo-unificado}
+
+El m\'etodo h\'ibrido del Cap\'itulo~\ref{ch:metodo-hibrido} supone que la estrella analizada es una binaria eclipsante, pues su segunda etapa parte del supuesto de dos eclipses por \'orbita. En un cartografiado, sin embargo, el tipo de variabilidad no se conoce antes de determinar el periodo; con frecuencia el periodo es, de hecho, uno de los insumos de la clasificaci\'on \citep{SanchezSaez2021}. Este cap\'itulo extiende el m\'etodo h\'ibrido a un \emph{m\'etodo unificado}, aplicable a una curva de luz cualquiera sin informaci\'on previa sobre su tipo. La extensi\'on consta de tres pasos. Primero, se verifica que la primera etapa, la b\'usqueda global combinada, no degrada el desempe\~no de Lomb--Scargle sobre Cefeidas y RR Lyrae, para las cuales este \'ultimo ya es satisfactorio. Segundo, se introduce una regla anal\'itica que decide, a partir de la distribuci\'on de magnitudes, si a la curva se le aplica la correcci\'on propia de las binarias eclipsantes. Tercero, se re\'unen ambas piezas en un procedimiento \'unico y se eval\'ua sobre las tres clases de variabilidad de OGLE.
+
+\section{La primera etapa en Cefeidas y RR Lyrae}
+\label{sec:unificado-pulsantes}
+
+Se extrajeron del OCVS dos muestras aleatorias nuevas, con la misma semilla del Cap\'itulo~\ref{ch:metodo-hibrido}: 500 Cefeidas cl\'asicas, de todos los campos del subconjunto descrito en la Secci\'on~\ref{sec:datos-reales}, y 500 RR Lyrae de la Nube Mayor de Magallanes. La b\'usqueda global se aplic\'o con exactamente la misma configuraci\'on empleada sobre las binarias: la grilla uniforme de $10^5$ frecuencias entre 0.01 y 10~d$^{-1}$, la entrop\'ia condicional con $L=10$ y $K=7$, sin ninguna m\'ascara, y el producto de rangos de la Ecuaci\'on~\eqref{eq:producto-rangos}. No se restringi\'o el rango de b\'usqueda seg\'un el tipo de estrella, a diferencia de lo hecho en el Cap\'itulo~\ref{ch:resultados}, pues el objetivo es evaluar una b\'usqueda de prop\'osito general. Como periodo de referencia se tom\'o el primer periodo listado por OGLE para cada estrella, $P_1$, y el criterio de acierto es el de la Ecuaci\'on~\eqref{eq:acierto}. Los resultados se resumen en la Tabla~\ref{tab:unificado-pulsantes}.
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabular}{lcc}
+		\hline
+		\textbf{M\'etodo} & \textbf{Cefeidas} & \textbf{RR Lyrae} \\
+		\hline
+		Lomb--Scargle & 96.0\% & 97.2\% \\
+		Entrop\'ia condicional & 95.6\% & 95.6\% \\
+		Producto de rangos, condicional ($P_0$) & 96.8\% & 97.4\% \\
+		Producto de rangos, siempre $2P_0$ & 0.2\% & 0.0\% \\
+		\hline
+	\end{tabular}
+	\caption[Aciertos de la primera etapa sobre Cefeidas y RR Lyrae]{Tasa de aciertos (error relativo menor al 1\%) sobre 500 Cefeidas cl\'asicas y 500 RR Lyrae del OCVS, con la misma grilla y la misma configuraci\'on de la b\'usqueda global empleadas sobre las binarias en el Cap\'itulo~\ref{ch:metodo-hibrido}. La \'ultima fila aplica a las pulsantes la regla de duplicar siempre el periodo, propia de las binarias.}
+	\label{tab:unificado-pulsantes}
+\end{table}
+
+La primera etapa no degrada a Lomb--Scargle: el producto de rangos obtiene 96.8\% en Cefeidas y 97.4\% en RR Lyrae, frente a 96.0\% y 97.2\%. La comparaci\'on pareada de la Ecuaci\'on~\eqref{eq:mcnemar} confirma que las diferencias no son significativas: en Cefeidas, solo Lomb--Scargle acierta en $b=3$ estrellas y solo el producto de rangos en $c=7$, con $p=0.34$; en RR Lyrae, $b=5$ y $c=6$, con $p=1$. Por modo de pulsaci\'on, el producto de rangos obtiene 99.5\% en las Cefeidas de primer sobretono ($N=189$) y 98.4\% en las fundamentales ($N=256$), frente a 98.4\% y 97.3\% de Lomb--Scargle.
+
+Los fallos son, en su mayor\'ia, compartidos por ambos m\'etodos y tienen un origen identificable. En las Cefeidas de doble modo fundamental y primer sobretono ($N=12$), ambos m\'etodos detectan el periodo del primer sobretono, con $P/P_1\approx0.72$, mientras que OGLE lista el periodo fundamental como $P_1$; se trata de una se\~nal f\'isica genuina y no de un error del m\'etodo. En cuatro RR Lyrae, Lomb--Scargle obtiene $P/P_1\approx1.345$, y el producto de rangos en tres de ellas, el inverso de la raz\'on de periodos entre el primer sobretono y el modo fundamental, lo que es compatible con RR Lyrae de doble modo; el cat\'alogo descargado no incluye el subtipo, por lo que esta interpretaci\'on no pudo verificarse. El resto de los fallos corresponde a alias diarios, 13 con Lomb--Scargle y 8 con el producto de rangos, y a curvas de luz con 50 puntos o menos.
+
+La \'ultima fila de la Tabla~\ref{tab:unificado-pulsantes} cuantifica, por otra parte, el costo de aplicar la segunda etapa a ciegas: la regla de duplicar el periodo convierte un acierto de casi 97\% en uno pr\'acticamente nulo. Un m\'etodo aplicable sin conocer el tipo de variabilidad necesita, por tanto, decidir cu\'ando aplicar la segunda etapa.
+
+\section{Decisi\'on de rama mediante el coeficiente de asimetr\'ia}
+\label{sec:unificado-decision}
+
+\subsection{Motivaci\'on f\'isica}
+
+La forma de la curva de luz de una binaria eclipsante separada tiene una propiedad que la distingue de la de una estrella pulsante, con independencia del periodo: el sistema permanece la mayor parte de la \'orbita cerca de su brillo m\'aximo, y los eclipses son excursiones breves hacia magnitudes mayores. La distribuci\'on de las magnitudes observadas, sin plegar, presenta entonces una cola extendida hacia los valores d\'ebiles. En una Cefeida fundamental o una RR Lyrae de tipo ab ocurre lo contrario: la curva tiene un m\'aximo de brillo agudo y una rama descendente prolongada \citep{Carroll2017}, de modo que la cola de la distribuci\'on apunta, si acaso, hacia los valores brillantes. Una medida natural de esta diferencia es el coeficiente de asimetr\'ia de la distribuci\'on de magnitudes (\emph{skewness}), que se define como se muestra en la Ecuaci\'on~\eqref{eq:asimetria}.
+
+\begin{equation}
+	\hat\gamma = \frac{\hat\mu_3}{\hat\mu_2^{3/2}}, \qquad \hat\mu_r = \frac{1}{N}\sum_{i=1}^{N}\left(m_i - \bar m\right)^r.
+	\label{eq:asimetria}
+\end{equation}
+
+En esta, $\bar m$ es la magnitud media y $\hat\mu_r$ el momento central muestral de orden $r$. Con la convenci\'on astron\'omica de magnitudes, una cola hacia el brillo d\'ebil corresponde a $\hat\gamma>0$. El coeficiente de asimetr\'ia es un indicador habitual en la clasificaci\'on autom\'atica de curvas de luz; forma parte, por ejemplo, del conjunto de caracter\'isticas del clasificador del sistema de alertas ALeRCE \citep{SanchezSaez2021}. En este trabajo, sin embargo, no se usa como una entrada m\'as de un clasificador, sino como el \'unico criterio de una regla anal\'itica. Tiene, adem\'as, dos propiedades convenientes para este prop\'osito: no requiere conocer el periodo, de modo que puede calcularse antes de la b\'usqueda global, y es invariante ante un cambio de origen y de escala de las magnitudes, de modo que no depende de la amplitud absoluta de la variaci\'on. Su limitaci\'on natural tambi\'en es clara: una curva perfectamente sinusoidal tiene $\gamma=0$, por lo que las binarias de contacto y las variables elipsoidales, cuyas curvas son casi sinusoidales, no pueden separarse con este criterio de las pulsantes de baja asimetr\'ia.
+
+\subsection{Correcci\'on por ruido}
+
+El ruido fotom\'etrico diluye el coeficiente de asimetr\'ia. Si cada magnitud observada es la suma de una se\~nal $s_i$ y un error $\epsilon_i$ independiente de ella, de media nula y distribuci\'on sim\'etrica, el tercer momento central de las observaciones coincide con el de la se\~nal, mientras que el segundo momento aumenta en la varianza media del ruido, como se muestra en la Ecuaci\'on~\eqref{eq:momentos-ruido}.
+
+\begin{equation}
+	\mu_3(m) = \mu_3(s), \qquad \mu_2(m) = \mu_2(s) + \overline{\sigma^2}, \qquad \overline{\sigma^2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_i^2.
+	\label{eq:momentos-ruido}
+\end{equation}
+
+En esta, $\sigma_i$ es el error fotom\'etrico de la $i$-\'esima observaci\'on; la expresi\'on vale tambi\'en cuando los errores son heteroced\'asticos. Al sustituir en la Ecuaci\'on~\eqref{eq:asimetria}, el coeficiente observado resulta ser el coeficiente intr\'inseco de la se\~nal multiplicado por un factor de diluci\'on menor que 1, como se muestra en la Ecuaci\'on~\eqref{eq:dilucion}.
+
+\begin{equation}
+	\gamma_{\mathrm{obs}} = \gamma_{\mathrm{int}}\left[\frac{\mu_2(s)}{\mu_2(s)+\overline{\sigma^2}}\right]^{3/2}.
+	\label{eq:dilucion}
+\end{equation}
+
+Para una se\~nal con una relaci\'on se\~nal a ruido baja, el factor de diluci\'on tiende a cero, y una binaria con eclipses bien definidos puede presentar un coeficiente observado cercano a cero. Como $\mu_2(s)=\mu_2(m)-\overline{\sigma^2}$, la Ecuaci\'on~\eqref{eq:dilucion} puede invertirse a partir de cantidades medibles para estimar el coeficiente intr\'inseco, como se muestra en la Ecuaci\'on~\eqref{eq:asimetria-corregida}.
+
+\begin{equation}
+	\hat\gamma_{\mathrm{int}} = \hat\gamma\left(\frac{\hat\mu_2}{\hat\mu_2-\overline{\sigma^2}}\right)^{3/2}, \qquad \text{si } \hat\mu_2 > \overline{\sigma^2}.
+	\label{eq:asimetria-corregida}
+\end{equation}
+
+En esta, si la varianza total no supera la varianza media del ruido, $\hat\gamma_{\mathrm{int}}$ no est\'a definido; en ese caso la curva no muestra una se\~nal medible por encima del ruido y se trata como una curva sin asimetr\'ia. La correcci\'on supone que los errores fotom\'etricos reportados est\'an bien calibrados, una condici\'on que se discute para TESS en la Secci\'on~\ref{sec:validacion-tess}.
+
+\subsection{Regla de decisi\'on}
+
+La regla de decisi\'on asigna la curva a la rama de binarias cuando el coeficiente de asimetr\'ia corregido supera un umbral, como se muestra en la Ecuaci\'on~\eqref{eq:regla-rama}.
+
+\begin{equation}
+	\text{rama de binarias} \iff \hat\gamma_{\mathrm{int}} > \gamma_\star, \qquad \gamma_\star = 0.5.
+	\label{eq:regla-rama}
+\end{equation}
+
+El umbral $\gamma_\star=0.5$ se fij\'o sobre la muestra de OGLE, con 1000 binarias y 1000 pulsantes, como un valor redondo que env\'ia a la rama de binarias a menos del 2\% de las pulsantes; las pruebas con curvas sint\'eticas y con TESS del Cap\'itulo~\ref{ch:validacion} se realizaron despu\'es con el umbral ya fijo y son, por tanto, independientes de esa elecci\'on. Sobre las 2000 curvas de OGLE, el coeficiente de asimetr\'ia sin corregir separa binarias de pulsantes con un \'area bajo la curva ROC de 0.980, y el corregido con una de 0.977. Las medianas del coeficiente corregido son 2.42 para las binarias, $-0.18$ para las Cefeidas y $-0.16$ para las RR Lyrae, y el 94.6\% de las binarias, el 0.4\% de las Cefeidas y el 3.0\% de las RR Lyrae superan el umbral. La Figura~\ref{fig:unificado-skew} muestra la distribuci\'on acumulada del coeficiente corregido en OGLE y en la muestra de TESS de la Secci\'on~\ref{sec:validacion-tess}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/unificado_skew_distribucion.png}
+	\caption[Distribuci\'on del coeficiente de asimetr\'ia corregido por tipo de variabilidad]{Distribuci\'on acumulada del coeficiente de asimetr\'ia corregido por ruido (Ecuaci\'on~\ref{eq:asimetria-corregida}), en escala sim\'etrica logar\'itmica, con el umbral $\gamma_\star=0.5$ de la Ecuaci\'on~\eqref{eq:regla-rama}. (a) 1000 binarias, 500 Cefeidas y 500 RR Lyrae de OGLE. (b) Muestra de TESS de la Secci\'on~\ref{sec:validacion-tess}, con las binarias separadas seg\'un su par\'ametro morfol\'ogico. Las curvas cuya varianza total no supera la varianza del ruido, para las que $\hat\gamma_{\mathrm{int}}$ no est\'a definido, se acumulan en el borde izquierdo.}
+	\label{fig:unificado-skew}
+\end{figure}
+
+Se examinaron tambi\'en otros indicadores de forma, calculados sobre la curva plegada en $P_0$ con una serie de Fourier de cuatro arm\'onicos. El m\'as competitivo fue $|\sin\phi_{21}|$, con $\phi_{21}=\phi_2-2\phi_1$ la fase relativa del segundo arm\'onico, que vale cero para una curva sim\'etrica en el tiempo y obtuvo un \'area bajo la curva de 0.966. Un \'indice de asimetr\'ia temporal respecto del eje de simetr\'ia \'optimo, en cambio, fue mucho menos \'util (0.877): las Cefeidas de primer sobretono y las RR Lyrae de tipo c tienen curvas casi sim\'etricas en el tiempo y caen del lado de las binarias. Se adopt\'o el coeficiente de asimetr\'ia por ser el mejor indicador individual y por no depender de $P_0$.
+
+\section{Procedimiento completo}
+\label{sec:unificado-procedimiento}
+
+El m\'etodo unificado re\'une la b\'usqueda global del Cap\'itulo~\ref{ch:metodo-hibrido}, la regla de decisi\'on de la Ecuaci\'on~\eqref{eq:regla-rama} y la regla h\'ibrida de la Ecuaci\'on~\eqref{eq:regla-hibrida}. Para una curva de luz $\{(t_i, m_i, \sigma_i)\}_{i=1}^{N}$, el procedimiento es el siguiente:
+
+\begin{enumerate}
+	\item Se calcula el periodograma de Lomb--Scargle generalizado (Ecuaci\'on~\ref{eq:gls-potencia}) y la entrop\'ia condicional normalizada (Ecuaci\'on~\ref{eq:entropia-condicional-normalizada}) sobre la grilla uniforme de $10^5$ frecuencias entre 0.01 y 10~d$^{-1}$, y se obtiene $P_0$ como el m\'aximo del producto de rangos (Ecuaci\'on~\ref{eq:producto-rangos}).
+	\item Se calcula el coeficiente de asimetr\'ia corregido $\hat\gamma_{\mathrm{int}}$ de la Ecuaci\'on~\eqref{eq:asimetria-corregida}.
+	\item Si $\hat\gamma_{\mathrm{int}}>\gamma_\star$, se elige el m\'ultiplo $\hat n$ con la regla h\'ibrida de la Ecuaci\'on~\eqref{eq:regla-hibrida}; en caso contrario, se conserva $P_0$.
+\end{enumerate}
+
+El periodo final del m\'etodo unificado se define, en consecuencia, como se muestra en la Ecuaci\'on~\eqref{eq:metodo-unificado}.
+
+\begin{equation}
+	\hat P =
+	\begin{cases}
+		\hat n\,P_0, & \text{si } \hat\gamma_{\mathrm{int}} > \gamma_\star, \\
+		P_0, & \text{en otro caso o si } \hat\gamma_{\mathrm{int}} \text{ no est\'a definido}.
+	\end{cases}
+	\label{eq:metodo-unificado}
+\end{equation}
+
+En esta, $\hat n$ es el m\'ultiplo de la Ecuaci\'on~\eqref{eq:regla-hibrida}. El procedimiento tiene tres par\'ametros, todos fijados de antemano y sin reajuste posterior: el n\'umero de arm\'onicos $H_0=4$ de la regla h\'ibrida, la grilla de $L\times K=10\times7$ celdas de la entrop\'ia condicional y el umbral $\gamma_\star=0.5$. Ning\'un paso utiliza el periodo catalogado ni el tipo de variabilidad.
+
+\section{Resultados sobre OGLE}
+\label{sec:unificado-resultados}
+
+La Tabla~\ref{tab:unificado-ogle} compara el m\'etodo unificado, sobre las 1000 binarias del Cap\'itulo~\ref{ch:metodo-hibrido} y las 1000 pulsantes de la Secci\'on~\ref{sec:unificado-pulsantes}, con tres referencias: una decisi\'on perfecta, que usa el tipo catalogado para elegir la rama, y las dos reglas triviales que env\'ian todas las curvas a una misma rama.
+
+\begin{table}[H]
+	\centering
+	\small
+	\resizebox{\textwidth}{!}{%
+	\begin{tabular}{lccccc}
+		\hline
+		\textbf{Decisi\'on de rama} & \textbf{Binarias} & \textbf{Cefeidas} & \textbf{RR Lyrae} & \textbf{Puls. $\to$ bin.} & \textbf{Bin. $\to$ puls.} \\
+		\hline
+		Decisi\'on perfecta (tipo catalogado) & 75.3\% & 96.8\% & 97.4\% & 0.0\% & 0.0\% \\
+		Todas a la rama de pulsantes & 4.1\% & 96.8\% & 97.4\% & 0.0\% & 100\% \\
+		Todas a la rama de binarias & 75.3\% & 3.8\% & 2.4\% & 100\% & 0.0\% \\
+		\hline
+		$\hat\gamma>\gamma_\star$, sin corregir & 69.1\% & 96.4\% & 97.4\% & 0.3\% & 8.8\% \\
+		$\hat\gamma_{\mathrm{int}}>\gamma_\star$, corregido (m\'etodo unificado) & 71.6\% & 96.4\% & 94.8\% & 1.7\% & 5.4\% \\
+		Regresi\'on log\'istica, $P(\mathrm{bin})>0.7$ & 73.1\% & 96.4\% & 97.4\% & 0.7\% & 4.1\% \\
+		\hline
+	\end{tabular}}
+	\caption[Aciertos del m\'etodo unificado sobre OGLE]{Tasa de aciertos (error relativo menor al 1\%) del m\'etodo unificado sobre 1000 binarias, 500 Cefeidas y 500 RR Lyrae de OGLE, seg\'un la regla con la que se decide la rama. Las dos \'ultimas columnas indican la fracci\'on de pulsantes enviadas a la rama de binarias y la fracci\'on de binarias enviadas a la rama de pulsantes. La regresi\'on log\'istica es supervisada y su resultado proviene de una validaci\'on cruzada de cinco particiones.}
+	\label{tab:unificado-ogle}
+\end{table}
+
+Con la decisi\'on anal\'itica de la Ecuaci\'on~\eqref{eq:regla-rama}, el m\'etodo unificado alcanza 71.6\% en binarias, 96.4\% en Cefeidas y 94.8\% en RR Lyrae, es decir, conserva en las pulsantes pr\'acticamente el desempe\~no de Lomb--Scargle y en las binarias obtiene el 95\% de los aciertos que lograr\'ia el m\'etodo h\'ibrido con una decisi\'on perfecta. Frente a la versi\'on sin corregir, la correcci\'on por ruido traslada errores de una clase a la otra: reduce del 8.8\% al 5.4\% las binarias enviadas a la rama equivocada, con una ganancia de 2.5 puntos en binarias, y aumenta del 0.3\% al 1.7\% las pulsantes enviadas a la rama de binarias, con una p\'erdida de 2.6 puntos en RR Lyrae. En la muestra de OGLE ambos efectos casi se compensan; la ventaja decisiva de la versi\'on corregida aparece al variar el nivel de ruido, como se muestra en la Secci\'on~\ref{sec:validacion-sinteticas}. Las 54 binarias que quedan del lado de las pulsantes son 38 sistemas de no-contacto, 15 variables elipsoidales y uno de contacto, con una amplitud mediana de 0.09~mag, frente a 0.17~mag en el conjunto de las binarias. Las variables elipsoidales son el caso m\'as desfavorable: 15 de las 32 de la muestra quedan del lado de las pulsantes, como era de esperar para curvas casi sinusoidales, con un coeficiente de asimetr\'ia cercano a cero.
+
+\subsection{Comparaci\'on con alternativas supervisadas}
+
+Se evaluaron tambi\'en dos alternativas supervisadas, entrenadas con los periodos catalogados de OGLE. La primera reemplaza la regla de la Ecuaci\'on~\eqref{eq:regla-rama} por una regresi\'on log\'istica que estima la probabilidad de que la curva sea una binaria a partir de ocho indicadores de forma, calculados sobre la distribuci\'on de magnitudes y sobre la curva plegada en $P_0$, m\'as el n\'umero de puntos y $\log_{10}P_0$. En validaci\'on cruzada, su \'area bajo la curva ROC fue de 0.996 y, con un umbral de probabilidad de 0.7, obtuvo 73.1\%, 96.4\% y 97.4\%, como se indica en la Tabla~\ref{tab:unificado-ogle}. La segunda reemplaza la regla h\'ibrida de la Ecuaci\'on~\eqref{eq:regla-hibrida} por un clasificador de \emph{gradient boosting} que predice directamente el m\'ultiplo $n\in\{1,\dots,6\}$ a partir de 36 indicadores, entre ellos las diferencias de BIC, la potencia de Lomb--Scargle y la entrop\'ia en $P_0$, $2P_0$ y $4P_0$, y la asimetr\'ia entre ciclos pares e impares del plegado en $2P_0$. Sobre las 1000 binarias, en validaci\'on cruzada estratificada de cinco particiones repetida diez veces, este selector alcanz\'o $79.6\%\pm0.5\%$, frente al 75.3\% de la regla h\'ibrida.
+
+Ambas alternativas superan a sus contrapartes anal\'iticas sobre OGLE, pero a cambio requieren un conjunto de entrenamiento con periodos conocidos, y sus indicadores m\'as importantes, como las diferencias de BIC, el n\'umero de puntos o el cociente entre la l\'inea base y $P_0$, dependen directamente de la cadencia y del nivel de ruido del cartografiado con el que se entrenaron. Por esta raz\'on, en concordancia con la preferencia por la interpretabilidad anal\'itica planteada en la Secci\'on~\ref{sec:estado-del-arte}, se adopt\'o como m\'etodo de trabajo la versi\'on anal\'itica, y las alternativas supervisadas se conservan como referencia. La pregunta de si su ventaja sobre OGLE se mantiene fuera de los datos de entrenamiento se aborda en el Cap\'itulo~\ref{ch:validacion}.
+
+
+\chapter{Validaci\'on con curvas sint\'eticas y con TESS}
+\label{ch:validacion}
+
+Todos los resultados de los Cap\'itulos~\ref{ch:metodo-hibrido} y~\ref{ch:metodo-unificado} se obtuvieron sobre fotometr\'ia de OGLE, la misma con la que se tomaron las decisiones de dise\~no del m\'etodo. Este cap\'itulo somete el m\'etodo unificado a dos pruebas independientes de esas decisiones, siguiendo el esquema de validaci\'on planteado en la Secci\'on~\ref{sec:validacion}. La primera, con curvas de luz sint\'eticas de periodo conocido, mide la robustez del m\'etodo ante el nivel de ruido y el n\'umero de puntos. La segunda, con curvas de luz de TESS, mide su desempe\~no con otro instrumento, otra banda y una cadencia de observaci\'on radicalmente distinta. En ambas pruebas se conservaron sin cambios todos los par\'ametros del m\'etodo, es decir, la grilla de frecuencias, $L$, $K$, $H_0$ y $\gamma_\star$, y las alternativas supervisadas de la Secci\'on~\ref{sec:unificado-resultados} se usaron tal como fueron entrenadas con OGLE.
+
+\section{Curvas de luz sint\'eticas}
+\label{sec:validacion-sinteticas}
+
+\subsection{Dise\~no}
+
+La Secci\'on~\ref{sec:datos-sinteticas} plante\'o generar las curvas sint\'eticas a partir de familias anal\'iticas de morfolog\'ias. En la pr\'actica se opt\'o por plantillas emp\'iricas, construidas a partir de curvas de OGLE bien muestreadas, porque reproducen la variedad real de formas de los eclipses y de las pulsaciones sin necesidad de un modelo f\'isico para cada tipo. Se seleccionaron 240 plantillas, 120 binarias, 60 Cefeidas cl\'asicas de modo simple, fundamental o primer sobretono, y 60 RR Lyrae, entre estrellas que no pertenecen a ninguna de las muestras usadas en los cap\'itulos anteriores, con los siguientes criterios: al menos 400 puntos, una amplitud de al menos 25 veces el error fotom\'etrico mediano, un periodo catalogado menor a 100~d y una dispersi\'on de los residuos respecto de la plantilla menor a dos veces el error mediano, este \'ultimo para descartar curvas de doble modo, con modulaci\'on de amplitud fuerte o con periodos dudosos. La plantilla $\mathcal{T}(\varphi)$ de cada estrella es la mediana de sus magnitudes en $B$ intervalos de fase, con $B$ entre 50 y 150 seg\'un el n\'umero de puntos, interpolada linealmente y con mediana nula.
+
+Cada curva sint\'etica toma los instantes de observaci\'on $t_j$ de otra estrella de OGLE de la misma clase, de modo que conserva un patr\'on de muestreo real, y se construye como se muestra en la Ecuaci\'on~\eqref{eq:sintetica}.
+
+\begin{equation}
+	m_j = \bar m + \mathcal{T}(\varphi_j) + \epsilon_j, \qquad \varphi_j = \left[\frac{t_j - t_1}{P_{\mathrm{v}}} + \varphi_0\right] \bmod 1, \qquad \epsilon_j \sim \mathcal{N}(0, \sigma^2), \qquad \sigma = \frac{A_{\mathrm{pp}}}{\mathrm{SNR}}.
+	\label{eq:sintetica}
+\end{equation}
+
+En esta, $P_{\mathrm{v}}$ es el periodo verdadero, igual al periodo catalogado de la plantilla multiplicado por un factor aleatorio uniforme entre 0.85 y 1.15, para que la curva no herede la relaci\'on exacta entre el periodo original y su cadencia; $\varphi_0$ es una fase inicial aleatoria; $A_{\mathrm{pp}}$ es la amplitud pico a pico de la plantilla, y SNR la relaci\'on se\~nal a ruido impuesta. A cada curva se le asigna como error fotom\'etrico el valor $\sigma$. Cada plantilla se simul\'o en ocho configuraciones, con $\mathrm{SNR}\in\{50,15,8,4\}$ y con todos los puntos de la cadencia o con una submuestra aleatoria de $N=100$, conservando el periodo, la fase y la cadencia, lo que permite comparaciones pareadas entre configuraciones. En total se analizaron 1920 curvas. Como referencia, en las binarias de la muestra de OGLE la mediana del cociente entre la amplitud y el error mediano, con una definici\'on an\'aloga de la amplitud, es de aproximadamente 11.
+
+\subsection{Resultados}
+
+La Figura~\ref{fig:unificado-sinteticas} muestra la tasa de aciertos final de cada clase en funci\'on de la relaci\'on se\~nal a ruido, para tres reglas de decisi\'on de rama, todas seguidas de la regla h\'ibrida en la rama de binarias, y para la decisi\'on perfecta.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/unificado_sinteticas.png}
+	\caption[Robustez de la decisi\'on de rama ante el ruido y el n\'umero de puntos]{Tasa de aciertos final (error relativo menor al 1\%) sobre 1920 curvas sint\'eticas, en funci\'on de la relaci\'on se\~nal a ruido de la Ecuaci\'on~\eqref{eq:sintetica}, para binarias (a, b) y pulsantes (c, d), con todos los puntos de la cadencia (a, c) o con $N=100$ (b, d). Cada curva compara una regla de decisi\'on de rama, seguida de la regla h\'ibrida en la rama de binarias: el coeficiente de asimetr\'ia corregido (Ecuaci\'on~\ref{eq:asimetria-corregida}), el coeficiente sin corregir y la regresi\'on log\'istica entrenada con OGLE. La l\'inea discontinua usa el tipo verdadero para decidir la rama.}
+	\label{fig:unificado-sinteticas}
+\end{figure}
+
+El resultado m\'as claro es el colapso del coeficiente de asimetr\'ia sin corregir cuando el ruido es alto, tal como predice la Ecuaci\'on~\eqref{eq:dilucion}. Con $\mathrm{SNR}=4$ y todos los puntos, la diluci\'on env\'ia el 35\% de las binarias a la rama de pulsantes, y la tasa de aciertos en binarias cae a 54.2\%. La versi\'on corregida elimina casi por completo esa dependencia: en la misma configuraci\'on env\'ia solo el 4.2\% de las binarias a la rama equivocada y obtiene 77.5\%, frente al 80.0\% de la decisi\'on perfecta. La regresi\'on log\'istica, por su parte, se degrada fuera de las condiciones de su entrenamiento: con $N=100$ y $\mathrm{SNR}=4$ env\'ia el 54.2\% de las binarias a la rama de pulsantes. La Tabla~\ref{tab:validacion-sinteticas} resume los resultados promediados sobre las ocho configuraciones.
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabular}{llcccc}
+		\hline
+		\textbf{Decisi\'on de rama} & \textbf{M\'ultiplo} & \textbf{Binarias} & \textbf{Cefeidas} & \textbf{RR Lyrae} & \textbf{Ca\'ida en binarias} \\
+		\hline
+		Decisi\'on perfecta & Regla h\'ibrida & 76.4\% & 97.9\% & 95.8\% & 13.3 \\
+		Decisi\'on perfecta & Gradient boosting & 74.9\% & 97.9\% & 95.8\% & 17.5 \\
+		$\hat\gamma$ sin corregir & Regla h\'ibrida & 69.3\% & 96.9\% & 95.8\% & 37.5 \\
+		$\hat\gamma_{\mathrm{int}}$ corregido & Regla h\'ibrida & \textbf{74.3\%} & 95.8\% & 95.2\% & \textbf{14.2} \\
+		Regresi\'on log\'istica & Regla h\'ibrida & 72.0\% & 96.9\% & 95.8\% & 16.7 \\
+		Regresi\'on log\'istica & Gradient boosting & 70.5\% & 97.1\% & 95.8\% & 19.2 \\
+		\hline
+	\end{tabular}
+	\caption[Aciertos sobre curvas sint\'eticas por combinaci\'on de reglas]{Tasa de aciertos sobre las curvas sint\'eticas, promediada sobre las ocho configuraciones de ruido y n\'umero de puntos, para cada combinaci\'on de regla de decisi\'on de rama y de selecci\'on del m\'ultiplo. La \'ultima columna es la diferencia, en puntos porcentuales, entre la tasa de aciertos en binarias con $\mathrm{SNR}=50$ y con $\mathrm{SNR}=4$, ambas con todos los puntos. La fila destacada corresponde al m\'etodo unificado.}
+	\label{tab:validacion-sinteticas}
+\end{table}
+
+Entre las reglas que no usan el tipo verdadero, el m\'etodo unificado obtiene la tasa promedio m\'as alta en binarias (74.3\%) y la menor ca\'ida con el ruido (14.2 puntos), muy cerca de la ca\'ida de la decisi\'on perfecta (13.3 puntos), a cambio de un costo de entre 0.6 y 2.1 puntos en las pulsantes. El selector supervisado del m\'ultiplo, por su parte, no supera a la regla h\'ibrida fuera de OGLE: con decisi\'on perfecta obtiene 74.9\%, frente al 76.4\% de la regla h\'ibrida, cuando sobre OGLE la superaba por m\'as de cuatro puntos. Ambos resultados respaldan la preferencia por las reglas anal\'iticas expuesta en la Secci\'on~\ref{sec:unificado-resultados}.
+
+La prueba revela, adem\'as, una fragilidad de la primera etapa en el r\'egimen m\'as desfavorable. Con $N=100$ y $\mathrm{SNR}=4$, el producto de rangos recupera el periodo del 85.0\% de las Cefeidas y del 68.3\% de las RR Lyrae, frente a 98.3\% y 86.7\% de Lomb--Scargle; en las dem\'as configuraciones, ambos aciertan en pr\'acticamente todas las pulsantes. Una explicaci\'on plausible es el llenado de la grilla de la entrop\'ia: con 100 puntos repartidos en $L\times K=70$ celdas, cada celda contiene en promedio unos 1.4 puntos, y la entrop\'ia condicional responde a fluctuaciones de conteo m\'as que al orden de la curva, el mismo mecanismo que limit\'o el valor de $L$ en la Secci\'on~\ref{sec:hibrido-entropia-condicional}.
+
+\subsection{Limitaciones}
+
+Los criterios de calidad impuestos a las plantillas introducen un sesgo en la poblaci\'on simulada. Exigir una amplitud de al menos 25 veces el error favorece a las binarias separadas de eclipses profundos: de las 120 plantillas de binarias, 116 son de no-contacto, 2 de contacto y 2 elipsoidales, con una amplitud mediana de 0.47~mag, frente a 0.17~mag en la muestra de OGLE del Cap\'itulo~\ref{ch:metodo-hibrido}. Faltan, por tanto, precisamente los casos dif\'iciles, como las variables elipsoidales y las binarias de periodo largo cuyo periodo es $4P_0$, en los que el selector supervisado obten\'ia su ventaja sobre OGLE, de modo que la conclusi\'on sobre ese selector solo vale para esta poblaci\'on. Por otra parte, el ruido es gaussiano y no correlacionado, a diferencia del ruido rojo planteado en la Secci\'on~\ref{sec:datos-sinteticas}, y todas las cadencias provienen de OGLE; la prueba mide la robustez ante el ruido y el n\'umero de puntos, pero no ante otra cadencia, que es el objeto de la Secci\'on~\ref{sec:validacion-tess}.
+
+\section{Curvas de luz de TESS}
+\label{sec:validacion-tess}
+
+\subsection{Muestra y preparaci\'on}
+
+Las binarias eclipsantes se tomaron del cat\'alogo de binarias eclipsantes de TESS de \citet{Prsa2022}, que reporta, entre otros, el periodo orbital y un par\'ametro morfol\'ogico que va de 0 para los sistemas separados a 1 para los sistemas de contacto y las variables elipsoidales. Se seleccionaron sistemas con magnitud de TESS entre 8 y 12 y periodo entre 0.2 y 10~d, y se extrajeron 40 de cada uno de tres rangos del par\'ametro morfol\'ogico: separadas (menor a 0.4), intermedias (entre 0.4 y 0.7) y de contacto o elipsoidales (mayor o igual a 0.7). A diferencia de la muestra de OGLE, dominada por sistemas de no-contacto, esta estratificaci\'on garantiza la presencia de los casos casi sinusoidales. Las Cefeidas y las RR Lyrae se tomaron del \emph{International Variable Star Index} (VSX) \citep{Watson2006}, que se cita aunque es anterior a 2021 por ser la referencia del propio cat\'alogo: 60 Cefeidas cl\'asicas, 43 fundamentales y 17 de primer sobretono, con magnitud $V$ m\'axima entre 7.5 y 12 y periodo entre 1 y 10~d, y 60 RR Lyrae, 25 de tipo ab y 35 de tipo c, con magnitud $V$ m\'axima entre 9 y 12.5. El l\'imite de brillo busca reducir la contaminaci\'on por estrellas vecinas, que en TESS es importante por el tama\~no de sus p\'ixeles, de unos 21 segundos de arco, como se discuti\'o en la Secci\'on~\ref{sec:datos-reales}.
+
+Para cada estrella se us\'o un \'unico sector, de unos 27~d. Las curvas de luz se obtuvieron con \texttt{lightkurve} \citep{Lightkurve2018}, que se cita aunque es anterior a 2021 por ser la referencia del propio programa, priorizando los productos del \emph{Science Processing Operations Center} (SPOC) con cadencia de 2~min \citep{Jenkins2016} y, en su defecto, los productos de im\'agenes de campo completo de TESS-SPOC \citep{Caldwell2020}, este \'ultimo tambi\'en anterior a 2021 y citado por la misma raz\'on. En ambos casos se us\'o el flujo corregido por sistem\'aticas, se descartaron las observaciones marcadas por la m\'ascara de calidad y las observaciones se agruparon en intervalos de 30~min, lo que deja una mediana de 1047 puntos por curva, comparable con OGLE, y una l\'inea base mediana de 25.3~d. El flujo $F_i$ y su error $\sigma_{F,i}$ se convirtieron a magnitud relativa como se muestra en la Ecuaci\'on~\eqref{eq:flujo-magnitud}.
+
+\begin{equation}
+	m_i = -2.5\log_{10}\left(\frac{F_i}{\tilde F}\right), \qquad \sigma_i = \frac{2.5}{\ln 10}\,\frac{\sigma_{F,i}}{F_i} \approx 1.0857\,\frac{\sigma_{F,i}}{F_i}.
+	\label{eq:flujo-magnitud}
+\end{equation}
+
+En esta, $\tilde F$ es la mediana del flujo. Se excluyeron los productos del \emph{Quick-Look Pipeline} (QLP) \citep{Kunimoto2021}. En una primera versi\'on de la prueba se encontr\'o que su flujo sin correcci\'on presenta, en algunas curvas, tramos con sistem\'aticas fuertes, y que sus errores reportados son, en mediana, unas cinco veces mayores que la dispersi\'on real entre puntos consecutivos. Este \'ultimo defecto es especialmente da\~nino para el m\'etodo unificado, pues invalida la correcci\'on de la Ecuaci\'on~\eqref{eq:asimetria-corregida}; con curvas de QLP, las pulsantes obtuvieron un 72\% de aciertos con tolerancia de 5\%, frente a 93\% y 94\% con SPOC y TESS-SPOC.
+
+Como control de la calidad de las referencias, se identificaron las estrellas cuya curva de TESS no presenta potencia de Lomb--Scargle apreciable, menor al 10\% del m\'aximo del periodograma, ni en el periodo de referencia ni en su mitad ni en su doble. Solo 4 de las 240 estrellas cumplen esta condici\'on. En una de ellas, la RR Lyrae V0468~Hya, VSX reporta 0.3185~d, mientras que TESS muestra una se\~nal casi perfectamente coherente en 0.4681~d; el error parece estar en la referencia, o la se\~nal pertenece a una estrella vecina.
+
+\subsection{Resoluci\'on en frecuencia de un sector}
+
+Con un solo sector, la resoluci\'on en frecuencia es mucho menor que con la l\'inea base de OGLE. El ancho de un pico del periodograma es $\delta f\sim1/T$, que en t\'erminos de periodo corresponde al error relativo de la Ecuaci\'on~\eqref{eq:resolucion-sector}.
+
+\begin{equation}
+	\frac{\delta P}{P} \sim \frac{P}{T}.
+	\label{eq:resolucion-sector}
+\end{equation}
+
+En esta, para $P=5$~d y $T\approx25$~d el ancho relativo es del 20\%, de modo que el criterio de acierto de la Ecuaci\'on~\eqref{eq:acierto} exige localizar el m\'aximo con una precisi\'on de una peque\~na fracci\'on del ancho del pico, lo cual no siempre es posible para los periodos m\'as largos de la muestra. Por esta raz\'on, se reporta tambi\'en la tasa de aciertos con una tolerancia del 5\%.
+
+\subsection{Resultados}
+
+La Tabla~\ref{tab:validacion-tess} resume la tasa de aciertos por grupo, para la b\'usqueda global sola, para el m\'etodo unificado con una decisi\'on perfecta y para el m\'etodo unificado completo.
+
+\begin{table}[H]
+	\centering
+	\small
+	\resizebox{\textwidth}{!}{%
+	\begin{tabular}{lcccccc}
+		\hline
+		\textbf{Grupo} & \textbf{$N$} & \textbf{LS directo} & \textbf{$P_0$ directo} & \textbf{Decisi\'on perfecta} & \textbf{M\'etodo unificado} & \textbf{$\to$ rama bin.} \\
+		\hline
+		Binarias separadas & 40 & 12.5\% & 17.5\% & 60.0\% & 67.5\% & 70.0\% \\
+		Binarias intermedias & 40 & 7.5\% & 15.0\% & 75.0\% & 70.0\% & 82.5\% \\
+		Binarias de contacto/ELL & 40 & 0.0\% & 0.0\% & 97.5\% & 45.0\% & 45.0\% \\
+		Cefeidas & 60 & 85.0\% & 83.3\% & 83.3\% & 80.0\% & 8.3\% \\
+		RR Lyrae & 60 & 95.0\% & 95.0\% & 95.0\% & 95.0\% & 0.0\% \\
+		\hline
+		Todas las binarias & 120 & 6.7\% & 10.8\% & 77.5\% & 60.8\% & 65.8\% \\
+		\hline
+	\end{tabular}}
+	\caption[Aciertos del m\'etodo unificado sobre TESS]{Tasa de aciertos (error relativo menor al 1\%) sobre 240 estrellas observadas por TESS, con un sector por estrella. LS directo y $P_0$ directo son los periodos de Lomb--Scargle y del producto de rangos sin modificar; la decisi\'on perfecta usa el tipo catalogado para elegir la rama. La \'ultima columna es la fracci\'on de estrellas enviadas a la rama de binarias por la regla de la Ecuaci\'on~\eqref{eq:regla-rama}. Con una tolerancia del 5\%, el m\'etodo unificado obtiene 88.3\% en Cefeidas, y la tasa de los dem\'as grupos cambia a lo sumo en 2.5 puntos.}
+	\label{tab:validacion-tess}
+\end{table}
+
+En las pulsantes, la primera etapa vuelve a igualar a Lomb--Scargle: 95.0\% en RR Lyrae para ambos y 83.3\% frente a 85.0\% en Cefeidas, una diferencia de una estrella. Al excluir las dos RR Lyrae con referencia dudosa, la tasa sube a 98.3\%. Los fallos en Cefeidas se concentran en las fundamentales, de periodo m\'as largo, que obtienen 74.4\% con tolerancia del 1\% y 86.0\% con tolerancia del 5\%, de acuerdo con la limitaci\'on de la Ecuaci\'on~\eqref{eq:resolucion-sector}. Con la decisi\'on perfecta, las binarias alcanzan un 77.5\%, una tasa incluso mayor que la obtenida sobre OGLE, de modo que el esquema de dos etapas se transfiere a TESS sin ning\'un ajuste. El m\'etodo completo, en cambio, pierde 16.7 puntos en las binarias respecto de la decisi\'on perfecta. La Figura~\ref{fig:unificado-tess} representa estos resultados.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/unificado_tess.png}
+	\caption[Aciertos del m\'etodo unificado sobre TESS, por grupo]{Tasa de aciertos (error relativo menor al 1\%) sobre la muestra de TESS, por grupo, para Lomb--Scargle y el producto de rangos sin modificar, para el m\'etodo unificado con decisi\'on perfecta de rama y para el m\'etodo unificado completo, cuya tasa se indica sobre cada barra. En las binarias de contacto y elipsoidales, ninguno de los dos periodos sin modificar acierta, pues ambos convergen a la mitad del periodo orbital.}
+	\label{fig:unificado-tess}
+\end{figure}
+
+\subsection{Efectos de la cadencia}
+
+Las p\'erdidas del m\'etodo completo en TESS se deben a tres efectos de la cadencia y de la l\'inea base, y no a la b\'usqueda global.
+
+El primero afecta a las binarias separadas. Con la cadencia densa de TESS, la b\'usqueda global encuentra con frecuencia el periodo orbital directamente, y no su mitad, como ocurre en OGLE, porque el eclipse primario y el secundario quedan bien resueltos y son distinguibles. Como la regla h\'ibrida nunca baja de $n=2$, duplica un periodo que ya era correcto. En 12 de las 40 binarias separadas, con eclipses angostos y una varianza total que no supera la del ruido, el coeficiente de asimetr\'ia corregido no est\'a definido, de modo que la Ecuaci\'on~\eqref{eq:metodo-unificado} conserva $P_0$, que en varias de ellas es correcto. Por esta raz\'on, en este grupo el m\'etodo completo (67.5\%) supera a la decisi\'on perfecta (60.0\%), un resultado que no debe interpretarse como una virtud de la regla de decisi\'on. Adem\'as, en las binarias separadas de periodo cercano a 10~d, el sector contiene apenas dos o tres ciclos.
+
+El segundo afecta a las binarias de contacto y elipsoidales, y es la p\'erdida m\'as importante. En ellas la b\'usqueda global converge a la mitad del periodo orbital en el 97.5\% de los casos, de modo que la regla h\'ibrida ser\'ia pr\'acticamente perfecta, pero su coeficiente de asimetr\'ia corregido tiene una mediana de 0.47, justo por debajo del umbral, y el 55\% de ellas se env\'ia a la rama de pulsantes. Es la limitaci\'on anticipada en la Secci\'on~\ref{sec:unificado-decision} para las curvas casi sinusoidales, ahora con una muestra en la que estas curvas son abundantes.
+
+El tercero afecta a las Cefeidas. Las cinco Cefeidas enviadas a la rama de binarias cubren solo entre 2.6 y 5.2 ciclos dentro del sector. Una explicaci\'on plausible es que, cuando la l\'inea base contiene pocos ciclos y no un n\'umero entero de ellos, las fases de la curva quedan muestreadas de forma desigual y el coeficiente de asimetr\'ia de las magnitudes deja de representar la forma de la curva.
+
+\section{S\'intesis y trabajo pendiente}
+\label{sec:validacion-sintesis}
+
+Las dos pruebas de este cap\'itulo confirman que la primera etapa del m\'etodo unificado no degrada a Lomb--Scargle en estrellas pulsantes, salvo en el r\'egimen de muy pocos puntos y mucho ruido, y que el esquema de dos etapas para las binarias se transfiere a otra cadencia sin ajustes cuando la rama se elige correctamente. Tambi\'en confirman la ventaja de las reglas anal\'iticas: el coeficiente de asimetr\'ia corregido es la regla de decisi\'on m\'as robusta ante el ruido, y el selector supervisado del m\'ultiplo pierde su ventaja fuera de los datos con que fue entrenado.
+
+El eslab\'on d\'ebil del m\'etodo es la decisi\'on de rama, cuyos dos fallos principales tienen una causa f\'isica identificable: las curvas casi sinusoidales de las binarias de contacto y elipsoidales, y la dependencia de la cadencia del supuesto de que $P_0$ es la mitad del periodo orbital. Quedan planteadas tres extensiones anal\'iticas para resolverlos. La primera es permitir $n=1$ en la rama de binarias mediante un criterio morfol\'ogico: si la curva plegada en $P_0$ ya muestra dos m\'inimos de profundidad distinta, $P_0$ es el periodo orbital. La segunda es combinar el coeficiente de asimetr\'ia con $|\sin\phi_{21}|$, que mide la simetr\'ia temporal de la curva plegada y que sobre OGLE separa binarias de pulsantes casi tan bien como el coeficiente de asimetr\'ia. La tercera es calcular el coeficiente de asimetr\'ia sobre un n\'umero entero de ciclos de $P_0$. Para que TESS siga siendo una prueba independiente, estas extensiones deben dise\~narse con OGLE y con curvas sint\'eticas, y confirmarse despu\'es sobre TESS. Queda pendiente, adem\'as, la aplicaci\'on del m\'etodo a VVV/VVVX, cuya cadencia dispersa constituye el tercer r\'egimen de muestreo planteado en el Cap\'itulo~\ref{ch:datos}.
+
 
 
 \appendix

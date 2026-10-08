@@ -45,7 +45,8 @@ COLOR_METODO = {"ls": AZUL, "ent_c": NARANJA, "rp_c": AGUA}
 NOMBRE_METODO = {"ls": "Lomb–Scargle", "ent_c": "Entropía condicional",
                  "rp_c": "Producto de rangos"}
 
-EJEMPLO_COMBINACION = "OGLE-LMC-ECL-38031"
+EJEMPLO_COMBINACION = "OGLE-LMC-ECL-11394"
+F_MAX_EJEMPLO = 1.5  # d^-1, contiene f_cat, 2 f_cat y el maximo de LS
 EJEMPLO_BIC = "OGLE-LMC-ECL-14782"
 
 
@@ -80,7 +81,7 @@ def figura_combinacion(cache):
     f_cat = 1.0 / fila["periodo_catalogo"]
     f_ls = FRECUENCIA[np.argmax(potencia)]
     f_rp = FRECUENCIA[np.argmax(producto)]
-    visible = FRECUENCIA <= 2.6
+    visible = FRECUENCIA <= F_MAX_EJEMPLO
 
     fig = plt.figure(figsize=(14, 15))
     rejilla = fig.add_gridspec(4, 2, height_ratios=[1, 1, 1, 1.25], hspace=0.45, wspace=0.3)
@@ -103,7 +104,7 @@ def figura_combinacion(cache):
         marcar_punto_borde(ax, f_cat, "black")
         marcar_punto_borde(ax, 2 * f_cat, GRIS)
         marcar_punto_borde(ax, f_max, color)
-        ax.set_xlim(0, 2.6)
+        ax.set_xlim(0, F_MAX_EJEMPLO)
         ax.set_ylabel(etiqueta)
         ax.set_title(titulo, loc="left", fontsize=15, pad=16)
         if i == 2:

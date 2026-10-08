@@ -35,6 +35,9 @@ Este es el proyecto final de mi pregrado en Física. Un proyecto de investigaci�
 - Citar fuentes cuando se mencionen datos externos.
 - A la hora de buscar fuentes, priorizar que estas hayan sido publicadas del 2021 en adelante. De utilizar fuentes más antiguas, avisar y explicar por qué se utilizaron. 
 
+## Datos de terceros
+- Hay reglas adicionales sobre datos de terceros en `CLAUDE.local.md` (archivo local, no versionado). Seguirlas siempre.
+
 ## Código
 - Lenguaje: [Python]
 - Librerías principales: [numpy, astropy, matplotlib, entropypf]

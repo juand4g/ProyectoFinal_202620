@@ -257,7 +257,9 @@ def skew_ogle():
     return out
 
 
-def resumen(cache):
+def evaluar(cache):
+    """Tabla con las decisiones de rama y los aciertos de cada selector.
+    Devuelve (df, decisiones, ok_selector, ok_p0)."""
     cache = cache.astype({"snr": int, "n_objetivo": int, "id_plantilla": int})
     gb, cols_ind, cols_X = entrenar_selector()
     logistica = entrenar_logistica()
@@ -285,6 +287,13 @@ def resumen(cache):
     ok_selector = {"x2+BIC": acierto(df["n_hib"].to_numpy() * p0, P),
                    "GB": acierto(df["n_gb"].to_numpy() * p0, P)}
     ok_p0 = acierto(p0, P)
+    return df, decisiones, ok_selector, ok_p0
+
+
+def resumen(cache):
+    df, decisiones, ok_selector, ok_p0 = evaluar(cache)
+    es_bin = (df["clase"] == "Binaria").to_numpy()
+    P = df["periodo_catalogo"].to_numpy()
 
     lineas = []
     w = lineas.append
