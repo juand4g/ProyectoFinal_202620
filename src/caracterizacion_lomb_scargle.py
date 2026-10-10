@@ -25,9 +25,10 @@ from graficas_periodograma import (
 # ---------------------------------------------------------------------------
 # PARAMETROS
 # ---------------------------------------------------------------------------
-N_BINARIAS = 500
+N_BINARIAS = 500  # muestra original por tipo
 N_CEFEIDAS = 500
 N_RRLYRAE = 500
+N_AMPLIADA = 1500  # por tipo, desde el 09/10/2026; las 500 originales son su prefijo
 
 RANDOM_SEED = 42  # fija la muestra aleatoria para que la cache sea reutilizable
 
@@ -45,6 +46,7 @@ N_EJEMPLOS_PERIODOGRAMA = 3  # numero de periodogramas de ejemplo a graficar por
 DATA_DIR = Path(__file__).resolve().parent.parent / "ogle_collection"
 OUT_DIR = Path(__file__).resolve().parent.parent / "Lomb-Scargle"
 CACHE_CSV = OUT_DIR / "cache_resultados_ls.csv"
+MUESTRA_CSV = OUT_DIR / "muestra_caracterizacion.csv"  # compartida con caracterizacion_entropia.py
 PLOTS_DIR = OUT_DIR / "graficas"
 
 TIPOS = {
@@ -85,6 +87,30 @@ def cargar_catalogo(path_txt, col_periodo):
     df = pd.read_csv(path_txt, sep="\t", comment="#")
     df = df.set_index("ID")
     return df[col_periodo]
+
+
+def muestra_caracterizacion():
+    """{tipo: [ids]} de la muestra del Capitulo 4, congelada en MUESTRA_CSV.
+    Las 500 originales de cada tipo se reproducen con la secuencia original
+    (random.seed(42) una vez y random.sample por tipo, en el orden de TIPOS);
+    las 1000 adicionales se extraen de las restantes con random.Random(43 + k)."""
+    if not MUESTRA_CSV.exists():
+        random.seed(RANDOM_SEED)
+        filas = []
+        disponibles = {}
+        for tipo, cfg in TIPOS.items():
+            cat = cargar_catalogo(cfg["catalogo"], cfg["col_periodo"])
+            disponibles[tipo] = [f.stem for f in sorted(cfg["carpeta"].glob("*.dat")) if f.stem in cat.index]
+            base = random.sample(disponibles[tipo], min(cfg["n_muestra"], len(disponibles[tipo])))
+            filas += [(tipo, i) for i in base]
+        for k, tipo in enumerate(TIPOS):
+            base = {i for t, i in filas if t == tipo}
+            resto = [i for i in disponibles[tipo] if i not in base]
+            extra = random.Random(RANDOM_SEED + 1 + k).sample(resto, N_AMPLIADA - len(base))
+            filas += [(tipo, i) for i in extra]
+        pd.DataFrame(filas, columns=["tipo", "id"]).to_csv(MUESTRA_CSV, index=False)
+    m = pd.read_csv(MUESTRA_CSV)
+    return {tipo: m.loc[m["tipo"] == tipo, "id"].tolist() for tipo in TIPOS}
 
 
 def calcular_periodo_ls(t, mag, err, p_min, p_max, samples_per_peak=5):
@@ -243,13 +269,11 @@ def main():
     procesados = set(zip(cache["tipo"], cache["id"]))
     filas_nuevas = []
 
+    muestras = muestra_caracterizacion()  # ampliada a 1500 por tipo el 09/10/2026
+
     for tipo, cfg in TIPOS.items():
         periodos_catalogo = cargar_catalogo(cfg["catalogo"], cfg["col_periodo"])
-        archivos = sorted(cfg["carpeta"].glob("*.dat"))
-        ids_disponibles = [f.stem for f in archivos if f.stem in periodos_catalogo.index]
-
-        n = min(cfg["n_muestra"], len(ids_disponibles))
-        muestra = random.sample(ids_disponibles, n)
+        muestra = muestras[tipo]
 
         for id_estrella in tqdm(muestra, desc=tipo, unit="estrella"):
             if (tipo, id_estrella) in procesados:

@@ -15,7 +15,10 @@ prior x2 ni el refinamiento BIC, que suponen binaria eclipsante); el
 "siempre x2" se reporta para cuantificar el dano del prior en pulsantes.
 
 Muestra: N_POR_TIPO estrellas por tipo, semilla 2026. Periodo de referencia:
-P_1 de OGLE. Cache append-safe en Etapa1_Pulsantes/.
+P_1 de OGLE. Cache append-safe en Etapa1_Pulsantes/. Desde el 09/10/2026
+la muestra es de 1500 por tipo (las 500 originales como prefijo; la
+ampliacion excluye las plantillas y cadencias de las sinteticas) y queda
+congelada en Etapa1_Pulsantes/muestra_<tipo>.csv.
 """
 
 import random
@@ -29,7 +32,10 @@ from tqdm import tqdm
 
 from refinamiento_rank_product_enmascarado_bic import METODOS, periodos_base
 from refinamiento_rank_product_bic import N_PROCESOS, P_MAX, P_MIN
-from refinamiento_subarmonicos_bic import MIN_PUNTOS, N_MAX, RANDOM_SEED, acierto
+from refinamiento_subarmonicos_bic import (
+    MIN_PUNTOS, N_MAX, N_TECHO, RANDOM_SEED, acierto, estrellas_plantilla_originales,
+    muestra_anidada, muestra_congelada,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "ogle_collection"
@@ -37,7 +43,8 @@ OUT_DIR = BASE_DIR / "Etapa1_Pulsantes"
 CACHE_CSV = OUT_DIR / "cache_etapa1_pulsantes.csv"
 RESUMEN_TXT = OUT_DIR / "resumen_etapa1_pulsantes.txt"
 
-N_POR_TIPO = 500
+N_POR_TIPO_BASE = 500  # muestra original (07/10/2026)
+N_POR_TIPO = 1500  # ampliada el 09/10/2026; las 500 originales son su prefijo
 TIPOS = {
     "Cefeida": (DATA_DIR / "classical_cefeids_phot", DATA_DIR / "classical_cefeids.txt"),
     "RR Lyrae": (DATA_DIR / "rrlyrae_phot", DATA_DIR / "rrlyrae.txt"),
@@ -75,8 +82,9 @@ def muestra_tipo(tipo):
     catalogo = cargar_catalogo(catalogo_txt)
     disponibles = sorted(p.stem for p in carpeta.glob("*.dat"))
     disponibles = [i for i in disponibles if i in catalogo.index]
-    random.seed(RANDOM_SEED)
-    ids = random.sample(disponibles, N_POR_TIPO)
+    ruta = OUT_DIR / f"muestra_{tipo.replace(' ', '_')}.csv"
+    ids = muestra_congelada(ruta, lambda: muestra_anidada(
+        disponibles, N_POR_TIPO_BASE, N_POR_TIPO, RANDOM_SEED, estrellas_plantilla_originales()))
     return [(tipo, i, str(catalogo.at[i, "Mode"]), float(catalogo.at[i, "P_1"]), carpeta / f"{i}.dat")
             for i in ids]
 
@@ -93,7 +101,7 @@ def resumen(cache):
         P = g["periodo_catalogo"].to_numpy()
         w(f"{tipo}: {len(g)} estrellas (P_cat {P.min():.3f}-{P.max():.3f} d; "
           f"{np.mean(P > P_MAX):.1%} con P > {P_MAX:.0f} d, fuera de la grilla)")
-        w(f"  {'Metodo':20s}{'directo':>9}{'x1/2':>8}{'x2':>8}{'x1/3':>8}{'siempre x2':>12}{'oraculo x1-x6':>15}")
+        w(f"  {'Metodo':20s}{'directo':>9}{'x1/2':>8}{'x2':>8}{'x1/3':>8}{'siempre x2':>12}{'oraculo x1-x6':>15}{f'oraculo x1-x{N_TECHO}':>16}")
         ok = {}
         for m in REPORTADOS:
             p0 = g[f"periodo_{m}"].to_numpy()
@@ -101,9 +109,12 @@ def resumen(cache):
             oraculo = np.zeros(len(g), dtype=bool)
             for n in range(1, N_MAX + 1):
                 oraculo |= acierto(n * p0, P)
+            techo = oraculo.copy()
+            for n in range(N_MAX + 1, N_TECHO + 1):
+                techo |= acierto(n * p0, P)
             w(f"  {METODOS[m]:20s}{ok[m].mean():9.1%}{acierto(p0, P / 2).mean():8.1%}"
               f"{acierto(p0, 2 * P).mean():8.1%}{acierto(p0, P / 3).mean():8.1%}"
-              f"{acierto(2 * p0, P).mean():12.1%}{oraculo.mean():15.1%}")
+              f"{acierto(2 * p0, P).mean():12.1%}{oraculo.mean():15.1%}{techo.mean():16.1%}")
         a, b = ok["ls"], ok["rp_c"]
         n01, n10 = int(np.sum(~a & b)), int(np.sum(a & ~b))
         w(f"  LS vs rank_prod condic.: ambos {np.mean(a & b):.1%}, solo LS {n10}, "

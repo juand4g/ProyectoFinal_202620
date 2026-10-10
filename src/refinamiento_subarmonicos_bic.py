@@ -22,7 +22,10 @@ Metodo, para cada estrella:
 
 Se guarda el BIC de cada (n, H0) en el cache, de modo que el barrido de H0
 se evalua sin recalcular. Muestra NUEVA de N_MUESTRA binarias (semilla
-propia), con LS recalculado aqui. Cache append-safe.
+propia), con LS recalculado aqui. Cache append-safe. La muestra se amplio
+de 1000 a 3000 el 09/10/2026 (las 1000 originales son el prefijo; ver
+muestra_anidada) y queda congelada en Refinamiento_Subarmonicos/
+muestra_binarias.csv. El techo (oraculo) usa multiplos hasta x10.
 """
 
 import random
@@ -42,14 +45,19 @@ OUT_DIR = BASE_DIR / "Refinamiento_Subarmonicos"
 CACHE_CSV = OUT_DIR / "cache_refinamiento_bic.csv"
 RESUMEN_TXT = OUT_DIR / "resumen_refinamiento_bic.txt"
 
-N_MUESTRA = 1000
+N_MUESTRA_BASE = 1000  # muestra original (04/10/2026)
+N_MUESTRA = 3000  # ampliada el 09/10/2026; las 1000 originales son su prefijo
 RANDOM_SEED = 2026  # distinta de la muestra oficial (42) y de la ampliada (123)
+MUESTRA_CSV = OUT_DIR / "muestra_binarias.csv"
+PLANTILLAS_CSV = BASE_DIR / "Robustez_Sinteticas" / "plantillas.csv"
+N_PLANTILLAS_ORIGINALES = 240  # plantillas de las sinteticas anteriores a la ampliacion
 
 P_MIN, P_MAX = 0.1, 3000.0
 SAMPLES_PER_PEAK = 5
 MIN_PUNTOS = 10
 
-N_MAX = 6  # subarmonicos f0/1 ... f0/N_MAX
+N_MAX = 6  # subarmonicos f0/1 ... f0/N_MAX que explora la regla de seleccion
+N_TECHO = 10  # multiplos x1 ... x10 para el techo (oraculo), desde el 09/10/2026
 H0_VALORES = [2, 3, 4, 6, 8]  # armonicos del modelo en f0 (barrido)
 MIN_PUNTOS_POR_PARAMETRO = 3  # se descarta un candidato si N < 3*k
 UMBRAL = 0.01
@@ -58,6 +66,54 @@ UMBRAL = 0.01
 def cargar_catalogo():
     df = pd.read_csv(CATALOGO, sep="\t", comment="#").set_index("ID")
     return df[["Type", "P"]]
+
+
+def muestra_anidada(disponibles, n_base, n_total, semilla, excluir=()):
+    """Muestra de n_total elementos cuyos primeros n_base son exactamente
+    random.sample(disponibles, n_base) con la semilla dada (la muestra
+    original). El resto se extrae, con otra semilla, de los no elegidos que
+    no esten en `excluir`."""
+    random.seed(semilla)
+    base = random.sample(disponibles, n_base)
+    if n_total <= n_base:
+        return base[:n_total]
+    vetados = set(base) | set(excluir)
+    resto = [i for i in disponibles if i not in vetados]
+    return base + random.Random(semilla + 1).sample(resto, n_total - n_base)
+
+
+def muestra_congelada(ruta, generar):
+    """Lee la lista de IDs de `ruta`; si no existe, la genera y la guarda,
+    para que la muestra no dependa de cambios posteriores en los archivos."""
+    if ruta.exists():
+        return pd.read_csv(ruta)["id"].tolist()
+    ids = generar()
+    ruta.parent.mkdir(exist_ok=True)
+    pd.DataFrame({"id": ids}).to_csv(ruta, index=False)
+    return ids
+
+
+def estrellas_plantilla_originales():
+    """Estrellas usadas como plantilla o cadencia en las sinteticas originales:
+    las ampliaciones de las muestras OGLE las excluyen para no mezclar ambas."""
+    if not PLANTILLAS_CSV.exists():
+        return set()
+    pl = pd.read_csv(PLANTILLAS_CSV)
+    pl = pl[pl["id_plantilla"] < N_PLANTILLAS_ORIGINALES]
+    return {Path(r).stem for r in pd.concat([pl["plantilla"], pl["cadencia"]])}
+
+
+def muestra_binarias(disponibles):
+    return muestra_congelada(MUESTRA_CSV, lambda: muestra_anidada(
+        disponibles, N_MUESTRA_BASE, N_MUESTRA, RANDOM_SEED, estrellas_plantilla_originales()))
+
+
+def n_real_techo(p0, P):
+    """Menor n en 1..N_TECHO con n*P0 dentro del 1% de P (0 si ninguno)."""
+    n_real = np.zeros(len(P), dtype=int)
+    for n in range(N_TECHO, 0, -1):
+        n_real[acierto(n * np.asarray(p0), P)] = n
+    return n_real
 
 
 def periodo_ls(t, mag, err):
@@ -141,9 +197,7 @@ def resumen(cache):
     w = lineas.append
 
     # n "verdadero": multiplo entero de P_LS que reproduce el catalogo (0 = ninguno)
-    n_real = np.zeros(len(cache), dtype=int)
-    for n in range(N_MAX, 0, -1):
-        n_real[acierto(n * p_ls, P)] = n
+    n_real = n_real_techo(p_ls, P)
 
     w(f"RESUMEN - REFINAMIENTO POR SUBARMONICOS CON BIC")
     w("=" * 78)
@@ -155,7 +209,8 @@ def resumen(cache):
     w(f"  LS directo (x1):                     {acierto(p_ls, P).mean():6.1%}")
     w(f"  Siempre x2:                          {acierto(2 * p_ls, P).mean():6.1%}")
     w(f"  Oraculo x1-x2 (usa catalogo):        {(n_real >= 1).__and__(n_real <= 2).mean():6.1%}")
-    w(f"  Oraculo x1-x{N_MAX} (usa catalogo):        {(n_real >= 1).mean():6.1%}\n")
+    w(f"  Oraculo x1-x{N_MAX} (usa catalogo):        {((n_real >= 1) & (n_real <= N_MAX)).mean():6.1%}")
+    w(f"  Oraculo x1-x{N_TECHO} (usa catalogo):       {(n_real >= 1).mean():6.1%}\n")
 
     w("SELECCION POR BIC (sin usar el catalogo)")
     mejor_h0, mejor_tasa = None, -1
@@ -172,7 +227,7 @@ def resumen(cache):
     w(f"\nDETALLE PARA EL MEJOR H0 = {mejor_h0}")
     w("  Matriz n_real (filas, 0 = sin multiplo simple) vs. n elegido (columnas):")
     w("            " + "".join(f"{f'x{k}':>7}" for k in range(1, N_MAX + 1)) + "   total")
-    for r in range(0, N_MAX + 1):
+    for r in range(0, N_TECHO + 1):
         m = n_real == r
         if m.sum() == 0:
             continue
@@ -180,7 +235,7 @@ def resumen(cache):
           + f"   {m.sum():5d}")
 
     resolubles = n_real > 0
-    w(f"\n  Aciertos entre las resolubles con algun x1-x{N_MAX}: {ok[resolubles].mean():.1%} "
+    w(f"\n  Aciertos entre las resolubles con algun x1-x{N_TECHO}: {ok[resolubles].mean():.1%} "
       f"(n={resolubles.sum()})")
 
     w("\n  Por tipo morfologico (NC / C=W UMa / ELL):")
@@ -193,7 +248,7 @@ def resumen(cache):
                        "rango": pd.cut(P, bins)})
     for rango, g in df.groupby("rango", observed=True):
         w(f"    {str(rango):16s} n={len(g):4d}   BIC {g['ok'].mean():6.1%}   "
-          f"siempre x2 {g['x2'].mean():6.1%}   oraculo x1-x{N_MAX} {g['or'].mean():6.1%}")
+          f"siempre x2 {g['x2'].mean():6.1%}   oraculo x1-x{N_TECHO} {g['or'].mean():6.1%}")
 
     w("\nVARIANTE HIBRIDA: x2 por defecto; n>=3 solo si su BIC es menor que el de n=2")
     w("(nunca se elige x1; sin umbral ajustado, delta BIC = 0)")
@@ -213,8 +268,7 @@ def main():
     catalogo = cargar_catalogo()
     disponibles = sorted(p.stem for p in PHOT_DIR.glob("*.dat"))
     disponibles = [i for i in disponibles if i in catalogo.index]
-    random.seed(RANDOM_SEED)
-    muestra = random.sample(disponibles, N_MUESTRA)
+    muestra = muestra_binarias(disponibles)
 
     cache = pd.read_csv(CACHE_CSV) if CACHE_CSV.exists() else pd.DataFrame()
     procesados = set(cache["id"]) if not cache.empty else set()

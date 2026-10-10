@@ -1,7 +1,8 @@
 """
 Figuras del metodo hibrido (rank_product condicional + refinamiento de
 subarmonicos por BIC) para la tesis. Lee el cache de
-refinamiento_rank_product_enmascarado_bic.py (1000 binarias, semilla 2026) y
+refinamiento_rank_product_enmascarado_bic.py (3000 binarias desde el
+09/10/2026, semilla 2026) y
 recalcula los periodogramas completos solo para las dos estrellas de ejemplo.
 
 Figuras (en Refinamiento_Subarmonicos/graficas/ y copiadas a Tesis/img/):
@@ -10,7 +11,7 @@ Figuras (en Refinamiento_Subarmonicos/graficas/ y copiadas a Tesis/img/):
   2. hibrido_ejemplo_bic.png: Delta BIC vs. n y curvas plegadas en 2*P0 y en
      el n elegido, para una binaria en la que el BIC sube a n=6.
   3. hibrido_resumen_etapas.png: aciertos por etapa (directo, siempre x2,
-     hibrido, techo x1-x6) para LS, entropia condicional y rank_product.
+     hibrido, techo x1-x10) para LS, entropia condicional y rank_product.
   4. hibrido_aciertos_por_periodo.png: aciertos del hibrido por rango de
      periodo catalogado, LS vs. rank_product condicional, con el techo.
   5. hibrido_matriz_confusion.png: n real vs. n elegido por la regla hibrida.
@@ -30,7 +31,7 @@ from refinamiento_rank_product_enmascarado_bic import (
     CACHE_CSV, FRECUENCIA, N_FREQ, entropias_conjunta_y_fase,
 )
 from refinamiento_subarmonicos_bic import (
-    BASE_DIR, N_MAX, OUT_DIR, PHOT_DIR, acierto, bic_fourier, n_hibrido,
+    BASE_DIR, N_MAX, N_TECHO, OUT_DIR, PHOT_DIR, acierto, bic_fourier, n_hibrido, n_real_techo,
 )
 
 GRAF_DIR = OUT_DIR / "graficas"
@@ -165,9 +166,7 @@ def tasas(cache):
     salida = {}
     for m in COLOR_METODO:
         p0 = cache[f"periodo_{m}"].to_numpy()
-        oraculo = np.zeros(len(cache), dtype=bool)
-        for n in range(1, N_MAX + 1):
-            oraculo |= acierto(n * p0, P)
+        oraculo = n_real_techo(p0, P) >= 1
         salida[m] = {
             "directo": acierto(p0, P),
             "siempre2": acierto(2 * p0, P),
@@ -180,7 +179,7 @@ def tasas(cache):
 def figura_etapas(cache):
     r = tasas(cache)
     etapas = [("directo", r"Directo ($P_0$)"), ("siempre2", r"Siempre $2P_0$"),
-              ("hibrido", "Regla híbrida\n(BIC)"), ("oraculo", "Techo\n$\\times1$–$\\times6$")]
+              ("hibrido", "Regla híbrida\n(BIC)"), ("oraculo", "Techo\n$\\times1$–$\\times10$")]
     fig, ax = plt.subplots(figsize=(13, 6.5))
     ancho = 0.26
     x = np.arange(len(etapas))
@@ -217,7 +216,7 @@ def figura_por_periodo(cache):
         ax.bar(x + (j - 0.5) * ancho, valores, width=ancho - 0.03, color=color, label=nombre)
     techo = [100 * r["rp_c"]["oraculo"][rango == k].mean() for k in range(len(etiquetas))]
     ax.scatter(x + 0.5 * ancho, techo, marker="_", s=900, linewidths=2.5, color=TINTA,
-               label=r"Techo del producto de rangos ($\times1$–$\times6$)", zorder=4)
+               label=r"Techo del producto de rangos ($\times1$–$\times10$)", zorder=4)
     ax.set_xticks(x, [f"{e}\n($N={c}$)" for e, c in zip(etiquetas, conteo)])
     ax.set_xlabel(r"Periodo catalogado $P_{\mathrm{cat}}$ (d)")
     ax.set_ylabel("Aciertos (%)")
@@ -230,13 +229,11 @@ def figura_por_periodo(cache):
 def figura_confusion(cache):
     P = cache["periodo_catalogo"].to_numpy()
     p0 = cache["periodo_rp_c"].to_numpy()
-    n_real = np.zeros(len(cache), dtype=int)
-    for n in range(N_MAX, 0, -1):
-        n_real[acierto(n * p0, P)] = n
+    n_real = n_real_techo(p0, P)
     n_eleg = n_hibrido(cache, H0, "bic_rp_c")
-    filas = [1, 2, 3, 4, 5, 6, 0]
+    filas = list(range(1, N_TECHO + 1)) + [0]
     matriz = np.array([[np.sum((n_real == a) & (n_eleg == b)) for b in range(1, N_MAX + 1)] for a in filas])
-    fig, ax = plt.subplots(figsize=(9, 8))
+    fig, ax = plt.subplots(figsize=(9, 10))
     imagen = ax.imshow(np.log10(matriz + 1), cmap="Blues", aspect="auto")
     for i in range(len(filas)):
         for j in range(N_MAX):
@@ -250,7 +247,8 @@ def figura_confusion(cache):
     ax.set_yticks(range(len(filas)), [rf"$\times{n}$" for n in filas[:-1]] + ["ninguno"])
     ax.set_xlabel(r"Múltiplo elegido $\hat n$")
     ax.set_ylabel(r"Múltiplo real $n^\ast$ ($P_{\mathrm{cat}}\approx n^\ast P_0$)")
-    ax.axhline(5.5, color=TINTA, linewidth=1.2)
+    ax.axhline(N_MAX - 0.5, color=TINTA, linewidth=0.8, linestyle="--")  # n* > 6: fuera del alcance de la regla
+    ax.axhline(N_TECHO - 0.5, color=TINTA, linewidth=1.2)
     barra = fig.colorbar(imagen, ax=ax, fraction=0.046, pad=0.04)
     barra.set_label(r"$\log_{10}(1+\mathrm{conteo})$")
     guardar(fig, "hibrido_matriz_confusion.png")

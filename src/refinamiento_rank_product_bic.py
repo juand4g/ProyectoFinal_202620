@@ -32,8 +32,8 @@ from scipy.stats import rankdata
 from tqdm import tqdm
 
 from refinamiento_subarmonicos_bic import (
-    H0_VALORES, MIN_PUNTOS, N_MAX, N_MUESTRA, OUT_DIR, PHOT_DIR, RANDOM_SEED,
-    acierto, bic_fourier, cargar_catalogo, n_hibrido,
+    H0_VALORES, MIN_PUNTOS, N_MAX, OUT_DIR, PHOT_DIR, RANDOM_SEED,
+    acierto, bic_fourier, cargar_catalogo, muestra_binarias, n_hibrido,
 )
 
 CACHE_CSV = OUT_DIR / "cache_rank_product_bic.csv"
@@ -129,8 +129,7 @@ def main():
     catalogo = cargar_catalogo()
     disponibles = sorted(p.stem for p in PHOT_DIR.glob("*.dat"))
     disponibles = [i for i in disponibles if i in catalogo.index]
-    random.seed(RANDOM_SEED)
-    muestra = random.sample(disponibles, N_MUESTRA)  # misma muestra que refinamiento_subarmonicos_bic.py
+    muestra = muestra_binarias(disponibles)  # misma muestra que refinamiento_subarmonicos_bic.py
 
     cache = pd.read_csv(CACHE_CSV) if CACHE_CSV.exists() else pd.DataFrame()
     procesados = set(cache["id"]) if not cache.empty else set()

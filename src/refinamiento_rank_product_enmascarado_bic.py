@@ -20,8 +20,9 @@ H(fase) se obtiene con la misma get_entropies pasando magnitudes constantes
 (todo cae en un solo bin de magnitud), con el mismo origen de fase t0 y la
 misma normalizacion log(L*K). Los percentiles de entropia se calculan solo
 sobre las frecuencias libres. Despues se aplica a cada metodo base la misma
-regla hibrida de subarmonicos con BIC. Misma muestra de 1000 binarias
-(semilla 2026).
+regla hibrida de subarmonicos con BIC. Misma muestra de binarias (semilla
+2026; 1000 hasta el 08/10/2026, 3000 desde el 09/10/2026, con las 1000
+originales como prefijo). El techo usa los multiplos x1-x10.
 """
 
 import random
@@ -38,8 +39,8 @@ from tqdm import tqdm
 from caracterizacion_entropia import ALIAS_DIURNO_EPS, generar_alias_diurnos
 from refinamiento_rank_product_bic import N_FREQ, N_PROCESOS, P_MAX, P_MIN, TAMANO_BLOQUE
 from refinamiento_subarmonicos_bic import (
-    H0_VALORES, MIN_PUNTOS, N_MAX, N_MUESTRA, OUT_DIR, PHOT_DIR, RANDOM_SEED,
-    acierto, bic_fourier, cargar_catalogo, n_hibrido,
+    H0_VALORES, MIN_PUNTOS, N_MAX, N_TECHO, OUT_DIR, PHOT_DIR, RANDOM_SEED,
+    acierto, bic_fourier, cargar_catalogo, muestra_binarias, n_hibrido,
 )
 
 CACHE_CSV = OUT_DIR / "cache_rank_product_enmascarado_bic.csv"
@@ -142,16 +143,19 @@ def resumen(cache):
     w("")
 
     w(f"{'Metodo base':18s}{'directo':>9}{'siempre x2':>12}"
-      + "".join(f"{f'hib H0={h}':>11}" for h in H0_VALORES) + f"{'oraculo x1-x6':>15}")
+      + "".join(f"{f'hib H0={h}':>11}" for h in H0_VALORES) + f"{'oraculo x1-x6':>15}{f'oraculo x1-x{N_TECHO}':>16}")
     for metodo, nombre in METODOS.items():
         p0 = cache[f"periodo_{metodo}"].to_numpy()
         oraculo = np.zeros(len(cache), dtype=bool)
         for n in range(1, N_MAX + 1):
             oraculo |= acierto(n * p0, P)
+        techo = oraculo.copy()
+        for n in range(N_MAX + 1, N_TECHO + 1):
+            techo |= acierto(n * p0, P)
         celdas = [acierto(p0, P).mean(), acierto(2 * p0, P).mean()]
         celdas += [acierto(n_hibrido(cache, h, f"bic_{metodo}") * p0, P).mean() for h in H0_VALORES]
         w(f"{nombre:18s}{celdas[0]:9.1%}{celdas[1]:12.1%}"
-          + "".join(f"{c:11.1%}" for c in celdas[2:]) + f"{oraculo.mean():15.1%}")
+          + "".join(f"{c:11.1%}" for c in celdas[2:]) + f"{oraculo.mean():15.1%}{techo.mean():16.1%}")
 
     ok = {m: acierto(n_hibrido(cache, 4, f"bic_{m}") * cache[f"periodo_{m}"].to_numpy(), P) for m in METODOS}
     w("")
@@ -186,8 +190,7 @@ def main():
     catalogo = cargar_catalogo()
     disponibles = sorted(p.stem for p in PHOT_DIR.glob("*.dat"))
     disponibles = [i for i in disponibles if i in catalogo.index]
-    random.seed(RANDOM_SEED)
-    muestra = random.sample(disponibles, N_MUESTRA)
+    muestra = muestra_binarias(disponibles)
 
     cache = pd.read_csv(CACHE_CSV) if CACHE_CSV.exists() else pd.DataFrame()
     procesados = set(cache["id"]) if not cache.empty else set()

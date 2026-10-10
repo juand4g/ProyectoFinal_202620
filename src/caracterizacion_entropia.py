@@ -310,13 +310,12 @@ def main():
     procesados = set(zip(cache["tipo"], cache["id"]))
     filas_nuevas = []
 
+    from caracterizacion_lomb_scargle import muestra_caracterizacion
+    muestras = muestra_caracterizacion()  # ampliada a 1500 por tipo el 09/10/2026
+
     for tipo, cfg in TIPOS.items():
         periodos_catalogo = cargar_catalogo(cfg["catalogo"], cfg["col_periodo"])
-        archivos = sorted(cfg["carpeta"].glob("*.dat"))
-        ids_disponibles = [f.stem for f in archivos if f.stem in periodos_catalogo.index]
-
-        n = min(cfg["n_muestra"], len(ids_disponibles))
-        muestra = random.sample(ids_disponibles, n)
+        muestra = muestras[tipo]
 
         for id_estrella in tqdm(muestra, desc=tipo, unit="estrella"):
             if (tipo, id_estrella) in procesados:

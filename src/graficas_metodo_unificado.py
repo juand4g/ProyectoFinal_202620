@@ -4,7 +4,7 @@ x2/BIC) para la tesis. Solo lee caches; no recalcula periodogramas.
 
 Figuras (en Robustez_Sinteticas/graficas/ y copiadas a Tesis/img/):
   1. unificado_skew_distribucion.png: distribucion acumulada de la skewness
-     corregida por grupo, en OGLE (2000 curvas) y en TESS (240 curvas), con el
+     corregida por grupo, en OGLE (6000 curvas) y en TESS (720 curvas), con el
      umbral de decision.
   2. unificado_sinteticas.png: acierto final vs. SNR en curvas sinteticas,
      para cada decision de rama (x2+BIC en la rama de binarias), con todos los

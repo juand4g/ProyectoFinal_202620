@@ -52,8 +52,9 @@ INTENTOS_CSV = OUT_DIR / "intentos_descarga.csv"
 CACHE_CSV = OUT_DIR / "cache_tess.csv"
 RESUMEN_TXT = OUT_DIR / "resumen_tess.txt"
 
-N_POR_GRUPO = {"Binaria separada": 40, "Binaria intermedia": 40, "Binaria contacto/ELL": 40,
-               "Cefeida": 60, "RR Lyrae": 60}
+# Ampliada el 09/10/2026 (antes 40/40/40/60/60); las curvas originales se conservan
+N_POR_GRUPO = {"Binaria separada": 120, "Binaria intermedia": 120, "Binaria contacto/ELL": 120,
+               "Cefeida": 180, "RR Lyrae": 180}
 CORTES_MORFOLOGIA = [(0.0, 0.4, "Binaria separada"), (0.4, 0.7, "Binaria intermedia"),
                      (0.7, 1.01, "Binaria contacto/ELL")]
 CANDIDATOS_POR_GRUPO = 4  # se piden 4x candidatos: no todos tienen datos de TESS
@@ -72,9 +73,14 @@ warnings.filterwarnings("ignore")
 
 
 # ------------------------------------------------------------------ muestra
-def consultar_catalogos():
+def consultar_catalogos(rng=None, excluir=(), objetivo=None):
+    """Candidatos por grupo. `objetivo` = candidatos a extraer por grupo
+    (por defecto CANDIDATOS_POR_GRUPO x N_POR_GRUPO); `excluir` = nombres ya
+    presentes, para ampliar la lista sin repetir."""
     from astroquery.vizier import Vizier
-    rng = random.Random(RANDOM_SEED)
+    rng = rng or random.Random(RANDOM_SEED)
+    objetivo = objetivo or {g: n * CANDIDATOS_POR_GRUPO for g, n in N_POR_GRUPO.items()}
+    excluir = set(excluir)
     filas = []
 
     v = Vizier(columns=["TIC", "RAJ2000", "DEJ2000", "Tmag", "Per", "Morph"], row_limit=-1)
@@ -82,7 +88,8 @@ def consultar_catalogos():
     ebs = ebs.dropna(subset=["Morph", "Per"])
     for lo, hi, grupo in CORTES_MORFOLOGIA:
         g = ebs[(ebs["Morph"] >= lo) & (ebs["Morph"] < hi)]
-        idx = rng.sample(list(g.index), min(len(g), N_POR_GRUPO[grupo] * CANDIDATOS_POR_GRUPO))
+        g = g[~g["TIC"].map(lambda x: f"TIC {int(x)}").isin(excluir)]
+        idx = rng.sample(list(g.index), min(len(g), objetivo[grupo]))
         for _, r in g.loc[idx].iterrows():
             filas.append({"grupo": grupo, "clase": "Binaria", "subtipo": f"morph={r['Morph']:.2f}",
                           "nombre": f"TIC {int(r['TIC'])}", "ra": r["RAJ2000"], "dec": r["DEJ2000"],
@@ -96,7 +103,8 @@ def consultar_catalogos():
                   for tp in tipos]
         g = pd.concat(tablas, ignore_index=True)
         g = g[g["n_max"].astype(str).str.strip() == "V"].dropna(subset=["Period"])
-        idx = rng.sample(list(g.index), min(len(g), N_POR_GRUPO[clase] * CANDIDATOS_POR_GRUPO))
+        g = g[~g["Name"].astype(str).str.strip().isin(excluir)]
+        idx = rng.sample(list(g.index), min(len(g), objetivo[clase]))
         for _, r in g.loc[idx].iterrows():
             filas.append({"grupo": clase, "clase": clase, "subtipo": str(r["Type"]).strip(),
                           "nombre": str(r["Name"]).strip(), "ra": r["RAJ2000"], "dec": r["DEJ2000"],
@@ -169,6 +177,16 @@ def construir_muestra():
     ruta_candidatos = OUT_DIR / "candidatos_tess.csv"
     if ruta_candidatos.exists():
         candidatos = pd.read_csv(ruta_candidatos)
+        faltan = {g: n * CANDIDATOS_POR_GRUPO - int((candidatos["grupo"] == g).sum())
+                  for g, n in N_POR_GRUPO.items()}
+        if any(v > 0 for v in faltan.values()):
+            # ampliacion: candidatos nuevos al final de la lista, con otra semilla,
+            # para que la muestra original siga siendo el prefijo de cada grupo
+            nuevos = consultar_catalogos(random.Random(RANDOM_SEED + 1), set(candidatos["nombre"]),
+                                         {g: max(v, 0) for g, v in faltan.items()})
+            candidatos = pd.concat([candidatos, nuevos], ignore_index=True)
+            candidatos.to_csv(ruta_candidatos, index=False)
+            log("Candidatos tras la ampliacion: " + str(candidatos.groupby("grupo").size().to_dict()))
     else:
         candidatos = consultar_catalogos()
         candidatos.to_csv(ruta_candidatos, index=False)

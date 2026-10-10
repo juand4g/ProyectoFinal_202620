@@ -32,6 +32,11 @@ Curvas sinteticas:
     periodo, misma cadencia, misma fase): comparaciones pareadas.
 
 Cache append-safe en Robustez_Sinteticas/cache_sinteticas.csv.
+
+Ampliacion del 09/10/2026: de 240 a 720 plantillas. Las 240 originales se
+conservan (plantillas.csv no se reescribe) y las nuevas se eligen con los
+mismos criterios entre estrellas que no estan en las muestras OGLE
+ampliadas ni son ya plantilla o cadencia (barajado con semilla 2027).
 """
 
 import random
@@ -50,11 +55,14 @@ from tqdm import tqdm
 from decision_binaria_pulsante import (
     CACHE_CSV as CACHE_DECISION, INDICADORES, indicadores_forma,
 )
-from etapa1_cefeidas_rrlyrae import CACHE_CSV as CACHE_PULSANTES, TIPOS, cargar_catalogo as catalogo_pulsantes
+from etapa1_cefeidas_rrlyrae import (
+    CACHE_CSV as CACHE_PULSANTES, OUT_DIR as ETAPA1_DIR, TIPOS, cargar_catalogo as catalogo_pulsantes,
+)
 from refinamiento_rank_product_bic import N_PROCESOS
 from refinamiento_rank_product_enmascarado_bic import CACHE_CSV as CACHE_HIBRIDO, periodos_base
 from refinamiento_subarmonicos_bic import (
-    N_MAX, PHOT_DIR, RANDOM_SEED, acierto, bic_fourier, cargar_catalogo as catalogo_binarias, n_hibrido,
+    MUESTRA_CSV as MUESTRA_BINARIAS, N_MAX, PHOT_DIR, RANDOM_SEED, acierto, bic_fourier,
+    cargar_catalogo as catalogo_binarias, n_hibrido,
 )
 from selector_multiplo_binarias import (
     CACHE_INDICADORES, construir_tabla, indicadores_curva, modelos,
@@ -67,7 +75,8 @@ CACHE_PLANTILLAS = OUT_DIR / "plantillas.csv"
 CACHE_SKEW_OGLE = OUT_DIR / "cache_skew_ogle.csv"
 RESUMEN_TXT = OUT_DIR / "resumen_sinteticas.txt"
 
-N_PLANTILLAS = {"Binaria": 120, "Cefeida": 60, "RR Lyrae": 60}
+N_PLANTILLAS_BASE = {"Binaria": 120, "Cefeida": 60, "RR Lyrae": 60}  # originales (07/10/2026)
+N_PLANTILLAS = {"Binaria": 360, "Cefeida": 180, "RR Lyrae": 180}  # ampliadas el 09/10/2026
 SNRS = [50, 15, 8, 4]
 N_OBJETIVO = [0, 100]  # 0 = todos los puntos de la cadencia
 MIN_PUNTOS_PLANTILLA = 400
@@ -112,6 +121,9 @@ def evaluar_plantilla(c, v, fase):
 def candidatos_por_clase():
     """(ruta, P_cat, subtipo) de estrellas fuera de toda muestra de entrenamiento."""
     usados = set(pd.read_csv(CACHE_HIBRIDO)["id"]) | set(pd.read_csv(CACHE_PULSANTES)["id"])
+    for ruta in [MUESTRA_BINARIAS] + [ETAPA1_DIR / f"muestra_{c.replace(' ', '_')}.csv" for c in TIPOS]:
+        if ruta.exists():  # muestras ampliadas congeladas (09/10/2026)
+            usados |= set(pd.read_csv(ruta)["id"])
     cat_b = catalogo_binarias()
     out = {"Binaria": [(PHOT_DIR / f"{i}.dat", float(cat_b.at[i, "P"]), cat_b.at[i, "Type"])
                        for i in sorted(p.stem for p in PHOT_DIR.glob("*.dat"))
@@ -126,23 +138,47 @@ def candidatos_por_clase():
 
 def elegir_plantillas():
     if CACHE_PLANTILLAS.exists():
-        return pd.read_csv(CACHE_PLANTILLAS)
+        previas = pd.read_csv(CACHE_PLANTILLAS)
+        if all((previas["clase"] == c).sum() >= n for c, n in N_PLANTILLAS.items()):
+            return previas
+        return ampliar_plantillas(previas)
+    return seleccionar_plantillas(candidatos_por_clase(), N_PLANTILLAS_BASE, random.Random(RANDOM_SEED),
+                                  np.random.default_rng(RANDOM_SEED), 0)
+
+
+def ampliar_plantillas(previas):
+    ocupadas = {Path(r).stem for r in pd.concat([previas["plantilla"], previas["cadencia"]])}
+    candidatos = {c: [x for x in lista if x[0].stem not in ocupadas]
+                  for c, lista in candidatos_por_clase().items()}
+    faltan = {c: N_PLANTILLAS[c] - int((previas["clase"] == c).sum()) for c in N_PLANTILLAS}
+    nuevas = seleccionar_plantillas(candidatos, faltan, random.Random(RANDOM_SEED + 1),
+                                    np.random.default_rng(RANDOM_SEED + 1), int(previas["id_plantilla"].max()) + 1)
+    df = pd.concat([previas, nuevas], ignore_index=True)
+    df.to_csv(CACHE_PLANTILLAS, index=False)
+    return df
+
+
+def seleccionar_plantillas(candidatos_clase, cuantas, rng_baraja, rng, primer_id):
     filas = []
-    for clase, candidatos in candidatos_por_clase().items():
-        random.seed(RANDOM_SEED)
-        random.shuffle(candidatos)
+    for clase, candidatos in candidatos_clase.items():
+        if primer_id == 0:  # seleccion original: misma secuencia que antes de la ampliacion
+            random.seed(RANDOM_SEED)
+            random.shuffle(candidatos)
+        else:
+            rng_baraja.shuffle(candidatos)
+        N_PLANTILLAS_CLASE = cuantas[clase]
         elegidas = []
         cadencias = []
         for ruta, periodo, subtipo in tqdm(candidatos, desc=f"Plantillas {clase}", unit="estrella"):
-            if len(elegidas) >= N_PLANTILLAS[clase] and len(cadencias) >= N_PLANTILLAS[clase]:
+            if len(elegidas) >= N_PLANTILLAS_CLASE and len(cadencias) >= N_PLANTILLAS_CLASE:
                 break
             try:
                 t, mag, err = leer(ruta)
             except (ValueError, OSError):
                 continue
-            if t.size >= MIN_PUNTOS_CADENCIA and len(cadencias) < N_PLANTILLAS[clase]:
+            if t.size >= MIN_PUNTOS_CADENCIA and len(cadencias) < N_PLANTILLAS_CLASE:
                 cadencias.append(str(ruta))
-            if (len(elegidas) >= N_PLANTILLAS[clase] or t.size < MIN_PUNTOS_PLANTILLA
+            if (len(elegidas) >= N_PLANTILLAS_CLASE or t.size < MIN_PUNTOS_PLANTILLA
                     or periodo > P_MAX_PLANTILLA or (clase == "Cefeida" and subtipo not in {"F", "1", "2"})):
                 continue
             pl = plantilla(t, mag, periodo)
@@ -164,12 +200,12 @@ def elegir_plantillas():
             fila["cadencia"] = cadencias[j % len(cadencias)]
         filas += elegidas
     df = pd.DataFrame(filas)
-    rng = np.random.default_rng(RANDOM_SEED)
     df["periodo_verdadero"] = df["periodo_plantilla"] * rng.uniform(0.85, 1.15, len(df))
     df["fase0"] = rng.uniform(0, 1, len(df))
-    df["id_plantilla"] = np.arange(len(df))
-    OUT_DIR.mkdir(exist_ok=True)
-    df.to_csv(CACHE_PLANTILLAS, index=False)
+    df["id_plantilla"] = primer_id + np.arange(len(df))
+    if primer_id == 0:
+        OUT_DIR.mkdir(exist_ok=True)
+        df.to_csv(CACHE_PLANTILLAS, index=False)
     return df
 
 
@@ -242,17 +278,20 @@ def entrenar_logistica():
 
 
 def skew_ogle():
-    """Skewness cruda y corregida de las 2000 curvas OGLE (referencia)."""
-    if CACHE_SKEW_OGLE.exists():
-        return pd.read_csv(CACHE_SKEW_OGLE)
+    """Skewness cruda y corregida de las curvas OGLE de la decision de rama
+    (referencia). Incremental: solo calcula las estrellas que faltan."""
+    previas = pd.read_csv(CACHE_SKEW_OGLE) if CACHE_SKEW_OGLE.exists() else pd.DataFrame(columns=["id"])
     d = pd.read_csv(CACHE_DECISION)
+    d = d[~d["id"].isin(set(previas["id"]))]
+    if d.empty:
+        return previas
     carpetas = {"Binaria": PHOT_DIR} | {c: carpeta for c, (carpeta, _) in TIPOS.items()}
     filas = []
     for _, r in tqdm(d.iterrows(), total=len(d), desc="Skew OGLE", unit="estrella"):
         t, mag, err = leer(carpetas[r["clase"]] / f"{r['id']}.dat")
         filas.append({"id": r["id"], "clase": r["clase"], "skew_mag": float(skew(mag)),
                       "skew_corregida": skew_corregida(mag, err)})
-    out = pd.DataFrame(filas)
+    out = pd.concat([previas, pd.DataFrame(filas)], ignore_index=True)
     out.to_csv(CACHE_SKEW_OGLE, index=False)
     return out
 
@@ -361,7 +400,7 @@ def resumen(cache):
 
     og = skew_ogle()
     b = (og["clase"] == "Binaria").to_numpy()
-    w("5. Referencia OGLE: la regla de skewness sobre las 2000 curvas reales")
+    w(f"5. Referencia OGLE: la regla de skewness sobre las {len(og)} curvas reales")
     for col in ["skew_mag", "skew_corregida"]:
         r = og[col].fillna(-np.inf).to_numpy() > UMBRAL_SKEW
         w(f"  {col:15s} > {UMBRAL_SKEW}: pulsantes -> rama binaria {np.mean(r[~b]):5.1%}, "
@@ -383,10 +422,14 @@ def main():
 
     filas = []
     with ProcessPoolExecutor(max_workers=N_PROCESOS) as pool:
-        futuros = [pool.submit(analizar, s) for s in pendientes]
+        futuros = {pool.submit(analizar, s): s["id"] for s in pendientes}
         for k, futuro in enumerate(tqdm(as_completed(futuros), total=len(futuros),
                                         desc="Sinteticas", unit="curva")):
-            filas.append(futuro.result())
+            try:
+                filas.append(futuro.result())
+            except Exception as e:  # una curva defectuosa no debe detener la corrida
+                print(f"ERROR en {futuros[futuro]}: {type(e).__name__}: {e}", flush=True)
+                continue
             if (k + 1) % 50 == 0:
                 cache = pd.concat([cache, pd.DataFrame(filas)], ignore_index=True)
                 cache.to_csv(CACHE_CSV, index=False)

@@ -2,8 +2,8 @@
 Tabla adicional (aparte de las tablas principales de caracterizacion) que,
 solo para las binarias eclipsantes, descompone el porcentaje de aciertos de
 forma ACUMULATIVA a medida que se aceptan ordenes de alias cada vez mas
-altos: 1x unicamente, luego 1x-2x, luego 1x-2x-3x, y asi hasta 1x-6x (el
-mismo rango de multiplos ahora graficado en los diagramas de frecuencia
+altos: 1x unicamente, luego 1x-2x, luego 1x-2x-3x, y asi hasta 1x-10x (mas alla
+del x6 graficado en los diagramas de frecuencia
 recuperada vs. catalogada). Se calcula para Lomb-Scargle y para minima
 entropia.
 
@@ -23,7 +23,7 @@ CACHE_ENTROPIA = BASE_DIR / "Entropia" / "cache_resultados_entropia.csv"
 OUT_CSV = BASE_DIR / "Combinacion_LS_Entropia" / "tabla_aciertos_binarias_por_alias.csv"
 
 UMBRAL = 0.01  # mismo umbral del 1% usado en las tablas principales de caracterizacion
-ORDEN_MAX = 6
+ORDEN_MAX = 10  # hasta x6 hasta el 08/10/2026; x10 por recomendacion del director
 
 
 def tasa_acumulada_por_alias(periodo_bruto, periodo_catalogo, orden_max=ORDEN_MAX, umbral=UMBRAL):
