@@ -288,34 +288,34 @@ Desarrollar y validar un m\'etodo para la determinaci\'on robusta de periodos en
 \chapter{Descripci\'on de los datos}
 \label{ch:datos}
 
-Para dise\~nar, entrenar el criterio de decisi\'on y validar el m\'etodo combinado propuesto en este trabajo se emplear\'an dos categor\'ias de datos. La primera son curvas de luz sint\'eticas, generadas con control total sobre la morfolog\'ia de la se\~nal, el nivel de ruido y la cadencia de muestreo. La segunda son curvas de luz reales, provenientes de los cartografiados OGLE, VVV/VVVX y TESS, cuyos periodos catalogados sirven como referencia (\emph{ground truth}) independiente. Este cap\'itulo describe ambas fuentes de datos.
+Para dise\~nar el m\'etodo combinado, fijar su criterio de decisi\'on y validarlo se emplearon dos categor\'ias de datos. La primera son curvas de luz sint\'eticas, con periodo conocido por construcci\'on y con control sobre el nivel de ruido y el n\'umero de puntos. La segunda son curvas de luz reales de los cartografiados OGLE y TESS, cuyos periodos catalogados sirven como referencia externa (\emph{ground truth}), aunque provienen a su vez de otros m\'etodos de determinaci\'on de periodicidad y no constituyen una verdad absoluta. Este cap\'itulo describe ambas fuentes de datos y, adem\'as, el cartografiado VVV/VVVX, planteado en la propuesta de este trabajo como tercer r\'egimen de muestreo y cuya aplicaci\'on queda pendiente, como se discute en la Secci\'on~\ref{sec:validacion-sintesis}.
 
 \section{Curvas de luz sint\'eticas}
 \label{sec:datos-sinteticas}
 
-El uso de curvas de luz sint\'eticas permite evaluar el desempe\~no de un algoritmo de determinaci\'on de periodicidad bajo condiciones completamente controladas, en las que el periodo verdadero es conocido de antemano. Esta estrategia fue empleada originalmente por \citet{cincotta_1995} para validar el m\'etodo de m\'inima entrop\'ia, y ser\'a adoptada aqu\'i con tres grados de libertad principales: la morfolog\'ia f\'isica de la variabilidad, el modelo de ruido, y la cadencia de muestreo temporal.
+El uso de curvas de luz sint\'eticas permite evaluar el desempe\~no de un algoritmo de determinaci\'on de periodicidad bajo condiciones completamente controladas, en las que el periodo verdadero es conocido de antemano. Esta estrategia fue empleada originalmente por \citet{cincotta_1995} para validar el m\'etodo de m\'inima entrop\'ia, y se adopt\'o aqu\'i con tres grados de libertad principales: la morfolog\'ia f\'isica de la variabilidad, el nivel de ruido y el patr\'on de muestreo temporal.
 
 Esta estrategia complementa, en lugar de reemplazar, el uso de datos reales, y resulta indispensable por al menos tres razones. En primer lugar, en los datos reales el periodo verdadero de una estrella no se conoce con certeza absoluta, sino que proviene, a su vez, de la aplicaci\'on de alg\'un otro m\'etodo de determinaci\'on de periodicidad reportado en la literatura; esto introduce una circularidad que las curvas sint\'eticas, con periodo impuesto por construcci\'on, evitan por completo. En segundo lugar, las curvas de luz reales combinan de forma simult\'anea e inseparable la morfolog\'ia de la variabilidad, el nivel de ruido y el patr\'on de muestreo, lo que dificulta atribuir un cambio en el desempe\~no de un m\'etodo a una causa espec\'ifica; las curvas sint\'eticas permiten, en cambio, variar cada uno de estos factores de forma independiente y sistem\'atica. En tercer lugar, las curvas sint\'eticas permiten explorar regiones del espacio de par\'ametros, como niveles de ruido extremos o cadencias de muestreo particularmente escasas, que pueden estar subrepresentadas o ausentes en los cat\'alogos reales disponibles, pero que son relevantes para caracterizar los l\'imites de aplicabilidad del m\'etodo combinado.
 
 \subsection{Morfolog\'ias de variabilidad}
 
-Se generar\'an tres familias de curvas de luz sint\'eticas, representativas de los principales mecanismos f\'isicos de variabilidad estelar discutidos en la Secci\'on~\ref{sec:estado-del-arte}:
+La propuesta de este trabajo plante\'o generar tres familias anal\'iticas de curvas de luz, representativas de los principales mecanismos f\'isicos de variabilidad estelar discutidos en la Secci\'on~\ref{sec:estado-del-arte}:
 
 \begin{itemize}
 	\item \textbf{Oscilaciones sinusoidales}, como aproximaci\'on de primer orden a pulsadores radiales de baja amplitud, representadas por una \'unica componente arm\'onica.
-	\item \textbf{Pulsaciones asim\'etricas}, representativas de Cefeidas y RR Lyrae cl\'asicas, cuyas curvas de luz reales exhiben una rama ascendente breve hacia el m\'aximo de brillo, seguida de una rama descendente m\'as prolongada hacia el m\'inimo, y que se modelar\'an mediante una serie de Fourier truncada con m\'ultiples arm\'onicos y fases relativas no triviales entre ellos \citep{Karttunen2016,Carroll2017}.
+	\item \textbf{Pulsaciones asim\'etricas}, representativas de Cefeidas y RR Lyrae cl\'asicas, cuyas curvas de luz reales exhiben una rama ascendente breve hacia el m\'aximo de brillo, seguida de una rama descendente m\'as prolongada hacia el m\'inimo \citep{Karttunen2016,Carroll2017}.
 	\item \textbf{Eclipses}, representativos de sistemas binarios eclipsantes, caracterizados por m\'inimos de brillo abruptos y de corta duraci\'on relativa al periodo orbital, que fraccionan fuertemente la potencia espectral entre la frecuencia fundamental y sus arm\'onicos al ser analizados mediante t\'ecnicas puramente espectrales.
 \end{itemize}
 
-Esta selecci\'on de morfolog\'ias permite explorar de manera controlada el espacio en el que se espera que las fortalezas y debilidades de Lomb--Scargle y de la entrop\'ia m\'inima sean m\'as distinguibles. Se anticipa que ambos m\'etodos se desempe\~nen de forma similar sobre la morfolog\'ia sinusoidal, mientras que las morfolog\'ias asim\'etrica y de eclipses deber\'ian favorecer progresivamente al m\'etodo de entrop\'ia.
+En la pr\'actica, en lugar de modelos anal\'iticos se emplearon plantillas emp\'iricas: la forma de cada curva sint\'etica se tom\'o de la curva plegada de una estrella de OGLE bien muestreada, de una de tres clases, binarias eclipsantes, Cefeidas cl\'asicas y RR Lyrae. Estas plantillas cubren las morfolog\'ias de eclipses y de pulsaciones asim\'etricas con la variedad real de formas de cada clase, sin necesidad de un modelo f\'isico para cada tipo, e incluyen curvas casi sinusoidales, como las de las Cefeidas de primer sobretono. Su construcci\'on se describe en la Secci\'on~\ref{sec:validacion-sinteticas}. Antes de obtener los resultados se esperaba que ambos m\'etodos se desempe\~naran de forma similar sobre las curvas casi sinusoidales y que las morfolog\'ias asim\'etricas y de eclipses favorecieran progresivamente al m\'etodo de entrop\'ia; como se muestra en el Cap\'itulo~\ref{ch:resultados}, esta expectativa no se cumpli\'o.
 
 \subsection{Modelo de ruido}
 
-Adem\'as del ruido blanco gaussiano, que aproxima el ruido fotom\'etrico y de conteo de fotones, se incorporar\'a ruido correlacionado (``ruido rojo'', o ruido con espectro de potencias tipo ley de potencia). Para esto se usar\'a el algoritmo de \citet{timmer_1995}, que genera series de tiempo estoc\'asticas con un espectro de potencias prescrito, aleatorizando tanto la fase como la amplitud de la transformada de Fourier de la se\~nal. \citet{gurpide_2025} se\~nalan que la variabilidad aperi\'odica de tipo ruido rojo es f\'acilmente confundible con una se\~nal peri\'odica genuina cuando se emplean periodogramas cl\'asicos. Por esta raz\'on, su inclusi\'on constituye una prueba de robustez exigente para cualquier m\'etodo de determinaci\'on de periodicidad.
+A cada curva sint\'etica se le a\~nadi\'o ruido blanco gaussiano, que aproxima el ruido fotom\'etrico y de conteo de fotones, con cuatro niveles de relaci\'on se\~nal a ruido. La propuesta contemplaba adem\'as ruido correlacionado (``ruido rojo'', o ruido con espectro de potencias tipo ley de potencia), generado con el algoritmo de \citet{timmer_1995}, que produce series de tiempo estoc\'asticas con un espectro de potencias prescrito aleatorizando tanto la fase como la amplitud de su transformada de Fourier. \citet{gurpide_2025} se\~nalan que la variabilidad aperi\'odica de tipo ruido rojo es f\'acilmente confundible con una se\~nal peri\'odica genuina cuando se emplean periodogramas cl\'asicos, por lo que su inclusi\'on constituye una prueba de robustez exigente para cualquier m\'etodo de determinaci\'on de periodicidad. Esta prueba no se realiz\'o y queda como trabajo pendiente.
 
 \subsection{Cadencia y muestreo temporal}
 
-Finalmente, cada combinaci\'on de morfolog\'ia y nivel de ruido se muestrear\'a bajo distintos esquemas temporales: muestreo regular denso, como referencia; y muestreo irregular con brechas, dise\~nado para emular las ventanas de visibilidad estacional y las interrupciones diarias t\'ipicas de los cartografiados terrestres descritos en la Secci\'on~\ref{sec:datos-reales}. Este \'ultimo esquema es central para poner a prueba el comportamiento de ambos m\'etodos frente al aliasing, cuya relaci\'on con la frecuencia de Nyquist bajo muestreo irregular se discute con mayor detalle en la Secci\'on~\ref{sec:nyquist} del Cap\'itulo~\ref{ch:metodologia}. La implementaci\'on finalmente adoptada, basada en plantillas emp\'iricas construidas a partir de curvas de OGLE, se describe en la Secci\'on~\ref{sec:validacion-sinteticas}, junto con sus diferencias respecto de lo planteado aqu\'i.
+La propuesta planteaba muestrear cada curva bajo un esquema regular y denso, como referencia, y bajo un esquema irregular con brechas que emulara las ventanas de visibilidad estacional y las interrupciones diarias t\'ipicas de los cartografiados terrestres descritos en la Secci\'on~\ref{sec:datos-reales}. Este \'ultimo esquema es central para poner a prueba el comportamiento de ambos m\'etodos frente al aliasing, cuya relaci\'on con la frecuencia de Nyquist bajo muestreo irregular se discute en la Secci\'on~\ref{sec:nyquist}. En la implementaci\'on adoptada, cada curva sint\'etica toma los instantes de observaci\'on de una estrella real de OGLE, de modo que conserva un patr\'on de muestreo irregular realista, con todos sus puntos o con una submuestra aleatoria de 100. El muestreo regular y denso no se simul\'o, pues ese r\'egimen se evalu\'o directamente con las curvas reales de TESS (Secci\'on~\ref{sec:validacion-tess}). Los detalles de la implementaci\'on se describen en la Secci\'on~\ref{sec:validacion-sinteticas}.
 
 \section{Curvas de luz reales}
 \label{sec:datos-reales}
@@ -434,7 +434,7 @@ La Tabla~\ref{tab:comparacion-datos} resume las caracter\'isticas m\'as relevant
 \chapter{Metodolog\'ia}
 \label{ch:metodologia}
 
-Este cap\'itulo describe el marco te\'orico de los dos m\'etodos individuales que se combinar\'an, el problema del aliasing bajo muestreo irregular, el dise\~no propuesto para el m\'etodo combinado, y el esquema de validaci\'on que se emplear\'a tanto sobre datos sint\'eticos como sobre datos reales.
+Este cap\'itulo describe el marco te\'orico de los dos m\'etodos individuales que se combinaron, el problema del aliasing bajo muestreo irregular, el planteamiento general del m\'etodo combinado y el esquema de validaci\'on empleado sobre datos sint\'eticos y reales.
 
 \section{Periodograma de Lomb--Scargle}
 \label{sec:metodologia-ls}
@@ -459,7 +459,7 @@ En esta, $\bar u$ es la magnitud media de la serie, y el desfase $\tau$ se calcu
 
 La elecci\'on de $\tau$ hace que la Ecuaci\'on~\eqref{eq:lomb-scargle} sea invariante ante traslaciones temporales y equivalente, en el caso de muestreo uniforme, al periodograma cl\'asico basado en la transformada discreta de Fourier. F\'isicamente, $P_{LS}(\omega)$ puede interpretarse como una medida de cu\'anta varianza de los datos queda explicada por una onda sinusoidal de frecuencia $\omega$: mientras m\'as se parezca la se\~nal a esa sinusoide, mayor ser\'a la potencia asignada a esa frecuencia. El periodo candidato corresponde, por tanto, a la frecuencia que maximiza $P_{LS}(\omega)$. Esta formulaci\'on es computacionalmente eficiente, pues admite una evaluaci\'on vectorizada sobre toda una grilla de frecuencias de prueba en una \'unica pasada, y cuenta con una teor\'ia estad\'istica bien establecida para evaluar la significancia de los picos resultantes. Su principal limitaci\'on, como se discuti\'o en la Secci\'on~\ref{sec:estado-del-arte}, es que al concentrarse en una \'unica componente arm\'onica, fracciona su sensibilidad ante se\~nales fuertemente no sinusoidales.
 
-La implementaci\'on computacional de este m\'etodo se realizar\'a mediante el m\'odulo \texttt{astropy.\allowbreak timeseries.\allowbreak LombScargle} \citep{astropy}, que provee una evaluaci\'on vectorizada y de acceso libre de la Ecuaci\'on~\eqref{eq:lomb-scargle} sobre arreglos completos de frecuencias de prueba.
+La implementaci\'on computacional de este m\'etodo se realiz\'o mediante el m\'odulo \texttt{astropy.\allowbreak timeseries.\allowbreak LombScargle} \citep{astropy}, que provee una evaluaci\'on vectorizada y de acceso libre de la Ecuaci\'on~\eqref{eq:lomb-scargle} sobre arreglos completos de frecuencias de prueba.
 
 \section{M\'etodo de m\'inima entrop\'ia}
 \label{sec:metodologia-entropia}
@@ -482,7 +482,7 @@ En esta, $t_0$ es un instante de referencia arbitrario y $\lfloor \cdot \rfloor$
 
 F\'isicamente, cuando $P$ coincide con el periodo real de la se\~nal, los puntos plegados en fase se agrupan de forma ordenada a lo largo de la curva de luz caracter\'istica, concentrando la probabilidad de ocupaci\'on en relativamente pocas celdas y produciendo un valor bajo de $S(P)$. Para periodos incorrectos, en cambio, los puntos se distribuyen de manera aproximadamente uniforme sobre el cuadrado unitario, maximizando la entrop\'ia. El periodo candidato corresponde, por tanto, al m\'inimo global de $S(P)$ sobre la grilla de periodos de prueba. A diferencia del periodograma de Lomb--Scargle, este criterio no asume ninguna forma funcional para la variabilidad. Por ello es sensible por igual a pulsaciones sinusoidales, pulsaciones asim\'etricas y eclipses, aunque a un mayor costo computacional por evaluaci\'on, asociado al c\'alculo de la grilla de ocupaci\'on para cada periodo de prueba.
 
-La implementaci\'on computacional de este m\'etodo se realizar\'a mediante la librer\'ia \texttt{entropypf}, desarrollada previamente por el autor de este trabajo, la cual provee una implementaci\'on vectorizada del c\'alculo de la Ecuaci\'on~\eqref{eq:entropia} sobre arreglos completos de periodos de prueba, as\'i como rutinas para la remoci\'on de aliases conocidos y la selecci\'on de m\'ultiples candidatos locales de m\'inima entrop\'ia.
+La implementaci\'on computacional de este m\'etodo se realiz\'o mediante la librer\'ia \texttt{entropypf}, desarrollada previamente por el autor de este trabajo, la cual provee una implementaci\'on vectorizada del c\'alculo de la Ecuaci\'on~\eqref{eq:entropia} sobre arreglos completos de periodos de prueba, as\'i como rutinas para la remoci\'on de aliases conocidos y la selecci\'on de m\'ultiples candidatos locales de m\'inima entrop\'ia.
 
 \section{Aliasing y la frecuencia de Nyquist bajo muestreo irregular}
 \label{sec:nyquist}
@@ -499,29 +499,29 @@ El m\'etodo combinado propuesto en este trabajo integra el periodograma de Lomb-
 	\item \textbf{Entrop\'ia de Shannon.} Sobre la misma grilla de periodos de prueba, expresada en frecuencia, se calcula de forma simult\'anea e independiente la entrop\'ia $S(P)$ del diagrama de fase, seg\'un la Ecuaci\'on~\eqref{eq:entropia}.
 \end{itemize}
 
-Ambos criterios se calculan, por tanto, sobre el mismo dominio y de manera concurrente. El periodo final candidato se obtiene combin\'andolos en una \'unica m\'etrica conjunta que privilegie los periodos con alta potencia espectral y baja entrop\'ia de forma simult\'anea. La forma exacta de esta m\'etrica conjunta, as\'i como el peso relativo asignado a cada criterio, constituyen los principales hiperpar\'ametros del m\'etodo, cuyo efecto sobre el desempe\~no se explorar\'a sistem\'aticamente durante la etapa de validaci\'on descrita en la Secci\'on~\ref{sec:validacion}. La forma concreta adoptada para las binarias eclipsantes, un producto de rangos sin pesos libres, se describe en el Cap\'itulo~\ref{ch:metodo-hibrido}.
+Ambos criterios se calculan, por tanto, sobre el mismo dominio y de manera concurrente. El periodo candidato se obtiene combin\'andolos en una \'unica m\'etrica conjunta que privilegia los periodos con alta potencia espectral y baja entrop\'ia de forma simult\'anea. Como las escalas de ambos criterios no son comparables, para no introducir un peso relativo arbitrario entre ellos se adopt\'o un producto de rangos sin par\'ametros libres, y la entrop\'ia de Shannon se reemplaz\'o por su versi\'on condicional, que corrige en el c\'alculo mismo los m\'inimos esp\'ureos asociados a la cadencia; ambos elementos se describen en el Cap\'itulo~\ref{ch:metodo-hibrido}. A esta b\'usqueda global se a\~nadieron despu\'es una correcci\'on por subarm\'onicos propia de las binarias eclipsantes (Cap\'itulo~\ref{ch:metodo-hibrido}) y una regla que decide, a partir de la fotometr\'ia, cu\'ando aplicarla (Cap\'itulo~\ref{ch:metodo-unificado}).
 
 \section{Esquema de validaci\'on}
 \label{sec:validacion}
 
-La validaci\'on del m\'etodo combinado se realizar\'a en dos etapas, siguiendo la estructura de datos descrita en el Cap\'itulo~\ref{ch:datos}.
+La validaci\'on del m\'etodo combinado se realiz\'o en dos etapas, siguiendo la estructura de datos descrita en el Cap\'itulo~\ref{ch:datos}.
 
 \subsection{Validaci\'on con curvas de luz sint\'eticas}
 
-Sobre el conjunto de curvas de luz sint\'eticas descrito en la Secci\'on~\ref{sec:datos-sinteticas} se aplicar\'an, de forma independiente, el periodograma de Lomb--Scargle, el m\'etodo de m\'inima entrop\'ia y el m\'etodo combinado, para cada combinaci\'on de morfolog\'ia, nivel de ruido y esquema de muestreo. El periodo verdadero es conocido por construcci\'on en este conjunto de datos, por lo que el desempe\~no de cada m\'etodo se cuantificar\'a mediante:
+Sobre el conjunto de curvas de luz sint\'eticas descrito en la Secci\'on~\ref{sec:datos-sinteticas} se aplicaron, de forma independiente, el periodograma de Lomb--Scargle, el m\'etodo de m\'inima entrop\'ia, en su versi\'on convencional y en la condicional, y el m\'etodo combinado, para cada clase de variabilidad, nivel de ruido y n\'umero de puntos. Como el periodo verdadero es conocido por construcci\'on, el desempe\~no de cada m\'etodo se cuantific\'o mediante:
 
 \begin{itemize}
-	\item la fracci\'on de curvas de luz para las cuales el periodo recuperado coincide con el periodo verdadero dentro de una tolerancia relativa preestablecida;
-	\item la distribuci\'on del error relativo del periodo recuperado, para los casos en que la recuperaci\'on es exitosa;
-	\item la incidencia de aliases y arm\'onicos err\'oneos entre los periodos recuperados incorrectamente; y
-	\item el tiempo de c\'omputo requerido por cada m\'etodo.
+	\item la tasa de aciertos, es decir, la fracci\'on de curvas de luz cuyo periodo recuperado coincide con el verdadero dentro de una tolerancia relativa del 1\%;
+	\item la incidencia de alias y arm\'onicos, en particular las convergencias a la mitad o al doble del periodo verdadero;
+	\item la fracci\'on de curvas enviadas a la rama equivocada por la regla de decisi\'on del m\'etodo unificado; y
+	\item la ca\'ida de la tasa de aciertos entre el nivel de ruido m\'as bajo y el m\'as alto.
 \end{itemize}
 
-Esta comparaci\'on permitir\'a caracterizar de forma controlada en qu\'e condiciones de morfolog\'ia, ruido y muestreo el m\'etodo combinado ofrece una ventaja medible frente a cada m\'etodo individual, y en cu\'ales su desempe\~no es equivalente o inferior.
+Esta comparaci\'on permiti\'o caracterizar en qu\'e condiciones de ruido y muestreo el m\'etodo combinado ofrece una ventaja medible frente a cada m\'etodo individual, y en cu\'ales su desempe\~no es equivalente o inferior (Secci\'on~\ref{sec:validacion-sinteticas}).
 
 \subsection{Aplicaci\'on y validaci\'on sobre datos reales}
 
-Posteriormente, el m\'etodo combinado se aplicar\'a a muestras de curvas de luz reales, extra\'idas de los cat\'alogos de OGLE, VVV/VVVX y TESS descritos en la Secci\'on~\ref{sec:datos-reales}. Sus periodos catalogados en la literatura servir\'an como referencia externa. Los periodos obtenidos mediante el m\'etodo combinado se contrastar\'an contra dichos valores de referencia, y contra los resultados de aplicar Lomb--Scargle y m\'inima entrop\'ia de forma individual sobre las mismas curvas de luz. Esto permitir\'a evaluar tanto la precisi\'on del m\'etodo propuesto como su facilidad de aplicaci\'on generalizada sobre datos observacionales reales, con sus imperfecciones caracter\'isticas de muestreo irregular, ruido correlacionado y brechas observacionales.
+Posteriormente, el m\'etodo combinado se aplic\'o a muestras de curvas de luz reales de OGLE (Cap\'itulos~\ref{ch:metodo-hibrido} y~\ref{ch:metodo-unificado}) y de TESS (Secci\'on~\ref{sec:validacion-tess}). Sus periodos catalogados en la literatura sirvieron como referencia externa, y los periodos obtenidos se contrastaron contra ellos y contra los resultados de aplicar Lomb--Scargle y m\'inima entrop\'ia de forma individual sobre las mismas curvas de luz. Esto permiti\'o evaluar tanto la precisi\'on del m\'etodo propuesto como su aplicabilidad sobre datos observacionales reales, con sus imperfecciones caracter\'isticas de muestreo irregular, ruido y brechas observacionales. La aplicaci\'on a VVV/VVVX planteada en la propuesta queda pendiente (Secci\'on~\ref{sec:validacion-sintesis}).
 
 
 \chapter{Resultados de la caracterizaci\'on individual}
@@ -1184,6 +1184,29 @@ Entre las reglas que no usan el tipo verdadero, el m\'etodo unificado obtiene la
 
 La prueba revela, adem\'as, una fragilidad de la primera etapa en el r\'egimen m\'as desfavorable. Con $N=100$ y $\mathrm{SNR}=4$, el producto de rangos recupera el periodo del 85.6\% de las Cefeidas y del 71.7\% de las RR Lyrae, frente a 93.9\% y 83.9\% de Lomb--Scargle; en las dem\'as configuraciones, ambos aciertan en al menos el 96.7\% de las pulsantes. Una explicaci\'on plausible es el llenado de la grilla de la entrop\'ia: con 100 puntos repartidos en $L\times K=70$ celdas, cada celda contiene en promedio unos 1.4 puntos, y la entrop\'ia condicional responde a fluctuaciones de conteo m\'as que al orden de la curva, el mismo mecanismo que limit\'o el valor de $L$ en la Secci\'on~\ref{sec:hibrido-entropia-condicional}.
 
+\subsection{Comparaci\'on con los m\'etodos individuales}
+
+Para aislar el efecto de la b\'usqueda global, se compar\'o el producto de rangos con Lomb--Scargle y con la entrop\'ia condicional aplicados por separado sobre las mismas curvas, todos con la decisi\'on de rama perfecta: en las binarias se aplic\'o a cada periodo de partida la regla h\'ibrida de la Ecuaci\'on~\eqref{eq:regla-hibrida}, como en la Tabla~\ref{tab:hibrido-resultados}, y en las pulsantes se tom\'o el periodo sin modificar. La Tabla~\ref{tab:validacion-individuales} resume el resultado.
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabular}{lcccc}
+		\hline
+		& \multicolumn{2}{c}{\textbf{Binarias}} & \multicolumn{2}{c}{\textbf{Pulsantes}} \\
+		\textbf{B\'usqueda global} & \textbf{Todos los puntos} & \textbf{$N=100$} & \textbf{Todos los puntos} & \textbf{$N=100$} \\
+		\hline
+		Lomb--Scargle & 91.0\% & 70.3\% & 99.7\% & 96.9\% \\
+		Entrop\'ia condicional & 59.7\% & 37.4\% & 97.8\% & 85.0\% \\
+		Producto de rangos & 91.1\% & 62.8\% & 99.4\% & 94.2\% \\
+		\hline
+	\end{tabular}
+	\caption[Comparaci\'on con los m\'etodos individuales sobre curvas sint\'eticas]{Tasa de aciertos (error relativo menor al 1\%) sobre las curvas sint\'eticas, promediada sobre los cuatro niveles de relaci\'on se\~nal a ruido, con todos los puntos de la cadencia o con $N=100$, para cada b\'usqueda global con decisi\'on de rama perfecta: regla h\'ibrida en las binarias y periodo sin modificar en las pulsantes, que agrupan Cefeidas y RR Lyrae.}
+	\label{tab:validacion-individuales}
+\end{table}
+
+Con todos los puntos de la cadencia, el producto de rangos y Lomb--Scargle obtienen pr\'acticamente la misma tasa, tanto en binarias (91.1\% frente a 91.0\%) como en pulsantes (99.4\% frente a 99.7\%), y ambos superan ampliamente a la entrop\'ia condicional. La entrop\'ia convencional con la m\'ascara oficial queda muy por debajo de los tres: recupera el 35.3\% de las pulsantes y, al duplicar su periodo, el 28.4\% de las binarias. Con $N=100$, en cambio, Lomb--Scargle es superior: 70.3\% frente a 62.8\% en binarias y 96.9\% frente a 94.2\% en pulsantes, con la mayor diferencia en el nivel de ruido m\'as alto, donde obtiene 45.8\% frente a 33.3\% en binarias. Sobre el conjunto de las curvas, la diferencia en binarias es significativa (solo Lomb--Scargle acierta en $b=177$ curvas y solo el producto de rangos en $c=71$, con $p=1.3\times10^{-11}$), y proviene por completo de las curvas con pocos puntos, en el r\'egimen de llenado escaso de la grilla de entrop\'ia ya se\~nalado. La ventaja del producto de rangos sobre Lomb--Scargle observada en OGLE no se reproduce, por tanto, en estas curvas: con todos los puntos, en las binarias con periodo mayor a 3~d el producto de rangos supera a Lomb--Scargle por 1.2 puntos (86.3\% frente a 85.1\%), frente a los 6.4 puntos del intervalo de 3 a 10~d en OGLE (Secci\'on~\ref{sec:hibrido-resultados}). Una explicaci\'on plausible es que las plantillas, elegidas por su alta relaci\'on se\~nal a ruido y su plegado limpio, representan eclipses profundos y curvas sin valores at\'ipicos, en las que el m\'aximo de Lomb--Scargle rara vez cae en un pico sin relaci\'on con la \'orbita, que es precisamente el tipo de error que corrige la entrop\'ia condicional.
+
 \subsection{Limitaciones}
 
 Los criterios de calidad impuestos a las plantillas introducen un sesgo en la poblaci\'on simulada. Exigir una amplitud de al menos 25 veces el error favorece a las binarias separadas de eclipses profundos: de las 360 plantillas de binarias, 350 son de no-contacto, 6 de contacto y 4 elipsoidales, con una amplitud mediana de 0.48~mag, frente a 0.17~mag en la muestra de OGLE del Cap\'itulo~\ref{ch:metodo-hibrido}. Faltan, por tanto, precisamente los casos dif\'iciles, como las variables elipsoidales y las binarias de periodo largo cuyo periodo es $4P_0$, en los que el selector supervisado obten\'ia su ventaja sobre OGLE, de modo que la conclusi\'on sobre ese selector solo vale para esta poblaci\'on. Por otra parte, el ruido es gaussiano y no correlacionado, a diferencia del ruido rojo planteado en la Secci\'on~\ref{sec:datos-sinteticas}, y todas las cadencias provienen de OGLE; la prueba mide la robustez ante el ruido y el n\'umero de puntos, pero no ante otra cadencia, que es el objeto de la Secci\'on~\ref{sec:validacion-tess}.
@@ -1251,6 +1274,30 @@ En las pulsantes, la primera etapa vuelve a igualar a Lomb--Scargle: ambos obtie
 	\label{fig:unificado-tess}
 \end{figure}
 
+La Tabla~\ref{tab:validacion-tess-individuales} compara, con la decisi\'on de rama perfecta, la b\'usqueda global combinada con Lomb--Scargle y con la entrop\'ia condicional aplicados por separado, del mismo modo que en la Tabla~\ref{tab:validacion-individuales}.
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabular}{lccc}
+		\hline
+		\textbf{Grupo} & \textbf{Lomb--Scargle} & \textbf{Entrop\'ia condicional} & \textbf{Producto de rangos} \\
+		\hline
+		Binarias separadas & 51.7\% & 36.7\% & 57.5\% \\
+		Binarias intermedias & 79.2\% & 37.5\% & 78.3\% \\
+		Binarias de contacto/ELL & 90.8\% & 74.2\% & 90.8\% \\
+		Cefeidas & 82.8\% & 81.1\% & 82.8\% \\
+		RR Lyrae & 97.2\% & 93.9\% & 97.2\% \\
+		\hline
+		Todas las binarias & 73.9\% & 49.4\% & 75.6\% \\
+		\hline
+	\end{tabular}
+	\caption[Comparaci\'on con los m\'etodos individuales sobre TESS]{Tasa de aciertos (error relativo menor al 1\%) sobre la muestra de TESS para cada b\'usqueda global con decisi\'on de rama perfecta: regla h\'ibrida en las binarias y periodo sin modificar en las pulsantes.}
+	\label{tab:validacion-tess-individuales}
+\end{table}
+
+En las pulsantes, el producto de rangos y Lomb--Scargle obtienen exactamente la misma tasa, con tres estrellas discordantes en cada sentido. En las binarias, el producto de rangos obtiene 75.6\% frente a 73.9\%, una diferencia que no es significativa ($b=5$, $c=11$, $p=0.21$) y que se concentra en las binarias separadas. Ambos superan a la entrop\'ia condicional, que obtiene 49.4\% en binarias. La entrop\'ia convencional con la m\'ascara oficial, dise\~nada para la cadencia terrestre, no recupera directamente ninguna binaria y solo el 53.3\% de las Cefeidas y el 22.8\% de las RR Lyrae, lo que confirma que esa m\'ascara no es transferible a otra cadencia.
+
 \subsection{Efectos de la cadencia}
 
 Las p\'erdidas del m\'etodo completo en TESS se deben a tres efectos de la cadencia y de la l\'inea base, y no a la b\'usqueda global.
@@ -1264,7 +1311,7 @@ El tercero afecta a las Cefeidas. Las 12 Cefeidas enviadas a la rama de binarias
 \section{S\'intesis y trabajo pendiente}
 \label{sec:validacion-sintesis}
 
-Las dos pruebas de este cap\'itulo confirman que la primera etapa del m\'etodo unificado no degrada a Lomb--Scargle en estrellas pulsantes, salvo en el r\'egimen de muy pocos puntos y mucho ruido, y que el esquema de dos etapas para las binarias se transfiere a otra cadencia sin ajustes cuando la rama se elige correctamente. Tambi\'en confirman la ventaja de las reglas anal\'iticas: el coeficiente de asimetr\'ia corregido es la regla de decisi\'on m\'as robusta ante el ruido, y el selector supervisado del m\'ultiplo pierde su ventaja fuera de los datos con que fue entrenado.
+Las dos pruebas de este cap\'itulo confirman que la primera etapa del m\'etodo unificado no degrada a Lomb--Scargle en estrellas pulsantes, salvo en el r\'egimen de muy pocos puntos y mucho ruido, y que el esquema de dos etapas para las binarias se transfiere a otra cadencia sin ajustes cuando la rama se elige correctamente. Tambi\'en confirman la ventaja de las reglas anal\'iticas: el coeficiente de asimetr\'ia corregido es la regla de decisi\'on m\'as robusta ante el ruido, y el selector supervisado del m\'ultiplo pierde su ventaja fuera de los datos con que fue entrenado. Frente a los m\'etodos individuales, la b\'usqueda combinada supera ampliamente a la entrop\'ia condicional en ambas pruebas, pero su ventaja sobre Lomb--Scargle, clara en OGLE, se reduce a un empate en las curvas sint\'eticas con todos los puntos y en TESS, y se invierte cuando las curvas tienen pocos puntos.
 
 La extensi\'on de los candidatos de la regla h\'ibrida hasta $10P_0$, que en OGLE mejor\'o ligeramente la tasa de aciertos (Secci\'on~\ref{sec:hibrido-hasta-10}), no se transfiere a las otras dos pruebas. En las curvas sint\'eticas, con decisi\'on perfecta, la tasa promedio en binarias pasa de 77.0\% a 76.9\%. Con $N=100$ no cambia, porque cien puntos no alcanzan para ajustar los modelos con $n\geq7$, de hasta 81 par\'ametros, con el m\'inimo de tres observaciones por par\'ametro; con todos los puntos y $\mathrm{SNR}=50$, en cambio, baja de 95.0\% a 93.1\%, porque el BIC elige un m\'ultiplo entre 8 y 10 en binarias cuyo periodo correcto era $2P_0$. En TESS, con decisi\'on perfecta, la tasa promedio en binarias baja de 75.6\% a 74.4\%, y la ampliaci\'on pierde seis binarias y gana dos, todas las p\'erdidas con $\hat n$ igual a 8 o 10. Una explicaci\'on plausible es que, cuando el ruido es muy bajo, las diferencias sistem\'aticas entre la forma real de la curva y la serie de Fourier hacen que un modelo con muchos arm\'onicos reduzca los residuos m\'as de lo que la penalizaci\'on del BIC compensa. Por esta raz\'on se conservaron los candidatos hasta $6P_0$.
 

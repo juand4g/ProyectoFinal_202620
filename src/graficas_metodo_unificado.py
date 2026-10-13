@@ -71,7 +71,7 @@ def ecdf(ax, valores, color, etiqueta, estilo="-"):
 def figura_skew():
     ogle = pd.read_csv(CACHE_SKEW_OGLE)
     tess = pd.read_csv(CACHE_TESS)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5.2), sharey=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 11.5), sharex=True)  # apilados: letras legibles a ancho de pagina
     for ax, series, titulo in [
         (ax1, [(ogle[ogle["clase"] == "Binaria"], AZUL, "Binarias", "-"),
                (ogle[ogle["clase"] == "Cefeida"], NARANJA, "Cefeidas", "--"),
@@ -86,19 +86,21 @@ def figura_skew():
             ecdf(ax, d["skew_corregida"].to_numpy(), color, etiqueta, estilo)
         ax.axvline(UMBRAL_SKEW, color=TINTA, linewidth=1.2)
         ax.annotate(rf"$\gamma_\star={UMBRAL_SKEW}$", (UMBRAL_SKEW, 0.03), xytext=(6, 0),
-                    textcoords="offset points", color=TINTA, fontsize=12)
+                    textcoords="offset points", color=TINTA, fontsize=15)
         ax.set_xscale("symlog", linthresh=1.0)
         ax.set_xlim(X_MIN, 1e3)
         marcas = [-1, 0, 1, 10, 100, 1000]
         ax.set_xticks(marcas, [r"$-1$", "0", "1", "10", "100", "1000"])
         ax.minorticks_off()
         ax.set_ylim(0, 1.01)
-        ax.set_xlabel(r"Coeficiente de asimetría corregido $\hat\gamma_{\mathrm{int}}$")
-        ax.set_title(titulo, loc="left", fontsize=15)
+        ax.set_ylabel("Fracción acumulada", fontsize=16)
+        ax.tick_params(labelsize=14)
+        ax.set_title(titulo, loc="left", fontsize=17)
         recuadro(ax, "both")
-    ax1.legend(loc="lower right", frameon=False, fontsize=11)
-    ax2.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), frameon=False, fontsize=11)
-    ax1.set_ylabel("Fracción acumulada")
+    ax1.legend(loc="lower right", frameon=False, fontsize=14)
+    ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2, frameon=False, fontsize=14)
+    ax2.set_xlabel(r"Coeficiente de asimetría corregido $\hat\gamma_{\mathrm{int}}$", fontsize=16)
+    fig.tight_layout(h_pad=2.0)
     guardar(fig, "unificado_skew_distribucion.png")
 
 
