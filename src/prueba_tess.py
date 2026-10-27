@@ -19,9 +19,11 @@ pixeles de 21" de TESS):
     para Cefeidas.
 Curva: UN sector por estrella (el primero disponible), preferencia SPOC
 2 min > TESS-SPOC > QLP; flujo PDCSAP o equivalente, sin NaN y con la
-mascara de calidad por defecto de lightkurve; agrupado en bins de 30 min;
-convertido a magnitud relativa m = -2.5 log10(F / mediana(F)), error
-1.0857 * dF / F. Cada curva se guarda en TESS_Prueba/fotometria/ (formato
+mascara de calidad por defecto de lightkurve; agrupado en bins de 30 min
+(flujo medio; error = sqrt(sum dF_i^2) / n, corregido el 26/10/2026: el
+error por defecto de lightkurve.bin es la media cuadratica de los errores,
+~sqrt(n) veces mayor que el de la media); convertido a magnitud relativa
+m = -2.5 log10(F / mediana(F)), error 1.0857 * dF / F. Cada curva se guarda en TESS_Prueba/fotometria/ (formato
 OGLE: t, mag, err) para no volver a descargarla.
 
 Con un solo sector (~27 d) la resolucion en frecuencia es ~1/27 d^-1: para
@@ -116,8 +118,10 @@ def archivo(nombre):
     return FOTO_DIR / (nombre.replace(" ", "_").replace("/", "-") + ".dat")
 
 
-def descargar(fila):
-    """Descarga un sector y lo guarda en formato OGLE. Devuelve metadatos o None."""
+def descargar(fila, producto=None):
+    """Descarga un sector y lo guarda en formato OGLE. Devuelve metadatos o None.
+    `producto` = (autor, sector, exptime) fuerza ese producto en lugar de elegirlo
+    (para regenerar las curvas de la muestra ya congelada)."""
     import astropy.units as u
     import lightkurve as lk
     from astropy.coordinates import SkyCoord
@@ -134,27 +138,45 @@ def descargar(fila):
         tabla = busqueda.table.to_pandas()
         tabla["prioridad"] = tabla["author"].map({a: k for k, a in enumerate(AUTORES)})
         tabla["dist"] = tabla.get("distance", 0.0)
+        if producto is not None:
+            autor, sector, exptime = producto
+            tabla = tabla[(tabla["author"] == autor) & (tabla["mission"] == sector)
+                          & np.isclose(tabla["exptime"].astype(float), exptime)]
+            if tabla.empty:
+                return None
         elegido = tabla.sort_values(["dist", "prioridad", "mission"]).index[0]
         lc = busqueda[int(elegido)].download()
-        if lc is None:
+        if lc is None or not guardar_curva(lc, destino):
             return None
-        lc = lc.remove_nans()
-        lc = lc[lc.flux.value > 0]
-        lc = lc.bin(time_bin_size=BIN_MIN / 1440.0).remove_nans()
-        plano = lambda x: np.asarray(np.ma.filled(np.ma.asarray(x), np.nan), dtype=float)
-        f, df, t = plano(lc.flux.value), plano(lc.flux_err.value), plano(lc.time.value)
-        mag = -2.5 * np.log10(f / np.nanmedian(f))
-        err = 1.0857 * df / f
-        bueno = np.isfinite(mag) & np.isfinite(err) & (err > 0)
-        if bueno.sum() < MIN_PUNTOS:
-            return None
-        np.savetxt(destino, np.column_stack([t[bueno], mag[bueno], err[bueno]]), fmt="%.6f")
         return {"autor": tabla.loc[elegido, "author"], "sector": tabla.loc[elegido, "mission"],
                 "exptime": tabla.loc[elegido, "exptime"], "distancia_arcsec": tabla.loc[elegido, "dist"],
                 "crowdsap": lc.meta.get("CROWDSAP", np.nan)}
     except Exception as e:  # red, archivos corruptos, productos sin flujo...
         log(f"  {fila['nombre']}: {type(e).__name__}: {str(e)[:80]}")
         return None
+
+
+def guardar_curva(lc, destino):
+    """Limpia, agrupa en bins de BIN_MIN y guarda la curva en formato OGLE.
+    Devuelve False si quedan menos de MIN_PUNTOS puntos validos."""
+    lc = lc.remove_nans()
+    lc = lc[lc.flux.value > 0]
+    # lightkurve asigna a cada bin la media cuadratica de los errores
+    # individuales (no el error de la media): se divide por sqrt(n) del bin.
+    plano = lambda x: np.asarray(np.ma.filled(np.ma.asarray(x), np.nan), dtype=float)
+    t_orig, df_orig = plano(lc.time.value), plano(lc.flux_err.value)
+    lc = lc.bin(time_bin_size=BIN_MIN / 1440.0)
+    f, t = plano(lc.flux.value), plano(lc.time.value)
+    bordes = np.append(t - BIN_MIN / 2880.0, t[-1] + BIN_MIN / 2880.0)
+    n_bin = np.histogram(t_orig[np.isfinite(df_orig)], bins=bordes)[0]
+    df = plano(lc.flux_err.value) / np.sqrt(np.where(n_bin > 0, n_bin, np.nan))
+    mag = -2.5 * np.log10(f / np.nanmedian(f))
+    err = 1.0857 * df / f
+    bueno = np.isfinite(mag) & np.isfinite(err) & (err > 0)
+    if bueno.sum() < MIN_PUNTOS:
+        return False
+    np.savetxt(destino, np.column_stack([t[bueno], mag[bueno], err[bueno]]), fmt="%.6f")
+    return True
 
 
 def log(mensaje):
@@ -215,6 +237,59 @@ def construir_muestra():
     muestra = pd.DataFrame(elegidas)
     muestra.to_csv(MUESTRA_CSV, index=False)
     return muestra
+
+
+def regenerar_fotometria(muestra):
+    """Vuelve a escribir las curvas de la muestra congelada con el mismo producto
+    (autor, sector, exptime) registrado en MUESTRA_CSV. Usada el 26/10/2026 para
+    corregir el error de los bins de 30 min (antes sin dividir por sqrt(n))."""
+    filas = muestra.to_dict("records")
+    productos = [(f["autor"], f["sector"], float(f["exptime"])) for f in filas]
+    fallidas = []
+    with ThreadPoolExecutor(N_HILOS_DESCARGA) as pool:
+        for fila, meta in zip(filas, pool.map(descargar, filas, productos)):
+            if meta is None:
+                fallidas.append(fila["nombre"])
+    log(f"Curvas regeneradas: {len(filas) - len(fallidas)}/{len(filas)}; fallidas: {fallidas}")
+    return fallidas
+
+
+def indice_cache_lightkurve():
+    """Productos SPOC y TESS-SPOC presentes en la cache local de lightkurve:
+    autor, sector, exptime (s), TIC y coordenadas, leidos del encabezado."""
+    from astropy.io import fits
+    base = Path.home() / ".lightkurve" / "cache" / "mastDownload"
+    filas = []
+    for ruta in list(base.glob("TESS/*/*_lc.fits")) + list(base.glob("HLSP/hlsp_tess-spoc*/*.fits")):
+        h0, h1 = fits.getheader(ruta, 0), fits.getheader(ruta, 1)
+        filas.append({"ruta": str(ruta), "autor": "SPOC" if ruta.parent.parent.name == "TESS" else "TESS-SPOC",
+                      "sector_num": int(h0["SECTOR"]), "exptime": round(h1["TIMEDEL"] * 86400.0),
+                      "tic": int(h0["TICID"]), "ra": h0["RA_OBJ"], "dec": h0["DEC_OBJ"]})
+    return pd.DataFrame(filas)
+
+
+def regenerar_desde_cache(muestra):
+    """Como regenerar_fotometria, pero leyendo los FITS de la cache local de
+    lightkurve (sin red). Binarias: por TIC; pulsantes: el producto mas cercano
+    dentro de RADIO_ARCSEC. En ambos casos con el autor, sector y exptime de
+    MUESTRA_CSV. Devuelve las filas sin archivo en la cache."""
+    import lightkurve as lk
+    indice = indice_cache_lightkurve()
+    faltan = []
+    for fila in muestra.to_dict("records"):
+        sector = int(str(fila["sector"]).split()[-1])
+        c = indice[(indice["autor"] == fila["autor"]) & (indice["sector_num"] == sector)
+                   & (indice["exptime"] == round(float(fila["exptime"])))]
+        if fila["nombre"].startswith("TIC"):
+            c = c[c["tic"] == int(fila["nombre"].split()[1])]
+        else:
+            dist = 3600.0 * np.hypot((c["ra"] - fila["ra"]) * np.cos(np.radians(fila["dec"])), c["dec"] - fila["dec"])
+            c = c.assign(dist=dist).sort_values("dist")
+            c = c[c["dist"] <= RADIO_ARCSEC]
+        if c.empty or not guardar_curva(lk.read(c["ruta"].iloc[0]), archivo(fila["nombre"])):
+            faltan.append(fila)
+    log(f"Curvas regeneradas desde la cache local: {len(muestra) - len(faltan)}/{len(muestra)}")
+    return pd.DataFrame(faltan)
 
 
 # ------------------------------------------------------------------ analisis
@@ -314,6 +389,10 @@ def resumen(d):
 
 def main():
     muestra = construir_muestra()
+    if "--regenerar" in sys.argv:
+        faltan = regenerar_desde_cache(muestra)
+        if len(faltan) and regenerar_fotometria(faltan):
+            return
     print(muestra.groupby("grupo").size().to_dict(), flush=True)
     cache = pd.read_csv(CACHE_CSV) if CACHE_CSV.exists() else pd.DataFrame(columns=["nombre"])
     pendientes = [f for f in muestra.to_dict("records") if f["nombre"] not in set(cache["nombre"])]

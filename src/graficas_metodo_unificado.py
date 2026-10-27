@@ -124,6 +124,7 @@ def figura_sinteticas():
                         linewidth=2, label=etiqueta)
             ax.set_xscale("log")
             ax.set_xticks(SNRS, [str(s) for s in SNRS])
+            ax.tick_params(labelbottom=True)  # sharex los oculta en la fila superior
             ax.minorticks_off()
             ax.set_ylim(0, 102)
             ax.set_title(f"({'abcd'[2 * fila + col]}) {nombre_clase}, {nombre_n}", loc="left", fontsize=15)
