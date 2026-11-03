@@ -21,7 +21,7 @@ from bic_multiplos_hasta_10 import leer, n_hibrido_hasta
 from prueba_tess import CACHE_CSV as CACHE_TESS, MUESTRA_CSV as MUESTRA_TESS, archivo
 from refinamiento_rank_product_bic import N_PROCESOS
 from refinamiento_subarmonicos_bic import acierto, bic_fourier
-from robustez_sinteticas import CACHE_CSV as CACHE_SINT, OUT_DIR, curva_sintetica
+from robustez_sinteticas import FRACCIONES, OUT_DIR, SNRS, cache_principal, curva_sintetica
 
 H0 = 4
 BASES = ["ls", "ent_c"]
@@ -95,16 +95,31 @@ def bloque(w, titulo, d, P, grupos):
 def main():
     w = ["COMPARACION CON LOS METODOS INDIVIDUALES EN SINTETICAS Y TESS (regla hibrida H0=4, decision perfecta)",
          "=" * 78]
-    sint = pd.read_csv(CACHE_SINT)
+    sint = cache_principal()
     cache = con_cache("sinteticas", sint.to_dict("records"), tarea_sint, "id")
     s = sint.merge(cache, on="id", how="left")
     P = s["periodo_catalogo"].to_numpy()
     cl = s["clase"].to_numpy()
-    ok = bloque(w, "Sinteticas, todas las configuraciones", s, P, [(c, cl == c) for c in ["Binaria", "Cefeida", "RR Lyrae"]])
-    for snr, nobj, nom in [(50, 0, "SNR 50, todos los puntos"), (4, 0, "SNR 4, todos los puntos"), (4, 100, "SNR 4, N = 100")]:
-        m = ((s["snr"] == snr) & (s["n_objetivo"] == nobj)).to_numpy()
-        bloque(w, f"Sinteticas, {nom}", s, P, [(c, (cl == c) & m) for c in ["Binaria", "Cefeida", "RR Lyrae"]])
+    clases = ["Binaria", "Cefeida", "RR Lyrae", "Pulsantes"]
+
+    def grupos_sint(m):
+        return [(c, (cl != "Binaria" if c == "Pulsantes" else cl == c) & m) for c in clases]
+
+    ok = bloque(w, "Sinteticas, todas las configuraciones", s, P, grupos_sint(np.ones(len(s), bool)))
+    frac = s["fraccion"].to_numpy()
+    for f in FRACCIONES:
+        bloque(w, f"Sinteticas, {f:.0%} de los puntos (promedio sobre SNR {SNRS})", s, P, grupos_sint(frac == f))
+    for snr in SNRS:
+        for f in FRACCIONES:
+            m = ((s["snr"] == snr).to_numpy() & (frac == f))
+            bloque(w, f"Sinteticas, SNR {snr}, {f:.0%} de los puntos", s, P, grupos_sint(m))
     bin_ = cl == "Binaria"
+    largo = bin_ & (frac == 1.0) & (P > 3)
+    w.append(f"  Binarias con P > 3 d y 100% de los puntos ({largo.sum()}): hibrida LS {ok['ls'][2][largo].mean():.1%}, "
+             f"rp_c {ok['rp_c'][2][largo].mean():.1%}")
+    for f in FRACCIONES:
+        m = bin_ & (frac == f)
+        w.append(f"  McNemar binarias {f:.0%}, hibrida rp_c vs LS: {mcnemar(ok['ls'][2][m], ok['rp_c'][2][m])}")
     w.append(f"  McNemar binarias, hibrida rp_c vs LS: {mcnemar(ok['ls'][2][bin_], ok['rp_c'][2][bin_])}; "
              f"vs ent_c: {mcnemar(ok['ent_c'][2][bin_], ok['rp_c'][2][bin_])}")
     pul = ~bin_

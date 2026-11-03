@@ -15,6 +15,9 @@ Figuras (en Refinamiento_Subarmonicos/graficas/ y copiadas a Tesis/img/):
   4. hibrido_aciertos_por_periodo.png: aciertos del hibrido por rango de
      periodo catalogado, LS vs. rank_product condicional, con el techo.
   5. hibrido_matriz_confusion.png: n real vs. n elegido por la regla hibrida.
+  6. hibrido_ejemplo_condicional.png: entropia convencional sin mascara frente
+     a entropia condicional, con la curva plegada en el minimo global de cada
+     una, para una binaria en la que la primera cae en el alias de 0.5 d.
 """
 
 import shutil
@@ -41,6 +44,7 @@ H0 = 4
 # Paleta categorica de referencia, en orden fijo (azul, naranja, aguamarina)
 # y tinta neutra para lo que no es una serie.
 AZUL, NARANJA, AGUA = "#2a78d6", "#eb6834", "#1baf7a"
+VIOLETA = "#7b61b8"
 GRIS, TINTA = "#9a9893", "#52514e"
 COLOR_METODO = {"ls": AZUL, "ent_c": NARANJA, "rp_c": AGUA}
 NOMBRE_METODO = {"ls": "Lomb–Scargle", "ent_c": "Entropía condicional",
@@ -49,6 +53,8 @@ NOMBRE_METODO = {"ls": "Lomb–Scargle", "ent_c": "Entropía condicional",
 EJEMPLO_COMBINACION = "OGLE-LMC-ECL-11394"
 F_MAX_EJEMPLO = 1.5  # d^-1, contiene f_cat, 2 f_cat y el maximo de LS
 EJEMPLO_BIC = "OGLE-LMC-ECL-14782"
+EJEMPLO_CONDICIONAL = "OGLE-LMC-ECL-08278"
+F_MAX_CONDICIONAL = 4.0  # d^-1, contiene f_cat y los alias de 1 d y 0.5 d
 
 
 def guardar(fig, nombre):
@@ -161,6 +167,42 @@ def figura_bic(cache):
           f"delta BIC={np.round(delta, 1)}")
 
 
+def figura_condicional(cache):
+    fila = cache.set_index("id").loc[EJEMPLO_CONDICIONAL]
+    t, mag, _ = cargar_estrella(EJEMPLO_CONDICIONAL)
+    conjunta, fase = entropias_conjunta_y_fase(t, mag)
+    condicional = conjunta - fase
+    f_cat = 1.0 / fila["periodo_catalogo"]
+    visible = FRECUENCIA <= F_MAX_CONDICIONAL
+
+    fig = plt.figure(figsize=(15, 10))
+    rejilla = fig.add_gridspec(2, 2, width_ratios=[1.9, 1], hspace=0.5, wspace=0.28)
+    paneles = [
+        (conjunta, r"$H(\varphi,m)/\ln(LK)$", VIOLETA, "Entropía convencional", "(a)", "(b)"),
+        (condicional, r"$\hat H(m\,|\,\varphi)$", NARANJA, "Entropía condicional", "(c)", "(d)"),
+    ]
+    periodos = []
+    for i, (y, etiqueta, color, nombre, letra_f, letra_c) in enumerate(paneles):
+        f_min = FRECUENCIA[np.argmin(y)]
+        periodos.append(1.0 / f_min)
+        ax = fig.add_subplot(rejilla[i, 0])
+        ax.plot(FRECUENCIA[visible], y[visible], color=color, linewidth=0.6)
+        marcar_punto_borde(ax, f_cat, "black")
+        marcar_punto_borde(ax, f_min, color)
+        ax.set_xlim(0, F_MAX_CONDICIONAL)
+        ax.set_xlabel(r"Frecuencia (d$^{-1}$)")
+        ax.set_ylabel(etiqueta)
+        ax.set_title(f"{letra_f} {nombre}", loc="left", fontsize=15, pad=16)
+        ax.legend(handles=[handle_punto("black", r"$f_{\mathrm{cat}}$"),
+                           handle_punto(color, "mínimo global")],
+                  loc="lower right", frameon=True, framealpha=0.9)
+        ax_c = fig.add_subplot(rejilla[i, 1])
+        panel_curva_luz(ax_c, t, mag, 1.0 / f_min, color, rf"{letra_c} $P={1.0 / f_min:.4f}$ d")
+    guardar(fig, "hibrido_ejemplo_condicional.png")
+    print(f"{EJEMPLO_CONDICIONAL}: P_cat={fila['periodo_catalogo']:.5f}, "
+          f"P_conv={periodos[0]:.5f}, P_cond={periodos[1]:.5f}, n={t.size}")
+
+
 def tasas(cache):
     P = cache["periodo_catalogo"].to_numpy()
     salida = {}
@@ -262,6 +304,7 @@ def main():
     figura_confusion(cache)
     figura_bic(cache)
     figura_combinacion(cache)
+    figura_condicional(cache)
 
 
 if __name__ == "__main__":

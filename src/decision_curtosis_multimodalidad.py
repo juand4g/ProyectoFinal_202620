@@ -28,7 +28,7 @@ Indicadores (solo dependen de las magnitudes y sus errores; ninguno usa P0):
 Conjuntos (cada uno con su referencia y su rama de binarias ya calculada):
   - OGLE (banda I): 3000 binarias + 1500 Cefeidas + 1500 RR Lyrae de
     decision_binaria_pulsante.py; originales = primeras 1000 + 500 + 500.
-  - Sinteticas: 5760 curvas de robustez_sinteticas.py (se regeneran con la
+  - Sinteticas: 6480 curvas de robustez_sinteticas.py (se regeneran con la
     misma semilla).
   - TESS: 720 estrellas de prueba_tess.py (acierto al 1%).
 
@@ -166,10 +166,10 @@ def conjunto_ogle():
 
 
 def conjunto_sinteticas():
-    from robustez_sinteticas import CACHE_CSV
-    d = pd.read_csv(CACHE_CSV).astype({"snr": int, "n_objetivo": int, "id_plantilla": int, "semilla": int})
-    specs = d[["id", "plantilla", "periodo_plantilla", "cadencia", "periodo_verdadero", "fase0", "snr",
-               "n_objetivo", "semilla"]].to_dict("records")
+    from robustez_sinteticas import cache_principal
+    d = cache_principal().astype({"snr": int, "id_plantilla": int, "semilla": int})
+    specs = d[["id", "id_plantilla", "plantilla", "periodo_plantilla", "cadencia", "periodo_verdadero", "fase0",
+               "snr", "fraccion", "semilla"]].to_dict("records")
     ind = calcular("sinteticas", specs, _sintetica, "id")
     d = d.drop(columns=[c for c in ind.columns if c in d.columns and c != "id"]).merge(ind, on="id")
     P, p0 = d["periodo_catalogo"].to_numpy(), d["periodo_rp_c"].to_numpy()
@@ -357,13 +357,13 @@ def resumen(datos):
     tabla["rango"] = fuera.max(axis=1) - fuera.min(axis=1)
     w(tabla.sort_values("min fuera", ascending=False).to_string(float_format=lambda x: f"{100 * x:6.1f}"))
     w("")
-    w("7. Sinteticas por SNR y N: acierto balanceado de las mejores reglas")
+    w("7. Sinteticas por SNR y fraccion de puntos: acierto balanceado de las mejores reglas")
     sin = datos["Sinteticas"]
     claves = [k for k in reglas if k.startswith(("skew corregida g1c > 0.5", "curtosis corregida", "BC corregido",
                                                  "h_crit corregido", "n_modos"))]
-    w(f"  {'SNR':>4}{'N':>7}  " + "".join(f"{k[:22]:>24}" for k in claves))
-    for (snr, n), g in sin.groupby(["snr", "n_objetivo"], sort=False):
-        w(f"  {snr:4d}{('todos' if n == 0 else n):>7}  "
+    w(f"  {'SNR':>4}{'frac':>7}  " + "".join(f"{k[:22]:>24}" for k in claves))
+    for (snr, frac), g in sin.groupby(["snr", "fraccion"]):
+        w(f"  {snr:4d}{frac:7.0%}  "
           + "".join(f"{tasas(g, reglas[k][0](g))['balanceado']:24.1%}" for k in claves))
     w("")
     w("8. TESS por grupo: fraccion enviada a la rama de binarias")

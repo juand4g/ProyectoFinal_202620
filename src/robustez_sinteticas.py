@@ -28,8 +28,10 @@ Curvas sinteticas:
     exacta entre el periodo original y su cadencia.
   - Cadencia: tiempos reales de OTRA estrella OGLE de la misma clase.
   - Ruido gaussiano con sigma = amplitud pico a pico / SNR; err = sigma.
-  - Cada plantilla se simula en todas las configuraciones SNR x N (mismo
-    periodo, misma cadencia, misma fase): comparaciones pareadas.
+  - Cada plantilla se simula en todas las configuraciones SNR x fraccion de
+    puntos (mismo periodo, misma cadencia, misma fase): comparaciones pareadas.
+    Las submuestras son anidadas: la fraccion f toma los primeros f*N
+    instantes de una permutacion fija por plantilla, comun a todos los SNR.
 
 Cache append-safe en Robustez_Sinteticas/cache_sinteticas.csv.
 
@@ -37,9 +39,16 @@ Ampliacion del 09/10/2026: de 240 a 720 plantillas. Las 240 originales se
 conservan (plantillas.csv no se reescribe) y las nuevas se eligen con los
 mismos criterios entre estrellas que no estan en las muestras OGLE
 ampliadas ni son ya plantilla o cadencia (barajado con semilla 2027).
+
+Cambio del 02/11/2026: SNR {4, 25, 50} (antes {4, 8, 15, 50}) y fracciones de
+la cadencia {25%, 50%, 100%} (antes todos los puntos o N = 100). Las curvas
+con SNR 4 y 50 y todos los puntos conservan su id y su semilla, de modo que se
+reutilizan del cache. Con --barrido se simulan ademas las fracciones de
+FRACCIONES_BARRIDO (1% a 100%) para la animacion de aciertos vs. fraccion.
 """
 
 import random
+import sys
 import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -77,8 +86,12 @@ RESUMEN_TXT = OUT_DIR / "resumen_sinteticas.txt"
 
 N_PLANTILLAS_BASE = {"Binaria": 120, "Cefeida": 60, "RR Lyrae": 60}  # originales (07/10/2026)
 N_PLANTILLAS = {"Binaria": 360, "Cefeida": 180, "RR Lyrae": 180}  # ampliadas el 09/10/2026
-SNRS = [50, 15, 8, 4]
-N_OBJETIVO = [0, 100]  # 0 = todos los puntos de la cadencia
+SNRS = [4, 25, 50]
+FRACCIONES = [0.25, 0.5, 1.0]  # fraccion de los instantes de la cadencia
+FRACCIONES_BARRIDO = [0.01, 0.02, 0.03, 0.05, 0.07, 0.10, 0.15, 0.20, 0.25, 0.30,
+                      0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
+MIN_PUNTOS_SUBMUESTRA = 3
+N_PROCESOS_SINTETICAS = N_PROCESOS
 MIN_PUNTOS_PLANTILLA = 400
 MIN_SNR_PLANTILLA = 25
 MAX_DISPERSION_PLANTILLA = 2.0
@@ -215,8 +228,10 @@ def curva_sintetica(spec):
     c, v = plantilla(t_p, mag_p, spec["periodo_plantilla"])
     t = np.loadtxt(spec["cadencia"], usecols=0)
     rng = np.random.default_rng(int(spec["semilla"]))
-    if spec["n_objetivo"] and t.size > spec["n_objetivo"]:
-        t = np.sort(rng.choice(t, int(spec["n_objetivo"]), replace=False))
+    if spec["fraccion"] < 1.0:
+        orden = np.random.default_rng(RANDOM_SEED + int(spec["id_plantilla"])).permutation(t.size)
+        k = max(int(round(spec["fraccion"] * t.size)), MIN_PUNTOS_SUBMUESTRA)
+        t = np.sort(t[orden[:k]])
     fase = ((t - t.min()) / spec["periodo_verdadero"] + spec["fase0"]) % 1.0
     sigma = (v.max() - v.min()) / spec["snr"]
     mag = 15.0 + evaluar_plantilla(c, v, fase) + rng.normal(0, sigma, t.size)
@@ -247,15 +262,37 @@ def analizar(spec):
     return fila
 
 
-def especificaciones(plantillas):
+def especificaciones(plantillas, fracciones=FRACCIONES):
     specs = []
     for _, p in plantillas.iterrows():
+        i = int(p["id_plantilla"])
         for snr in SNRS:
-            for n_obj in N_OBJETIVO:
-                specs.append(p.to_dict() | {
-                    "id": f"S{p['id_plantilla']:04d}_snr{snr}_n{n_obj}", "snr": snr, "n_objetivo": n_obj,
-                    "semilla": RANDOM_SEED + 1000 * int(p["id_plantilla"]) + 10 * snr + n_obj})
+            for f in fracciones:
+                pct = int(round(100 * f))
+                if pct == 100:  # id y semilla de la version anterior: se reutiliza del cache
+                    id_curva, semilla = f"S{i:04d}_snr{snr}_n0", RANDOM_SEED + 1000 * i + 10 * snr
+                else:
+                    id_curva, semilla = f"S{i:04d}_snr{snr}_f{pct}", RANDOM_SEED * 10**7 + 10**4 * i + 100 * snr + pct
+                specs.append(p.to_dict() | {"id": id_curva, "snr": snr, "fraccion": f, "semilla": semilla})
     return specs
+
+
+def con_fraccion(cache):
+    """Las filas anteriores al 02/11/2026 solo tienen n_objetivo (0 = todos)."""
+    cache = cache.copy()
+    if "fraccion" not in cache:
+        cache["fraccion"] = np.nan
+    if "n_objetivo" in cache:
+        cache.loc[cache["fraccion"].isna() & (cache["n_objetivo"] == 0), "fraccion"] = 1.0
+    return cache
+
+
+def cache_principal():
+    """Filas del cache de las configuraciones principales (SNRS x FRACCIONES),
+    sin las del barrido ni las de la version anterior (SNR 8 y 15, N = 100)."""
+    ids = {s["id"] for s in especificaciones(elegir_plantillas())}
+    cache = con_fraccion(pd.read_csv(CACHE_CSV))
+    return cache[cache["id"].isin(ids)].reset_index(drop=True)
 
 
 # ---------------------------------------------------------------- evaluacion
@@ -299,7 +336,7 @@ def skew_ogle():
 def evaluar(cache):
     """Tabla con las decisiones de rama y los aciertos de cada selector.
     Devuelve (df, decisiones, ok_selector, ok_p0)."""
-    cache = cache.astype({"snr": int, "n_objetivo": int, "id_plantilla": int})
+    cache = con_fraccion(cache).astype({"snr": int, "id_plantilla": int})
     gb, cols_ind, cols_X = entrenar_selector()
     logistica = entrenar_logistica()
 
@@ -342,28 +379,28 @@ def resumen(cache):
     w(f"Plantillas: " + ", ".join(f"{c} {n}" for c, n in pl["clase"].value_counts().items())
       + f" (binarias por tipo: {pl.loc[pl['clase'] == 'Binaria', 'subtipo'].value_counts().to_dict()}; "
       f"Cefeidas por modo: {pl.loc[pl['clase'] == 'Cefeida', 'subtipo'].value_counts().to_dict()}).")
-    w(f"Configuraciones: SNR (amplitud pico a pico / sigma) {SNRS} x N {{todos, 100}}. "
+    w(f"Configuraciones: SNR (amplitud pico a pico / sigma) {SNRS} x fraccion de puntos {FRACCIONES}. "
       f"Total {len(df)} curvas. Acierto = error < 1% respecto del periodo verdadero.")
     w("Rama pulsante: P0 directo. Entrenamiento de los supervisados: solo OGLE.")
     w("")
 
     w("1. Etapa 1 (P0 = rank_product condicional) y techo de cada selector con decision perfecta")
-    w(f"  {'SNR':>4} {'N':>6}  {'Bin x2+BIC':>11}{'Bin GB':>8}{'Cef P0':>8}{'RRL P0':>8}{'Cef LS':>8}{'RRL LS':>8}")
+    w(f"  {'SNR':>4} {'frac':>6}  {'Bin x2+BIC':>11}{'Bin GB':>8}{'Cef P0':>8}{'RRL P0':>8}{'Cef LS':>8}{'RRL LS':>8}")
     ok_ls = acierto(df["periodo_ls"].to_numpy(), P)
-    for (snr, n_obj), g in df.groupby(["snr", "n_objetivo"], sort=False):
+    for (snr, frac), g in df.groupby(["snr", "fraccion"]):
         i = g.index
         celdas = [ok_selector["x2+BIC"][i][es_bin[i]].mean(), ok_selector["GB"][i][es_bin[i]].mean()]
         for c in ["Cefeida", "RR Lyrae"]:
             celdas.append(ok_p0[i][(df.loc[i, "clase"] == c).to_numpy()].mean())
         for c in ["Cefeida", "RR Lyrae"]:
             celdas.append(ok_ls[i][(df.loc[i, "clase"] == c).to_numpy()].mean())
-        w(f"  {snr:4d} {('todos' if n_obj == 0 else n_obj):>6}  {celdas[0]:11.1%}"
+        w(f"  {snr:4d} {frac:6.0%}  {celdas[0]:11.1%}"
           + "".join(f"{x:8.1%}" for x in celdas[1:]))
     w("")
 
     w("2. Error de la decision de rama (pulsantes -> rama binaria / binarias -> rama pulsante)")
-    w(f"  {'SNR':>4} {'N':>6}  " + "".join(f"{k:>20}" for k in decisiones if k != "oraculo"))
-    for (snr, n_obj), g in df.groupby(["snr", "n_objetivo"], sort=False):
+    w(f"  {'SNR':>4} {'frac':>6}  " + "".join(f"{k:>20}" for k in decisiones if k != "oraculo"))
+    for (snr, frac), g in df.groupby(["snr", "fraccion"]):
         i = g.index
         celdas = []
         for k, ruta in decisiones.items():
@@ -371,24 +408,24 @@ def resumen(cache):
                 continue
             r = ruta[i]
             celdas.append(f"{np.mean(r[~es_bin[i]]):5.1%} / {np.mean(~r[es_bin[i]]):5.1%}")
-        w(f"  {snr:4d} {('todos' if n_obj == 0 else n_obj):>6}  " + "".join(f"{c:>20}" for c in celdas))
+        w(f"  {snr:4d} {frac:6.0%}  " + "".join(f"{c:>20}" for c in celdas))
     w("")
 
     w("3. Acierto final por clase (Binaria / Cefeida / RR Lyrae)")
     combos = [(dk, sk) for dk in decisiones for sk in ok_selector]
-    for (snr, n_obj), g in df.groupby(["snr", "n_objetivo"], sort=False):
+    for (snr, frac), g in df.groupby(["snr", "fraccion"]):
         i = g.index
-        w(f"  SNR {snr}, N {'todos' if n_obj == 0 else n_obj}:")
+        w(f"  SNR {snr}, fraccion {frac:.0%}:")
         for dk, sk in combos:
             ok = np.where(decisiones[dk][i], ok_selector[sk][i], ok_p0[i])
             w(f"    {dk:16s} + {sk:7s}" + "".join(
                 f"{ok[(df.loc[i, 'clase'] == c).to_numpy()].mean():9.1%}" for c in CLASES))
     w("")
 
-    w("4. Promedio sobre las 8 configuraciones y caida de SNR 50 a SNR 4 (N todos)")
+    w(f"4. Promedio sobre las {len(SNRS) * len(FRACCIONES)} configuraciones y caida de SNR 50 a SNR 4 (todos los puntos)")
     w(f"  {'Combinacion':26s}" + "".join(f"{c:>10}" for c in CLASES) + "   caida Bin  caida Cef  caida RRL")
-    alto = (df["snr"] == max(SNRS)) & (df["n_objetivo"] == 0)
-    bajo = (df["snr"] == min(SNRS)) & (df["n_objetivo"] == 0)
+    alto = (df["snr"] == max(SNRS)) & (df["fraccion"] == 1.0)
+    bajo = (df["snr"] == min(SNRS)) & (df["fraccion"] == 1.0)
     for dk, sk in combos:
         ok = np.where(decisiones[dk], ok_selector[sk], ok_p0)
         prom = [ok[(df["clase"] == c).to_numpy()].mean() for c in CLASES]
@@ -415,13 +452,14 @@ def main():
     OUT_DIR.mkdir(exist_ok=True)
     plantillas = elegir_plantillas()
     print(plantillas.groupby("clase").size().to_dict(), flush=True)
-    specs = especificaciones(plantillas)
+    barrido = "--barrido" in sys.argv
+    specs = especificaciones(plantillas, FRACCIONES_BARRIDO if barrido else FRACCIONES)
     cache = pd.read_csv(CACHE_CSV) if CACHE_CSV.exists() else pd.DataFrame(columns=["id"])
     hechos = set(cache["id"])
     pendientes = [s for s in specs if s["id"] not in hechos]
 
     filas = []
-    with ProcessPoolExecutor(max_workers=N_PROCESOS) as pool:
+    with ProcessPoolExecutor(max_workers=N_PROCESOS_SINTETICAS) as pool:
         futuros = {pool.submit(analizar, s): s["id"] for s in pendientes}
         for k, futuro in enumerate(tqdm(as_completed(futuros), total=len(futuros),
                                         desc="Sinteticas", unit="curva")):
@@ -438,6 +476,8 @@ def main():
         cache = pd.concat([cache, pd.DataFrame(filas)], ignore_index=True)
         cache.to_csv(CACHE_CSV, index=False)
 
+    if barrido:
+        return
     ids = {s["id"] for s in specs}
     resumen(cache[cache["id"].isin(ids)].reset_index(drop=True))
 

@@ -4,7 +4,7 @@ Regla hibrida con candidatos n = 1..10 (en vez de 1..6), a pedido del
 (rank_product condicional): no recalcula ninguna busqueda global.
 
 Muestras: 3000 binarias OGLE (todos los H0 del barrido), 3000 pulsantes
-OGLE (para el metodo unificado: H0 = 4), 5760 curvas sinteticas y 720
+OGLE (para el metodo unificado: H0 = 4), 6480 curvas sinteticas y 720
 estrellas de TESS (H0 = 4). Cache append-safe por muestra en
 Refinamiento_Subarmonicos/cache_bic_n7_10_<muestra>.csv.
 Resumen en Refinamiento_Subarmonicos/resumen_bic_hasta_10.txt.
@@ -25,7 +25,7 @@ from refinamiento_subarmonicos_bic import (
     H0_VALORES, MUESTRA_CSV, N_MUESTRA_BASE, OUT_DIR, PHOT_DIR, acierto, bic_fourier,
 )
 from robustez_sinteticas import (
-    CACHE_CSV as CACHE_SINT, CACHE_SKEW_OGLE, UMBRAL_SKEW, curva_sintetica, evaluar,
+    CACHE_SKEW_OGLE, UMBRAL_SKEW, cache_principal, curva_sintetica, evaluar,
 )
 
 N_NUEVOS = range(7, 11)
@@ -149,7 +149,7 @@ def main():
                                                for c in ["Binaria", "Cefeida", "RR Lyrae"]))
 
     # ------------------------------------------------------- sinteticas
-    sint = pd.read_csv(CACHE_SINT)
+    sint = cache_principal()
     nuevos_s = con_cache("sinteticas", sint.to_dict("records"), tarea_sintetica)
     df, decisiones, _, ok_p0 = evaluar(sint)
     df = df.merge(nuevos_s, on="id", how="left")
@@ -157,14 +157,14 @@ def main():
     es_bin = (df["clase"] == "Binaria").to_numpy()
     w.append("")
     w.append(f"3. Sinteticas ({len(df)} curvas), binarias, decision perfecta / skew corregida, por configuracion")
-    w.append(f"  {'SNR':>4} {'N':>6}   perfecta n<=6  n<=10    skew corr. n<=6  n<=10")
+    w.append(f"  {'SNR':>4} {'frac':>6}   perfecta n<=6  n<=10    skew corr. n<=6  n<=10")
     ok_s = {}
     for nmax in [6, 10]:
         oks = acierto(n_hibrido_hasta(df, H0, nmax) * p0s, Ps)
         ok_s[nmax] = (oks, np.where(decisiones["skew corr.>0.5"], oks, ok_p0))
-    for (snr, nobj), g in df.groupby(["snr", "n_objetivo"], sort=False):
+    for (snr, frac), g in df.groupby(["snr", "fraccion"]):
         i = g.index[es_bin[g.index]]
-        w.append(f"  {snr:4d} {('todos' if nobj == 0 else nobj):>6}   {ok_s[6][0][i].mean():12.1%}{ok_s[10][0][i].mean():7.1%}"
+        w.append(f"  {snr:4d} {frac:6.0%}   {ok_s[6][0][i].mean():12.1%}{ok_s[10][0][i].mean():7.1%}"
                  f"    {ok_s[6][1][i].mean():14.1%}{ok_s[10][1][i].mean():7.1%}")
     w.append(f"  Promedio: perfecta {ok_s[6][0][es_bin].mean():.1%} -> {ok_s[10][0][es_bin].mean():.1%}; "
              f"skew corregida {ok_s[6][1][es_bin].mean():.1%} -> {ok_s[10][1][es_bin].mean():.1%}; "

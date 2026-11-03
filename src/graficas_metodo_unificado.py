@@ -7,8 +7,8 @@ Figuras (en Robustez_Sinteticas/graficas/ y copiadas a Tesis/img/):
      corregida por grupo, en OGLE (6000 curvas) y en TESS (720 curvas), con el
      umbral de decision.
   2. unificado_sinteticas.png: acierto final vs. SNR en curvas sinteticas,
-     para cada decision de rama (x2+BIC en la rama de binarias), con todos los
-     puntos y con N = 100.
+     para cada decision de rama (x2+BIC en la rama de binarias), con el 25%,
+     el 50% y el 100% de los puntos de la cadencia.
   3. unificado_tess.png: acierto por grupo en TESS (LS directo, P0 directo,
      rama perfecta, metodo completo).
 """
@@ -24,7 +24,7 @@ from matplotlib.lines import Line2D
 from prueba_tess import CACHE_CSV as CACHE_TESS, N_POR_GRUPO
 from refinamiento_subarmonicos_bic import BASE_DIR, acierto, n_hibrido
 from robustez_sinteticas import (
-    CACHE_CSV as CACHE_SINTETICAS, CACHE_SKEW_OGLE, OUT_DIR, SNRS, UMBRAL_SKEW, evaluar,
+    CACHE_CSV as CACHE_SINTETICAS, CACHE_SKEW_OGLE, FRACCIONES, OUT_DIR, SNRS, UMBRAL_SKEW, cache_principal, evaluar,
 )
 
 warnings.filterwarnings("ignore")
@@ -105,20 +105,19 @@ def figura_skew():
 
 
 def figura_sinteticas():
-    cache = pd.read_csv(CACHE_SINTETICAS)
-    df, decisiones, ok_selector, ok_p0 = evaluar(cache)
+    df, decisiones, ok_selector, ok_p0 = evaluar(cache_principal())
     es_bin = (df["clase"] == "Binaria").to_numpy()
     series = [("oraculo", "Rama perfecta", TINTA, "--", "s"),
               ("skew corr.>0.5", "Asimetría corregida", AGUA, "-", "o"),
               ("skew>0.5", "Asimetría sin corregir", NARANJA, "-", "^"),
               ("logistica>0.7", "Regresión logística", AZUL, "-", "D")]
-    fig, ejes = plt.subplots(2, 2, figsize=(14, 9.5), sharex=True)
-    for col, (n_obj, nombre_n) in enumerate([(0, "todos los puntos"), (100, r"$N=100$")]):
+    fig, ejes = plt.subplots(2, len(FRACCIONES), figsize=(17, 9.5), sharex=True)
+    for col, fraccion in enumerate(FRACCIONES):
         for fila, (mascara_clase, nombre_clase) in enumerate([(es_bin, "Binarias"), (~es_bin, "Pulsantes")]):
             ax = ejes[fila, col]
             for clave, etiqueta, color, estilo, marcador in series:
                 ok = np.where(decisiones[clave], ok_selector["x2+BIC"], ok_p0)
-                y = [100 * ok[mascara_clase & (df["snr"] == s).to_numpy() & (df["n_objetivo"] == n_obj).to_numpy()].mean()
+                y = [100 * ok[mascara_clase & (df["snr"] == s).to_numpy() & (df["fraccion"] == fraccion).to_numpy()].mean()
                      for s in SNRS]
                 ax.plot(SNRS, y, color=color, linestyle=estilo, marker=marcador, markersize=8,
                         linewidth=2, label=etiqueta)
@@ -126,14 +125,16 @@ def figura_sinteticas():
             ax.set_xticks(SNRS, [str(s) for s in SNRS])
             ax.tick_params(labelbottom=True)  # sharex los oculta en la fila superior
             ax.minorticks_off()
-            ax.set_ylim(0, 102)
-            ax.set_title(f"({'abcd'[2 * fila + col]}) {nombre_clase}, {nombre_n}", loc="left", fontsize=15)
+            # las pulsantes no bajan del 65%: un eje de 0 a 100 desperdiciaria el panel
+            ax.set_ylim((0, 102) if fila == 0 else (65, 100.5))
+            letra = "abcdef"[len(FRACCIONES) * fila + col]
+            ax.set_title(f"({letra}) {nombre_clase}, {fraccion:.0%} de los puntos", loc="left", fontsize=15)
             recuadro(ax)
             if col == 0:
                 ax.set_ylabel("Aciertos (%)")
             if fila == 1:
                 ax.set_xlabel(r"Señal a ruido $A_{\mathrm{pp}}/\sigma$")
-    ejes[0, 1].legend(loc="lower right", frameon=False, fontsize=12)
+    ejes[0, -1].legend(loc="lower right", frameon=False, fontsize=12)
     fig.subplots_adjust(hspace=0.3, wspace=0.15)
     guardar(fig, "unificado_sinteticas.png")
 
