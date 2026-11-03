@@ -56,7 +56,7 @@ def ajustar(ax, titulo):
     ax.invert_yaxis()
     ax.set_title(titulo, fontsize=14, loc="left")
     ax.set_xlabel("Fase")
-    ax.set_ylabel("Magnitud")
+    ax.set_ylabel("$I$")
 
 
 def figura(cache, clase, nombre):
@@ -76,12 +76,12 @@ def figura(cache, clase, nombre):
     margen = 0.25 * (v.max() - v.min())
     lim = (nivel_p + v.max() + margen, nivel_p + v.min() - margen)
     fuera = int(np.sum((mag_p > lim[0]) | (mag_p < lim[1])))
-    ajustar(ax0, f"(a) Curva original de OGLE: {Path(s0['plantilla']).stem}, "
-                 f"$P={s0['periodo_plantilla']:.4f}$ d, $N={t_p.size}$; la línea es la plantilla")
+    ajustar(ax0, "(a)")
     ax0.set_ylim(lim)
 
     paneles = [(1 + i, j, snr, f) for i, snr in enumerate(SNRS) for j, f in enumerate(FRACCIONES)]
     ejes = []
+    n_panel = []
     for k, (fila, col, snr, f) in enumerate(paneles):
         letra = "bcdefghij"[k]
         spec = specs[(specs["snr"] == snr) & (specs["fraccion"] == f)].iloc[0]
@@ -90,7 +90,8 @@ def figura(cache, clase, nombre):
         ax = fig.add_subplot(rejilla[fila, col])
         puntos(ax, fase, mag, AZUL)
         molde(ax, c, v, 15.0)
-        ajustar(ax, rf"({letra}) $\mathrm{{SNR}}={snr}$, {f:.0%} de los puntos ($N={t.size}$)")
+        ajustar(ax, f"({letra})")
+        n_panel.append(t.size)
         if col > 0:
             ax.set_ylabel("")
         if fila < len(SNRS):
@@ -101,8 +102,6 @@ def figura(cache, clase, nombre):
     hi = max(a.get_ylim()[0] for a in ejes)
     for a in ejes:
         a.set_ylim(hi, lo)
-    fig.suptitle(f"Periodo verdadero de las curvas sintéticas: {s0['periodo_verdadero']:.4f} d "
-                 f"(cadencia tomada de {Path(s0['cadencia']).stem})", fontsize=14)
 
     GRAF_DIR.mkdir(parents=True, exist_ok=True)
     ruta = GRAF_DIR / nombre
@@ -111,7 +110,7 @@ def figura(cache, clase, nombre):
     shutil.copy(ruta, TESIS_IMG / nombre)
     print(f"{clase}: plantilla {Path(s0['plantilla']).stem} (subtipo {s0['subtipo']}), "
           f"P_plantilla={s0['periodo_plantilla']:.4f}, P_v={s0['periodo_verdadero']:.4f}, "
-          f"fuera de escala en (a): {fuera}, cadencia {Path(s0['cadencia']).stem}, N todos={specs[specs['fraccion'] == 1.0]['n_puntos'].iloc[0]}")
+          f"fuera de escala en (a): {fuera}, cadencia {Path(s0['cadencia']).stem}, N plantilla={t_p.size}, N paneles={n_panel}")
 
 
 def main():

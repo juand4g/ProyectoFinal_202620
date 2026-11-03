@@ -128,7 +128,7 @@ def figura_sinteticas():
             # las pulsantes no bajan del 65%: un eje de 0 a 100 desperdiciaria el panel
             ax.set_ylim((0, 102) if fila == 0 else (65, 100.5))
             letra = "abcdef"[len(FRACCIONES) * fila + col]
-            ax.set_title(f"({letra}) {nombre_clase}, {fraccion:.0%} de los puntos", loc="left", fontsize=15)
+            ax.set_title(f"({letra})", loc="left", fontsize=15)
             recuadro(ax)
             if col == 0:
                 ax.set_ylabel("Aciertos (%)")
