@@ -76,9 +76,9 @@ def figura_skew():
         (ax1, [(ogle[ogle["clase"] == "Binaria"], AZUL, "Binarias", "-"),
                (ogle[ogle["clase"] == "Cefeida"], NARANJA, "Cefeidas", "--"),
                (ogle[ogle["clase"] == "RR Lyrae"], AGUA, "RR Lyrae", ":")], "(a) OGLE, banda $I$"),
-        (ax2, [(tess[tess["grupo"] == "Binaria separada"], AZUL_OSCURO, "Binarias separadas", "-"),
-               (tess[tess["grupo"] == "Binaria intermedia"], AZUL, "Binarias intermedias", "-"),
-               (tess[tess["grupo"] == "Binaria contacto/ELL"], AZUL_CLARO, "Binarias de contacto/ELL", "-"),
+        (ax2, [(tess[tess["grupo"] == "Binaria separada"], AZUL_OSCURO, "Binarias tipo Algol", "-"),
+               (tess[tess["grupo"] == "Binaria intermedia"], AZUL, r"Binarias tipo $\beta$ Lyrae", "-"),
+               (tess[tess["grupo"] == "Binaria contacto/ELL"], AZUL_CLARO, "Binarias tipo W UMa", "-"),
                (tess[tess["clase"] == "Cefeida"], NARANJA, "Cefeidas", "--"),
                (tess[tess["clase"] == "RR Lyrae"], AGUA, "RR Lyrae", ":")], "(b) TESS, un sector"),
     ]:
@@ -152,7 +152,7 @@ def figura_tess():
                 ("Rama perfecta", acierto(np.where(es_bin, p_hib, p0), ref), "#d6d5d0", None),
                 ("Método completo", acierto(np.where(rama_bin, p_hib, p0), ref), NARANJA, None)]
     grupos = list(N_POR_GRUPO)
-    nombres = ["Binarias\nseparadas", "Binarias\nintermedias", "Binarias\ncontacto/ELL", "Cefeidas", "RR Lyrae"]
+    nombres = ["Binarias\ntipo Algol", "Binarias\ntipo $\\beta$ Lyrae", "Binarias\ntipo W UMa", "Cefeidas", "RR Lyrae"]
     x = np.arange(len(grupos))
     ancho = 0.2
     fig, ax = plt.subplots(figsize=(14, 5.5))

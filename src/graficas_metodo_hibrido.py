@@ -15,7 +15,7 @@ Figuras (en Refinamiento_Subarmonicos/graficas/ y copiadas a Tesis/img/):
   4. hibrido_aciertos_por_periodo.png: aciertos del hibrido por rango de
      periodo catalogado, LS vs. rank_product condicional, con el techo.
   5. hibrido_matriz_confusion.png: n real vs. n elegido por la regla hibrida.
-  6. hibrido_ejemplo_condicional.png: entropia convencional sin mascara frente
+  6. hibrido_ejemplo_condicional.png: entropia de Shannon sin mascara frente
      a entropia condicional, con la curva plegada en el minimo global de cada
      una, para una binaria en la que la primera cae en el alias de 0.5 d.
 """
@@ -55,6 +55,19 @@ F_MAX_EJEMPLO = 1.5  # d^-1, contiene f_cat, 2 f_cat y el maximo de LS
 EJEMPLO_BIC = "OGLE-LMC-ECL-14782"
 EJEMPLO_CONDICIONAL = "OGLE-LMC-ECL-08278"
 F_MAX_CONDICIONAL = 4.0  # d^-1, contiene f_cat y los alias de 1 d y 0.5 d
+PERIODOS_EJE = [0.25, 0.3, 0.4, 0.5, 0.75, 1, 2, 4]  # d, marcas del eje superior
+PERIODOS_EJE_COMBINACION = [0.75, 1, 1.5, 2, 3, 6, 15]  # d, eje superior de 0 a 1.5 d^-1
+
+
+def eje_periodo(ax, marcas):
+    """Eje superior en periodo con marcas fijas: con 1/f la escala no es
+    lineal y las marcas automaticas se amontonan cerca de f = 0."""
+    ax_p = ax.secondary_xaxis("top", functions=(inversa, inversa))
+    ax_p.set_xlabel("Periodo (d)")
+    ax_p.set_xticks(marcas, [f"{p:g}" for p in marcas])
+    ax_p.minorticks_off()
+    ax_p.tick_params(axis="x", pad=10)
+    return ax_p
 
 
 def guardar(fig, nombre):
@@ -69,6 +82,12 @@ def cargar_estrella(id_estrella):
     t, mag, err = np.loadtxt(PHOT_DIR / f"{id_estrella}.dat", unpack=True)
     err = np.where(err > 0, err, np.median(err[err > 0]))
     return t, mag, err
+
+
+def inversa(x):
+    """1/x protegida en x = 0 (borde izquierdo del eje de frecuencia)."""
+    x = np.asarray(x, dtype=float)
+    return 1.0 / np.maximum(x, 1e-6)
 
 
 def recuadro(ax):
@@ -90,8 +109,8 @@ def figura_combinacion(cache):
     f_rp = FRECUENCIA[np.argmax(producto)]
     visible = FRECUENCIA <= F_MAX_EJEMPLO
 
-    fig = plt.figure(figsize=(14, 15))
-    rejilla = fig.add_gridspec(4, 2, height_ratios=[1, 1, 1, 1.25], hspace=0.45, wspace=0.3)
+    fig = plt.figure(figsize=(14, 17))
+    rejilla = fig.add_gridspec(4, 2, height_ratios=[1, 1, 1, 1.25], hspace=0.75, wspace=0.3)
     paneles = [
         (potencia, r"$P_{LS}(f)$", AZUL, f_ls, "(a) Lomb–Scargle"),
         (condicional, r"$\hat H(m\,|\,\varphi)$", NARANJA,
@@ -113,7 +132,8 @@ def figura_combinacion(cache):
         marcar_punto_borde(ax, f_max, color)
         ax.set_xlim(0, F_MAX_EJEMPLO)
         ax.set_ylabel(etiqueta)
-        ax.set_title(titulo, loc="left", fontsize=15, pad=16)
+        eje_periodo(ax, PERIODOS_EJE_COMBINACION)
+        ax.set_title(titulo, loc="left", fontsize=15, pad=14)
         if i == 2:
             ax.set_xlabel(r"Frecuencia (d$^{-1}$)")
         ax.legend(handles=[handle_punto("black", r"$f_{\mathrm{cat}}$"),
@@ -175,10 +195,10 @@ def figura_condicional(cache):
     f_cat = 1.0 / fila["periodo_catalogo"]
     visible = FRECUENCIA <= F_MAX_CONDICIONAL
 
-    fig = plt.figure(figsize=(15, 10))
-    rejilla = fig.add_gridspec(2, 2, width_ratios=[1.9, 1], hspace=0.5, wspace=0.28)
+    fig = plt.figure(figsize=(15, 11))
+    rejilla = fig.add_gridspec(2, 2, width_ratios=[1.9, 1], hspace=0.75, wspace=0.28)
     paneles = [
-        (conjunta, r"$H(\varphi,m)/\ln(LK)$", VIOLETA, "Entropía convencional", "(a)", "(b)"),
+        (conjunta, r"$H(\varphi,m)/\ln(LK)$", VIOLETA, "Entropía de Shannon", "(a)", "(b)"),
         (condicional, r"$\hat H(m\,|\,\varphi)$", NARANJA, "Entropía condicional", "(c)", "(d)"),
     ]
     periodos = []
@@ -192,7 +212,14 @@ def figura_condicional(cache):
         ax.set_xlim(0, F_MAX_CONDICIONAL)
         ax.set_xlabel(r"Frecuencia (d$^{-1}$)")
         ax.set_ylabel(etiqueta)
-        ax.set_title(f"{letra_f} {nombre}", loc="left", fontsize=15, pad=16)
+        # eje superior en periodo con marcas fijas: con 1/f la escala no es
+        # lineal y las marcas automaticas se amontonan cerca de f = 0
+        ax_p = ax.secondary_xaxis("top", functions=(inversa, inversa))
+        ax_p.set_xlabel("Periodo (d)")
+        ax_p.set_xticks(PERIODOS_EJE, [f"{p:g}" for p in PERIODOS_EJE])
+        ax_p.minorticks_off()
+        ax_p.tick_params(axis="x", pad=10)
+        ax.set_title(f"{letra_f} {nombre}", loc="left", fontsize=15, pad=14)
         ax.legend(handles=[handle_punto("black", r"$f_{\mathrm{cat}}$"),
                            handle_punto(color, "mínimo global")],
                   loc="lower right", frameon=True, framealpha=0.9)

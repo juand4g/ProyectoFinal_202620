@@ -39,8 +39,10 @@ TESIS_IMG = BASE_DIR / "Tesis" / "img"
 H0 = 4
 TIPO_VSX = {"DCEP": "Cefeida clásica fundamental (DCEP)", "DCEPS": "Cefeida clásica de primer sobretono (DCEPS)",
             "RRAB": "RR Lyrae de tipo ab (RRAB)", "RRC": "RR Lyrae de tipo c (RRC)"}
-GRUPO_BIN = {"Binaria separada": "Binaria eclipsante separada", "Binaria intermedia": "Binaria eclipsante intermedia",
-             "Binaria contacto/ELL": "Binaria de contacto o elipsoidal"}
+# claves = grupos del cache (cortes del parametro morfologico de Prsa et al. 2022);
+# etiquetas = nomenclatura clasica usada en la tesis
+GRUPO_BIN = {"Binaria separada": "Binaria tipo Algol", "Binaria intermedia": r"Binaria tipo $\beta$ Lyrae",
+             "Binaria contacto/ELL": "Binaria tipo W UMa"}
 
 
 def cargar():

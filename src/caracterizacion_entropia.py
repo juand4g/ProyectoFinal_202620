@@ -254,10 +254,10 @@ def graficar_resumen(cache):
     datos_boxplot = [validos.loc[validos["tipo"] == t, "error_relativo"] for t in tipos_lista]
     ax_box.boxplot(datos_boxplot, showfliers=False)
     ax_box.set_xticks(range(1, len(tipos_lista) + 1))
-    ax_box.set_xticklabels(tipos_lista)
+    ax_box.set_xticklabels(["Cefeida clásica" if x == "Cefeida" else x for x in tipos_lista])
     ax_box.set_yscale("log")
     ax_box.set_ylabel("Error relativo del periodo")
-    ax_box.set_title("Exactitud y precision por tipo de estrella (minima entropia)")
+    ax_box.set_title("(a)", loc="left")
 
     colores = {"Binaria": "tab:orange", "Cefeida": "tab:blue", "RR Lyrae": "tab:green"}
     f_catalogo = 1.0 / validos["periodo_catalogo"]
@@ -273,9 +273,9 @@ def graficar_resumen(cache):
     agregar_lineas_alias(ax_scatter, lims)
     ax_scatter.set_xscale("log")
     ax_scatter.set_yscale("log")
-    ax_scatter.set_xlabel("Frecuencia catalogo (d$^{-1}$)")
-    ax_scatter.set_ylabel("Frecuencia minima entropia (d$^{-1}$)")
-    ax_scatter.set_title("Frecuencia recuperada vs. frecuencia catalogada")
+    ax_scatter.set_xlabel("Frecuencia catalogada (d$^{-1}$)")
+    ax_scatter.set_ylabel("Frecuencia de mínima entropía (d$^{-1}$)")
+    ax_scatter.set_title("(b)", loc="left")
     # Sin leyenda dentro de los ejes (tapaba puntos): el significado de
     # colores y lineas se explica en el caption de la figura (ver Tesis).
 

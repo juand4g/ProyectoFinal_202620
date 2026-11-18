@@ -43,12 +43,14 @@ def elegir(cache, clase):
 
 def puntos(ax, fase, mag, color):
     for d in (0.0, 1.0):
-        ax.scatter(fase + d, mag, s=8, alpha=0.6, color=color, linewidths=0)
+        ax.scatter(fase + d, mag, s=8, alpha=0.7, color=color, linewidths=0, zorder=2)
 
 
 def molde(ax, c, v, nivel):
+    # muy transparente y debajo de los puntos: la protagonista es la curva sintetica
     x = np.linspace(0, 2, 800)
-    ax.plot(x, nivel + evaluar_plantilla(c, v, x % 1.0), color=TINTA, linewidth=1.3)
+    ax.plot(x, nivel + evaluar_plantilla(c, v, x % 1.0), color=TINTA, linewidth=1.3,
+            alpha=0.25, zorder=1)
 
 
 def ajustar(ax, titulo):
