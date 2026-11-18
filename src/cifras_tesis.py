@@ -164,7 +164,11 @@ def capitulo5():
     gana = np.sum(ok["rp_c"] & ~siempre2)
     pierde = np.sum(~ok["rp_c"] & siempre2)
     w(f"BIC vs siempre 2P0: gana {gana}, pierde {pierde}")
-    w(f"2P0 > T (n=1 forzado): {np.sum(nh == 1)}")
+    # n=1 se fuerza cuando BIC_2 no esta definido: 2P0 > T o N < 3 k_2 (51 con H0=4)
+    forzado = nh == 1
+    w(f"n=1 forzado (candidato 2P0 no admisible): {np.sum(forzado)}; por 2P0 > T: "
+      f"{np.sum(forzado & (2 * p0 > hib['baseline_d'].to_numpy()))}; por N < 51: "
+      f"{np.sum(forzado & (hib['n_puntos'].to_numpy() < 51))}")
     w("Barrido H0: " + ", ".join(f"H0={h} {pct(acierto(n_hibrido(hib, h, 'bic_rp_c') * p0, P))}" for h in H0_VALORES)
       + " | originales: " + ", ".join(f"{h} {pct(acierto(n_hibrido(hib, h, 'bic_rp_c') * p0, P)[orig])}" for h in H0_VALORES)
       + " | agregadas: " + ", ".join(f"{h} {pct(acierto(n_hibrido(hib, h, 'bic_rp_c') * p0, P)[~orig])}" for h in H0_VALORES))
